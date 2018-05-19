@@ -60,7 +60,7 @@ public class MainController {
 		p.setUsername("user");
 		p.setSignDate(Instant.now());
 		p.setAbout(null);
-		p.setPreferences(null);
+		//p.setPreferences(null);
 		
 		Person per = new Person();
 		per.setGender("void");
@@ -109,7 +109,7 @@ public class MainController {
 		p.setUsername("user");
 		p.setSignDate(Instant.now());
 		p.setAbout(null);
-		p.setPreferences(null);
+		//p.setPreferences(null);
 		
 		Person per = new Person();
 		per.setGender("void");

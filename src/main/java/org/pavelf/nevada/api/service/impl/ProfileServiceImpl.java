@@ -1,10 +1,14 @@
 package org.pavelf.nevada.api.service.impl;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.JoinColumn;
 
+import org.pavelf.nevada.api.domain.MessageDTO;
 import org.pavelf.nevada.api.domain.PersonDTO;
 import org.pavelf.nevada.api.persistence.domain.Like;
 import org.pavelf.nevada.api.persistence.domain.Message;
@@ -26,35 +30,28 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ProfileServiceImpl implements ProfileService {
 
-	private PeopleService peopleService;
 	private ProfileRepository principalRepository;
 	private PeopleRepository peopleRepository;
 	private PhotoRepository photoRepository;
 	private MessageRepository messageRepository;
-	private MessageService messageService;
-	private PhotoService photoService;
-
+	
 	@Autowired
-	public ProfileServiceImpl(PeopleService peopleService,
-			ProfileRepository principalRepository,
+	public ProfileServiceImpl(ProfileRepository principalRepository,
 			PeopleRepository peopleRepository, PhotoRepository photoRepository,
-			MessageRepository messageRepository, MessageService messageService,
-			PhotoService photoService) {
-		this.peopleService = peopleService;
+			MessageRepository messageRepository) {
 		this.principalRepository = principalRepository;
 		this.peopleRepository = peopleRepository;
 		this.photoRepository = photoRepository;
 		this.messageRepository = messageRepository;
-		this.messageService = messageService;
-		this.photoService = photoService;
 	}
 
 	@Transactional
 	@Override
-	public long create(ProfileDTO profile) {
-		int personId = (profile.getPerson() == null) ? 
-					peopleService.register(PersonDTO.empty()) : peopleService.register(profile.getPerson());
-			
+	public ProfileDTO create(ProfileDTO profile) {
+		if (profile == null) {
+			throw new IllegalArgumentException();
+		}
+		
 		Profile newProfile = new Profile();
 		newProfile.setEmail(profile.getEmail());	
 		newProfile.setPassword(profile.getPassword());
@@ -62,22 +59,14 @@ public class ProfileServiceImpl implements ProfileService {
 		newProfile.setSignDate(Instant.now());
 		newProfile.setPopularity(0);
 		newProfile.setRating(0);
-		newProfile.setPerson(this.peopleRepository.getOne(personId));
-		
-		if (profile.getAbout() != null) {
-			Integer id = this.messageService.post(profile.getAbout()).getId();
-			newProfile.setAbout(this.messageRepository.getOne(id));
-		}
-		
-		if (profile.getPicture() != null) {
-			Integer id = this.photoService.post(profile.getPicture()).getId();
-			newProfile.setPicture(this.photoRepository.getOne(id));
-		}
-		
-		return this.principalRepository.save(newProfile).getId();
+		newProfile.setPerson(peopleRepository.getOne(profile.getPersonId()));
+		profile.setId(principalRepository.save(newProfile).getId());
+		return profile;
 	}
 
+	
 
+	
 
 	
 

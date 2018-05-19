@@ -1,6 +1,7 @@
 package org.pavelf.nevada.api.persistence.domain;
 
 import java.time.Instant;
+import java.util.Set;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -11,8 +12,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -26,6 +29,9 @@ public class Photo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private int id;
+	
+	@Column(name = "message")
+	private String message;
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
 	@NotNull
@@ -42,10 +48,18 @@ public class Photo {
 	@Past
 	private Instant postDate;
 	
-	@ManyToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
+	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
 	@NotNull
-	@JoinColumn(name = "album_id")
+	@JoinColumn(name = "album_id", insertable = false, updatable = false)
 	private Album album;
+	
+	//@OneToMany(fetch=FetchType.LAZY, cascade = { }, orphanRemoval = false)
+	//@NotNull
+	//@JoinTable(name = )
+	private transient Set<Tag> tags;
+	
+	@Column(name = "album_id")
+	private int albumId;
 	
 	@Column(name="small")
 	@NotNull
@@ -149,6 +163,30 @@ public class Photo {
 
 	public void setAlbum(Album album) {
 		this.album = album;
+	}
+
+	public int getAlbumId() {
+		return albumId;
+	}
+
+	public void setAlbumId(int albumId) {
+		this.albumId = albumId;
+	}
+
+	public Set<Tag> getTags() {
+		return tags;
+	}
+
+	public void setTags(Set<Tag> tags) {
+		this.tags = tags;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
 }

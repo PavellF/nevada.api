@@ -24,72 +24,167 @@ import org.pavelf.nevada.api.persistence.domain.Photo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import javax.annotation.Generated;
 
 /**
  * Represents application profile.
  * @since 1.0
  * @author Pavel F.
  * */
+
+
+/*
+ * controller : services, validation
+ * service: repository
+ * */
 @JsonInclude(Include.NON_NULL)
+
 public class ProfileDTO {
 
-	private int id;
+	private Integer id;
 	
-	@NotNull
-	@Size(min = 1, max = 128)
 	private String username;
 	
-	@NotNull
-	@Size(min = 1, max = 1024)
 	private char[] password;
 	
 	private Instant signDate;
 	
-	@NotNull
-	@javax.validation.constraints.Email
 	private String email;
 	
 	private MessageDTO about;
 	
 	private PhotoDTO picture;
 	
-	private int pictureId;
+	private Integer pictureId;
 	
-	private int popularity;
+	private Integer popularity;
 	
-	private int rating;
+	private Integer rating;
 	
-	private String preferences;
-	
-	private int personId; 
+	private Integer personId; 
 	
 	private PersonDTO person;
 	
-	public static ProfileDTO of(int id, String username, Instant signDate, String email,
-			MessageDTO about, PhotoDTO picture, int pictureId, int popularity,
-			int rating, String preferences, int personId, PersonDTO person) {
-		ProfileDTO thisProfile = new ProfileDTO();
-		thisProfile.id = id;
-		thisProfile.username = username;
-		thisProfile.signDate = signDate;
-		thisProfile.email = email;
-		thisProfile.about = about;
-		thisProfile.picture = picture;
-		thisProfile.pictureId = pictureId;
-		thisProfile.popularity = popularity;
-		thisProfile.rating = rating;
-		thisProfile.preferences = preferences;
-		thisProfile.personId = personId;
-		thisProfile.person = person;
-		return thisProfile;
-	}
+	private Integer aboutId;
 	
-	private ProfileDTO() { }
+	private transient Version version;
+	
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public char[] getPassword() {
+		return password;
+	}
+
+	public void setPassword(char[] password) {
+		this.password = password;
+	}
+
+	public Instant getSignDate() {
+		return signDate;
+	}
+
+	public void setSignDate(Instant signDate) {
+		this.signDate = signDate;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public MessageDTO getAbout() {
+		return about;
+	}
+
+	public void setAbout(MessageDTO about) {
+		this.about = about;
+	}
+
+	public PhotoDTO getPicture() {
+		return picture;
+	}
+
+	public void setPicture(PhotoDTO picture) {
+		this.picture = picture;
+	}
+
+	public Integer getPictureId() {
+		return pictureId;
+	}
+
+	public void setPictureId(Integer pictureId) {
+		this.pictureId = pictureId;
+	}
+
+	public Integer getPopularity() {
+		return popularity;
+	}
+
+	public void setPopularity(Integer popularity) {
+		this.popularity = popularity;
+	}
+
+	public Integer getRating() {
+		return rating;
+	}
+
+	public void setRating(Integer rating) {
+		this.rating = rating;
+	}
+
+	public Integer getPersonId() {
+		return personId;
+	}
+
+	public void setPersonId(Integer personId) {
+		this.personId = personId;
+	}
+
+	public PersonDTO getPerson() {
+		return person;
+	}
+
+	public void setPerson(PersonDTO person) {
+		this.person = person;
+	}
+
+	public Version getVersion() {
+		return version;
+	}
+
+	public void setVersion(Version version) {
+		this.version = version;
+	}
+
+	public Integer getAboutId() {
+		return aboutId;
+	}
+
+	public void setAboutId(Integer aboutId) {
+		this.aboutId = aboutId;
+	}
 
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Profile [id=");
+		builder.append("ProfileDTO [id=");
 		builder.append(id);
 		builder.append(", username=");
 		builder.append(username);
@@ -97,81 +192,20 @@ public class ProfileDTO {
 		builder.append(signDate);
 		builder.append(", email=");
 		builder.append(email);
-		builder.append(", about=");
-		builder.append(about);
-		builder.append(", picture=");
-		builder.append(picture);
 		builder.append(", pictureId=");
 		builder.append(pictureId);
 		builder.append(", popularity=");
 		builder.append(popularity);
 		builder.append(", rating=");
 		builder.append(rating);
-		builder.append(", preferences=");
-		builder.append(preferences);
 		builder.append(", personId=");
 		builder.append(personId);
-		builder.append(", person=");
-		builder.append(person);
+		builder.append(", aboutId=");
+		builder.append(aboutId);
 		builder.append("]");
 		return builder.toString();
 	}
 
-	public int getId() {
-		return id;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public char[] getPassword() {
-		return password;
-	}
-
-	public Instant getSignDate() {
-		return signDate;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public MessageDTO getAbout() {
-		return about;
-	}
-
-	public PhotoDTO getPicture() {
-		return picture;
-	}
-
-	public int getPictureId() {
-		return pictureId;
-	}
-
-	public int getPopularity() {
-		return popularity;
-	}
-
-	public int getRating() {
-		return rating;
-	}
-
-	public String getPreferences() {
-		return preferences;
-	}
-
-	public int getPersonId() {
-		return personId;
-	}
-
-	public PersonDTO getPerson() {
-		return person;
-	}
-
 	
-	
-	
-
 	
 }

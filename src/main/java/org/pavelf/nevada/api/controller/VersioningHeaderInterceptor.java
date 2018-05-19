@@ -13,7 +13,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import static org.pavelf.nevada.api.exception.ExceptionCases.*;
 
 /**
- * Checks whether request contain Accept header with version information.
+ * Checks whether request contain Accept or Content-Type header with version information.
  * @since 1.0
  * @author Pavel F.
  * */
@@ -31,13 +31,17 @@ public class VersioningHeaderInterceptor implements HandlerInterceptor {
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, 
 			Object handler) throws Exception {
-		logger.debug("Starting processing incomig request's Accept header...");
+		logger.debug("Starting processing incomig request's headers...");
 		String header = request.getHeader("Accept");
+		
+		if (header == null) {
+			header = request.getHeader("Content-Type");
+		}
 		
 		if (header == null) {
 			throw new WebApplicationException(HEADER_SHOULD_BE_SPECIFIED);
 		}
-		logger.debug("Successfully resolved accept header value.");
+		logger.debug("Successfully resolved header value.");
 		
 		if (!isHeaderHasVersionAttribute(header)) {
 			throw new WebApplicationException(MALFORMED_ACCEPT_HEADER);
@@ -50,6 +54,7 @@ public class VersioningHeaderInterceptor implements HandlerInterceptor {
 		String[] splitted = header.split(";");
 		
 		for (String part : splitted) {
+			System.out.println(part);
 			if (part.startsWith("version=")) {
 				logger.debug("Successfully resolved accept header value's version rapameter.");
 				return true;

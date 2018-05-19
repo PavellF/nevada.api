@@ -55,6 +55,7 @@ public class Profile {
 	@JoinColumn(name = "about")
 	private Message about;
 	
+	@OneToOne(fetch=FetchType.LAZY, cascade = { CascadeType.ALL }, optional = true)
 	@JoinColumn(name="user_pic")
 	private Photo picture;
 	
@@ -64,10 +65,6 @@ public class Profile {
 	
 	@Column(name="rating")
 	private int rating;
-	
-	@Column(name="preferences")
-	@Basic(fetch=FetchType.LAZY)
-	private String preferences;
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
 	@JoinColumn(name = "belongs_to")
@@ -137,14 +134,6 @@ public class Profile {
 
 	public void setRating(int rating) {
 		this.rating = rating;
-	}
-
-	public String getPreferences() {
-		return preferences;
-	}
-
-	public void setPreferences(String preferences) {
-		this.preferences = preferences;
 	}
 
 	public Person getPerson() {

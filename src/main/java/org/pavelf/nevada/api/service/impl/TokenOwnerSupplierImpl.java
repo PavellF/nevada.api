@@ -1,5 +1,6 @@
 package org.pavelf.nevada.api.service.impl;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,9 +40,14 @@ public class TokenOwnerSupplierImpl implements TokenOwnerSupplier {
 		}
 		return tokenRepository.findByToken(token)
 				.map((Token t) -> {
+					if (t.getValidUntil().isBefore(Instant.now())) {
+						return null;
+					} 
+					
 					Profile profile = t.getProfile();
 					User user = new User(profile.getUsername(), String.valueOf(profile.getId()), 
 							profile.getEmail());
+					
 					return new org.pavelf.nevada.api.security.Token(
 									t.getToken().toCharArray() ,mapTokenScopes(t), t.isSuperToken(), user);
 				}).orElse(null);

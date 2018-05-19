@@ -9,7 +9,7 @@ public interface Scope {
 	
 	public static final String PHOTO = "photo";
 	public static final String MESSAGE = "message";
-	public static final String FRIENDS = "froends";
+	public static final String FRIENDS = "friends";
 	public static final String ACCOUNT = "account";
 	public static final String NOTIFICATION = "notification";
 	public static final String CHAT = "chat";

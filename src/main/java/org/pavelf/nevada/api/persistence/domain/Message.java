@@ -63,6 +63,9 @@ public class Message {
 	@Past
 	private Instant date;
 	
+	@Column(name="reply_to")
+	private Integer replyTo;
+	
 	@Column(name="last_change")
 	private Instant lastChange;
 	
@@ -206,6 +209,15 @@ public class Message {
 	public void setTags(Set<Tag> tags) {
 		this.tags = tags;
 	}
+
+	public Integer getReplyTo() {
+		return replyTo;
+	}
+
+	public void setReplyTo(Integer replyTo) {
+		this.replyTo = replyTo;
+	}
+
 	
 	
 }

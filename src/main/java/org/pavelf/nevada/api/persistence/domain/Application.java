@@ -43,6 +43,7 @@ public class Application {
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
 	@JoinColumn(name = "belongs_to_profile")
+	@NotNull
 	private Profile profile; 
 	
 	/**
