@@ -1,11 +1,13 @@
 package org.pavelf.nevada.api.domain;
 
+import java.io.Serializable;
 import java.time.Instant;
 
 import org.pavelf.nevada.api.persistence.domain.Profile;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import javax.annotation.Generated;
 
 /**
  * Represents created application from which will be performed calls on endpoints.
@@ -13,57 +15,25 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
  * @author Pavel F.
  * */
 @JsonInclude(Include.NON_NULL)
-public class ApplicationDTO {
+public class ApplicationDTO implements Serializable {
 
+	private static final long serialVersionUID = -6372746061385237123L;
 	private Integer id;
 	private String title;
 	private Instant since;
 	private String accessKey;
-	private ProfileDTO profile; 
 	private Integer profileId;
 	private Instant suspendedUntil;
+
+	private ApplicationDTO() { }
 	
-	public Integer getId() {
-		return id;
-	}
-	public void setId(Integer id) {
-		this.id = id;
-	}
-	public String getTitle() {
-		return title;
-	}
-	public void setTitle(String title) {
-		this.title = title;
-	}
-	public Instant getSince() {
-		return since;
-	}
-	public void setSince(Instant since) {
-		this.since = since;
-	}
-	public String getAccessKey() {
-		return accessKey;
-	}
-	public void setAccessKey(String accessKey) {
-		this.accessKey = accessKey;
-	}
-	public ProfileDTO getProfile() {
-		return profile;
-	}
-	public void setProfile(ProfileDTO profile) {
-		this.profile = profile;
-	}
-	public Integer getProfileId() {
-		return profileId;
-	}
-	public void setProfileId(Integer profileId) {
-		this.profileId = profileId;
-	}
-	public Instant getSuspendedUntil() {
-		return suspendedUntil;
-	}
-	public void setSuspendedUntil(Instant suspendedUntil) {
-		this.suspendedUntil = suspendedUntil;
+	private ApplicationDTO(Builder builder) {
+		this.id = builder.id;
+		this.title = builder.title;
+		this.since = builder.since;
+		this.accessKey = builder.accessKey;
+		this.profileId = builder.profileId;
+		this.suspendedUntil = builder.suspendedUntil;
 	}
 	
 	@Override
@@ -83,6 +53,87 @@ public class ApplicationDTO {
 		builder.append(suspendedUntil);
 		builder.append("]");
 		return builder.toString();
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public Instant getSince() {
+		return since;
+	}
+
+	public String getAccessKey() {
+		return accessKey;
+	}
+
+	public Integer getProfileId() {
+		return profileId;
+	}
+
+	public Instant getSuspendedUntil() {
+		return suspendedUntil;
+	}
+
+	/**
+	 * Creates builder to build {@link ApplicationDTO}.
+	 * @return created builder
+	 */
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	/**
+	 * Builder to build {@link ApplicationDTO}.
+	 */
+	public static final class Builder {
+		private Integer id;
+		private String title;
+		private Instant since;
+		private String accessKey;
+		private Integer profileId;
+		private Instant suspendedUntil;
+
+		private Builder() {
+		}
+
+		public Builder withId(Integer id) {
+			this.id = id;
+			return this;
+		}
+
+		public Builder withTitle(String title) {
+			this.title = title;
+			return this;
+		}
+
+		public Builder withSince(Instant since) {
+			this.since = since;
+			return this;
+		}
+
+		public Builder withAccessKey(String accessKey) {
+			this.accessKey = accessKey;
+			return this;
+		}
+
+		public Builder withProfileId(Integer profileId) {
+			this.profileId = profileId;
+			return this;
+		}
+
+		public Builder withSuspendedUntil(Instant suspendedUntil) {
+			this.suspendedUntil = suspendedUntil;
+			return this;
+		}
+
+		public ApplicationDTO build() {
+			return new ApplicationDTO(this);
+		}
 	}
 	
 	

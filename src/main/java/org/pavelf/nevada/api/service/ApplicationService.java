@@ -14,14 +14,15 @@ public interface ApplicationService {
 	 * Creates new application.
 	 * @param application to create.
 	 * @param version of object to create.
-	 * @return Mutated input object. Never {@code null}.
+	 * @return Created application id. Never {@code null}.
 	 */
-	public ApplicationDTO create(ApplicationDTO application, Version version);
+	public Integer create(ApplicationDTO application, Version version);
 	
 	/**
 	 * Gets existing application by id.
 	 * @param id identifier,
 	 * @param version of object to create.
+	 * @return retrieved application.
 	 */
 	public ApplicationDTO getExisting(int id, Version version);
 	

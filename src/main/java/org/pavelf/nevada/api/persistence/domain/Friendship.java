@@ -22,12 +22,18 @@ public class Friendship {
 	private int id;
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
-	@JoinColumn(name = "user_id")
-	private Profile userId;
+	@JoinColumn(name = "user_id", insertable = false, updatable = false)
+	private Profile user;
+	
+	@Column(name = "user_id")
+	private int userId;
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
-	@JoinColumn(name = "friend_id")
-	private Profile friendId;
+	@JoinColumn(name = "friend_id", insertable = false, updatable = false)
+	private Profile friend;
+	
+	@Column(name = "friend_id")
+	private int friendId;
 	
 	@Column(name="since")
 	private Instant since;
@@ -68,22 +74,6 @@ public class Friendship {
 		this.id = id;
 	}
 
-	public Profile getUserId() {
-		return userId;
-	}
-
-	public void setUserId(Profile userId) {
-		this.userId = userId;
-	}
-
-	public Profile getFriendId() {
-		return friendId;
-	}
-
-	public void setFriendId(Profile friendId) {
-		this.friendId = friendId;
-	}
-
 	public Instant getSince() {
 		return since;
 	}
@@ -98,6 +88,38 @@ public class Friendship {
 
 	public void setMutual(boolean mutual) {
 		this.mutual = mutual;
+	}
+
+	public Profile getUser() {
+		return user;
+	}
+
+	public void setUser(Profile user) {
+		this.user = user;
+	}
+
+	public int getUserId() {
+		return userId;
+	}
+
+	public void setUserId(int userId) {
+		this.userId = userId;
+	}
+
+	public Profile getFriend() {
+		return friend;
+	}
+
+	public void setFriend(Profile friend) {
+		this.friend = friend;
+	}
+
+	public int getFriendId() {
+		return friendId;
+	}
+
+	public void setFriendId(int friendId) {
+		this.friendId = friendId;
 	}
 	
 }

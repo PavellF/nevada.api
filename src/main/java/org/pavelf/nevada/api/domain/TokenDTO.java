@@ -1,5 +1,6 @@
 package org.pavelf.nevada.api.domain;
 
+import java.io.Serializable;
 import java.time.Instant;
 
 import javax.persistence.Column;
@@ -15,6 +16,7 @@ import org.pavelf.nevada.api.persistence.domain.Profile;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import javax.annotation.Generated;
 
 /**
  * Represents application security token.
@@ -22,8 +24,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
  * @author Pavel F.
  * */
 @JsonInclude(Include.NON_NULL)
-public class TokenDTO {
+public class TokenDTO implements Serializable {
 
+	private static final long serialVersionUID = 4205881149429367060L;
 	private Integer id;
 	private String token;
 	private Instant validUntil;
@@ -32,110 +35,28 @@ public class TokenDTO {
 	private Access friendsAccess;
 	private Access accountAccess;
 	private Access notificationsAccess;
-	private boolean superToken;
+	private Boolean superToken;
 	private Access chatAccess;
 	private Access streamAccess;
-	private Profile profile; 
 	private Integer profileId;
-	private Application ussuedBy; 
 	private Integer applicationId;
-	private transient Version version;
 	
-	public Integer getId() {
-		return id;
-	}
-	public void setId(Integer id) {
-		this.id = id;
-	}
-	public String getToken() {
-		return token;
-	}
-	public void setToken(String token) {
-		this.token = token;
-	}
-	public Instant getValidUntil() {
-		return validUntil;
-	}
-	public void setValidUntil(Instant validUntil) {
-		this.validUntil = validUntil;
-	}
-	public Access getPhotoAccess() {
-		return photoAccess;
-	}
-	public void setPhotoAccess(Access photoAccess) {
-		this.photoAccess = photoAccess;
-	}
-	public Access getMessagesAccess() {
-		return messagesAccess;
-	}
-	public void setMessagesAccess(Access messagesAccess) {
-		this.messagesAccess = messagesAccess;
-	}
-	public Access getFriendsAccess() {
-		return friendsAccess;
-	}
-	public void setFriendsAccess(Access friendsAccess) {
-		this.friendsAccess = friendsAccess;
-	}
-	public Access getAccountAccess() {
-		return accountAccess;
-	}
-	public void setAccountAccess(Access accountAccess) {
-		this.accountAccess = accountAccess;
-	}
-	public Access getNotificationsAccess() {
-		return notificationsAccess;
-	}
-	public void setNotificationsAccess(Access notificationsAccess) {
-		this.notificationsAccess = notificationsAccess;
-	}
-	public boolean isSuperToken() {
-		return superToken;
-	}
-	public void setSuperToken(boolean superToken) {
-		this.superToken = superToken;
-	}
-	public Access getChatAccess() {
-		return chatAccess;
-	}
-	public void setChatAccess(Access chatAccess) {
-		this.chatAccess = chatAccess;
-	}
-	public Access getStreamAccess() {
-		return streamAccess;
-	}
-	public void setStreamAccess(Access streamAccess) {
-		this.streamAccess = streamAccess;
-	}
-	public Profile getProfile() {
-		return profile;
-	}
-	public void setProfile(Profile profile) {
-		this.profile = profile;
-	}
-	public Integer getProfileId() {
-		return profileId;
-	}
-	public void setProfileId(Integer profileId) {
-		this.profileId = profileId;
-	}
-	public Application getUssuedBy() {
-		return ussuedBy;
-	}
-	public void setUssuedBy(Application ussuedBy) {
-		this.ussuedBy = ussuedBy;
-	}
-	public Integer getApplicationId() {
-		return applicationId;
-	}
-	public void setApplicationId(Integer applicationId) {
-		this.applicationId = applicationId;
-	}
-	public Version getVersion() {
-		return version;
-	}
-	public void setVersion(Version version) {
-		this.version = version;
+	private TokenDTO() { }
+
+	private TokenDTO(Builder builder) {
+		this.id = builder.id;
+		this.token = builder.token;
+		this.validUntil = builder.validUntil;
+		this.photoAccess = builder.photoAccess;
+		this.messagesAccess = builder.messagesAccess;
+		this.friendsAccess = builder.friendsAccess;
+		this.accountAccess = builder.accountAccess;
+		this.notificationsAccess = builder.notificationsAccess;
+		this.superToken = builder.superToken;
+		this.chatAccess = builder.chatAccess;
+		this.streamAccess = builder.streamAccess;
+		this.profileId = builder.profileId;
+		this.applicationId = builder.applicationId;
 	}
 	
 	@Override
@@ -167,10 +88,159 @@ public class TokenDTO {
 		builder.append(profileId);
 		builder.append(", applicationId=");
 		builder.append(applicationId);
-		builder.append(", version=");
-		builder.append(version);
 		builder.append("]");
 		return builder.toString();
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public Instant getValidUntil() {
+		return validUntil;
+	}
+
+	public Access getPhotoAccess() {
+		return photoAccess;
+	}
+
+	public Access getMessagesAccess() {
+		return messagesAccess;
+	}
+
+	public Access getFriendsAccess() {
+		return friendsAccess;
+	}
+
+	public Access getAccountAccess() {
+		return accountAccess;
+	}
+
+	public Access getNotificationsAccess() {
+		return notificationsAccess;
+	}
+
+	public Boolean isSuperToken() {
+		return superToken;
+	}
+
+	public Access getChatAccess() {
+		return chatAccess;
+	}
+
+	public Access getStreamAccess() {
+		return streamAccess;
+	}
+
+	public Integer getProfileId() {
+		return profileId;
+	}
+
+	public Integer getApplicationId() {
+		return applicationId;
+	}
+
+	/**
+	 * Creates builder to build {@link TokenDTO}.
+	 * @return created builder
+	 */
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	/**
+	 * Builder to build {@link TokenDTO}.
+	 */
+	public static final class Builder {
+		private Integer id;
+		private String token;
+		private Instant validUntil;
+		private Access photoAccess;
+		private Access messagesAccess;
+		private Access friendsAccess;
+		private Access accountAccess;
+		private Access notificationsAccess;
+		private Boolean superToken;
+		private Access chatAccess;
+		private Access streamAccess;
+		private Integer profileId;
+		private Integer applicationId;
+
+		private Builder() {
+		}
+
+		public Builder withId(Integer id) {
+			this.id = id;
+			return this;
+		}
+
+		public Builder withToken(String token) {
+			this.token = token;
+			return this;
+		}
+
+		public Builder withValidUntil(Instant validUntil) {
+			this.validUntil = validUntil;
+			return this;
+		}
+
+		public Builder withPhotoAccess(Access photoAccess) {
+			this.photoAccess = photoAccess;
+			return this;
+		}
+
+		public Builder withMessagesAccess(Access messagesAccess) {
+			this.messagesAccess = messagesAccess;
+			return this;
+		}
+
+		public Builder withFriendsAccess(Access friendsAccess) {
+			this.friendsAccess = friendsAccess;
+			return this;
+		}
+
+		public Builder withAccountAccess(Access accountAccess) {
+			this.accountAccess = accountAccess;
+			return this;
+		}
+
+		public Builder withNotificationsAccess(Access notificationsAccess) {
+			this.notificationsAccess = notificationsAccess;
+			return this;
+		}
+
+		public Builder withSuperToken(Boolean superToken) {
+			this.superToken = superToken;
+			return this;
+		}
+
+		public Builder withChatAccess(Access chatAccess) {
+			this.chatAccess = chatAccess;
+			return this;
+		}
+
+		public Builder withStreamAccess(Access streamAccess) {
+			this.streamAccess = streamAccess;
+			return this;
+		}
+
+		public Builder withProfileId(Integer profileId) {
+			this.profileId = profileId;
+			return this;
+		}
+
+		public Builder withApplicationId(Integer applicationId) {
+			this.applicationId = applicationId;
+			return this;
+		}
+
+		public TokenDTO build() {
+			return new TokenDTO(this);
+		}
 	}
 	
 	

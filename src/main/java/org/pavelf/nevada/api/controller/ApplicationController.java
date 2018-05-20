@@ -14,6 +14,7 @@ import org.pavelf.nevada.api.security.Secured;
 import org.pavelf.nevada.api.security.TokenContext;
 import org.pavelf.nevada.api.security.User;
 import org.pavelf.nevada.api.service.ApplicationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -23,13 +24,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import static org.pavelf.nevada.api.exception.ExceptionCases.*;
 
+import java.net.URI;
+
 @RestController
 @RequestMapping("/applications")
 public class ApplicationController {
 
 	private ApplicationService applicationService;
-	private TokenContext context;
 	
+	
+	@Autowired
+	public ApplicationController(ApplicationService applicationService) {
+		this.applicationService = applicationService;
+	}
+
 	@PostMapping(consumes = {
 			APPLICATION_ACCEPT_PREFIX+".application+json", 
 			APPLICATION_ACCEPT_PREFIX+".application+xml"})
@@ -39,19 +47,15 @@ public class ApplicationController {
 		Version version = new VersionImpl(
 				entity.getHeaders().getContentType().getParameter("version"));
 		
-		posted.setVersion(version);
-		User issuer = context.getToken().getUser().orElseThrow(() -> {
-			return new WebApplicationException(USER_NOT_FOUND);
-		});
+		final Integer profileId = posted.getProfileId();
+		if (profileId == null) {
+			throw new WebApplicationException(UNRECOGNIZED_USER);
+		}
+		//check profile
 		
-		posted.setProfileId(Integer.valueOf(issuer.getId()));
+		Integer id = applicationService.create(posted, version);
 		
-		Integer id = applicationService.create(posted).getId();
-		
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.LOCATION, "/applications/" + id);
-		
-		return new ResponseEntity<>(headers, HttpStatus.CREATED);
+		return ResponseEntity.created(URI.create("/applications/" + id)).build();
 	}
 	
 }

@@ -7,8 +7,8 @@ package org.pavelf.nevada.api.domain;
  * */
 public interface Access {
 
-	public static final String NONE = "NONE";
-	public static final String READ = "READ";
-	public static final String READ_WRITE = "READ_WRITE";
+	public static final int NONE = 0;
+	public static final int READ = 1;
+	public static final int READ_WRITE = 2;
 	
 }

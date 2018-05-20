@@ -1,5 +1,5 @@
-DROP SCHEMA public CASCADE;
-CREATE SCHEMA public;
+--DROP SCHEMA IF EXISTS public CASCADE;
+--CREATE SCHEMA public;
 
 DROP TYPE IF EXISTS ACCESS;
 CREATE TYPE ACCESS AS ENUM ('NONE', 'READ', 'READ_WRITE');
@@ -7,12 +7,21 @@ CREATE TYPE ACCESS AS ENUM ('NONE', 'READ', 'READ_WRITE');
 DROP TYPE IF EXISTS VISIBILITY;
 CREATE TYPE VISIBILITY AS ENUM ('ALL', 'FRIENDS', 'ME');
 
+CREATE TABLE IF NOT EXISTS notifications (
+        id SERIAL NOT NULL,
+        when TIMESTAMP NOT NULL,
+        expired BOOLEAN NOT NULL,
+        type VARCHAR(64) NOT NULL,
+        belongs_to INTEGER NOT NULL,
+        issued_by INTEGER NOT NULL,
+        PRIMARY KEY(id)
+);
+
 CREATE TABLE IF NOT EXISTS photos (
         id SERIAL NOT NULL,
         date TIMESTAMP NOT NULL,
         owner_id INTEGER NOT NULL,
-        visibility_level VISIBILITY NOT NULL,
-        album_id INTEGER NOT NULL,
+        message VARCHAR(512) DEFAULT NULL,
         small BYTEA NOT NULL,
         medium BYTEA NOT NULL,
         original BYTEA NOT NULL,
@@ -67,14 +76,6 @@ CREATE TABLE IF NOT EXISTS friendship (
         PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS albums (
-        id SERIAL NOT NULL,
-        owner_id INTEGER NOT NULL,
-        title VARCHAR(64) NOT NULL,
-        visibility_level VISIBILITY NOT NULL,
-        PRIMARY KEY (id)
-);
-    
 CREATE TABLE IF NOT EXISTS tokens (
      id SERIAL NOT NULL,
      issued_by INTEGER NOT NULL,
@@ -86,14 +87,13 @@ CREATE TABLE IF NOT EXISTS tokens (
      friends_access VARCHAR(36) NOT NULL,
      account_access VARCHAR(36) NOT NULL,
      notifications_access VARCHAR(36) NOT NULL,
-     chat_access VARCHAR(36) NOT NULL,
      stream_access VARCHAR(36) NOT NULL,
      is_super_token BOOLEAN DEFAULT FALSE,
      PRIMARY KEY (id)
 );
     
 CREATE TABLE IF NOT EXISTS people (
-        id SERIAL NOT NULL,
+        id INTEGER NOT NULL,
         full_name VARCHAR(128) DEFAULT NULL,
         gender VARCHAR(64) DEFAULT NULL,
         location VARCHAR(128) DEFAULT NULL,
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS profiles (
         popularity INTEGER DEFAULT 0,
         rating INTEGER DEFAULT 0,
         about INTEGER DEFAULT NULL,
-        belongs_to INTEGER NOT NULL,
+        suspended_until TIMESTAMP DEFAULT NULL,
         PRIMARY KEY (id)
     );
     
@@ -128,6 +128,57 @@ CREATE TABLE IF NOT EXISTS tags (
         name VARCHAR(64) NOT NULL,
         PRIMARY KEY(name)
 );
+
+CREATE TABLE IF NOT EXISTS notification_attach_message (
+        notification_id INTEGER NOT NULL,
+        message_id INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS notification_attach_stream (
+        notification_id INTEGER NOT NULL,
+        stream_post_id INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS guests (
+        id SERIAL NOT NULL,
+        who INTEGER NOT NULL,
+        hidden BOOLEAN NOT NULL,
+        when TIMESTAMP NOT NULL,
+        PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS stream_post (
+        id SERIAL NOT NULL,
+        author INTEGER NOT NULL,
+        date TIMESTAMP NOT NULL,
+        content VARCHAR(16384) NOT NULL,
+        rating INTEGER DEFAULT 0,
+        popularity INTEGER DEFAULT 0,
+        priority SMALLINT DEFAULT 0,
+        visibility VARCHAR(36) NOT NULL,
+        last_change TIMESTAMP DEFAULT NULL,
+        PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS stream_post_has_photo (
+        stream_post_id INTEGER NOT NULL REFERENCES stream_post (id),
+        photo_id INTEGER NOT NULL REFERENCES photos (id)
+);
+
+CREATE TABLE IF NOT EXISTS stream_post_has_tag (
+        stream_post_id INTEGER NOT NULL REFERENCES stream_post (id),
+        tag VARCHAR NOT NULL REFERENCES tags (name)
+);
+
+CREATE TABLE IF NOT EXISTS like_stream_post (
+        stream_post_id INTEGER NOT NULL REFERENCES stream_post (id),
+        like_id INTEGER NOT NULL REFERENCES _likes (id)
+);
+
+CREATE TABLE IF NOT EXISTS guest_to_profile (
+        target_profile_id INTEGER NOT NULL REFERENCES profiles (id),
+        guest_id INTEGER NOT NULL REFERENCES guests (id)
+);
     
 ALTER TABLE IF EXISTS tokens 
        ADD CONSTRAINT uniq_tokens_token UNIQUE (token);
@@ -143,6 +194,9 @@ ALTER TABLE IF EXISTS profiles
        
 ALTER TABLE IF EXISTS applications 
        ADD CONSTRAINT uniq_applications_title UNIQUE (title);
+       
+ALTER TABLE IF EXISTS applications 
+       ADD CONSTRAINT uniq_applications_access_key UNIQUE (access_key);
        
 ALTER TABLE IF EXISTS friendship 
        ADD CONSTRAINT uniq_friendship UNIQUE (user_id, friend_id);
@@ -165,11 +219,6 @@ ALTER TABLE IF EXISTS photos
        FOREIGN KEY (owner_id) 
        REFERENCES profiles; 
        
-ALTER TABLE IF EXISTS photos
-       ADD CONSTRAINT fk_photos_album_id
-       FOREIGN KEY (album_id) 
-       REFERENCES albums;    
-       
 ALTER TABLE IF EXISTS applications 
        ADD CONSTRAINT fk_applications_belongs_to_profile
        FOREIGN KEY (belongs_to_profile) 
@@ -180,11 +229,6 @@ ALTER TABLE IF EXISTS _likes
        FOREIGN KEY (by_user) 
        REFERENCES profiles;
        
-ALTER TABLE IF EXISTS profiles 
-       ADD CONSTRAINT fk_profiles_belongs_to
-       FOREIGN KEY (belongs_to) 
-       REFERENCES people;
-
 ALTER TABLE IF EXISTS liked_messages 
        ADD CONSTRAINT fk_liked_messages_liked_message_id
        FOREIGN KEY (liked_message_id) 
@@ -219,6 +263,11 @@ ALTER TABLE IF EXISTS profiles
        ADD CONSTRAINT fk_profiles_about 
        FOREIGN KEY (about) 
        REFERENCES messages;
+       
+ALTER TABLE IF EXISTS people
+       ADD CONSTRAINT fk_people_id 
+       FOREIGN KEY (id) 
+       REFERENCES profiles;
 
 ALTER TABLE IF EXISTS messages 
        ADD CONSTRAINT fk_messages_author 
@@ -240,10 +289,48 @@ ALTER TABLE IF EXISTS friendship
        FOREIGN KEY (friend_id) 
        REFERENCES profiles;
        
-ALTER TABLE IF EXISTS albums
-       ADD CONSTRAINT fk_albums_owner_id
-       FOREIGN KEY (owner_id) 
+ALTER TABLE IF EXISTS notifications
+       ADD CONSTRAINT fk_notifications_belongs_to
+       FOREIGN KEY (belongs_to) 
        REFERENCES profiles;
+       
+ALTER TABLE IF EXISTS notifications
+       ADD CONSTRAINT fk_notifications_issued_by
+       FOREIGN KEY (issued_by) 
+       REFERENCES profiles;
+       
+ALTER TABLE IF EXISTS notification_attach_message
+       ADD CONSTRAINT fk_notification_attach_message_notification_id
+       FOREIGN KEY (notification_id) 
+       REFERENCES notifications; 
+       
+ALTER TABLE IF EXISTS notification_attach_message
+       ADD CONSTRAINT fk_notification_attach_message_message_id
+       FOREIGN KEY (message_id) 
+       REFERENCES messages; 
+       
+ALTER TABLE IF EXISTS notification_attach_stream
+       ADD CONSTRAINT fk_notification_attach_stream_stream_post_id
+       FOREIGN KEY (stream_post_id) 
+       REFERENCES stream_post; 
+       
+ALTER TABLE IF EXISTS notification_attach_stream
+       ADD CONSTRAINT fk_notification_attach_stream_notification_id
+       FOREIGN KEY (notification_id) 
+       REFERENCES notifications; 
+       
+ALTER TABLE IF EXISTS guests
+       ADD CONSTRAINT fk_guests_who
+       FOREIGN KEY (who) 
+       REFERENCES profiles; 
+       
+ALTER TABLE IF EXISTS stream_post
+       ADD CONSTRAINT fk_stream_post_author
+       FOREIGN KEY (author) 
+       REFERENCES profiles;   
+       
+       
+       
        
        
        

@@ -32,8 +32,11 @@ public class Like {
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
 	@NotNull
-	@JoinColumn(name = "by_user")
+	@JoinColumn(name = "by_user", insertable = false, updatable = false)
 	private Profile likedBy;
+	
+	@Column(name = "by_user")
+	private int likedById;
 	
 	@Column(name="date")
 	@NotNull
@@ -110,5 +113,13 @@ public class Like {
 
 	public void setRating(short rating) {
 		this.rating = rating;
+	}
+
+	public int getLikedById() {
+		return likedById;
+	}
+
+	public void setLikedById(int likedById) {
+		this.likedById = likedById;
 	}
 }

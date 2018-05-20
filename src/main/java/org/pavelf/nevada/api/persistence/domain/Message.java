@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.AccessType;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,6 +18,9 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.SecondaryTable;
+import javax.persistence.SecondaryTables;
 import javax.persistence.Table;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -43,7 +47,7 @@ public class Message {
 	cascade = {CascadeType.ALL},
 	 orphanRemoval = true	)
 	private Set<Like> likes;
-	
+
 	@JoinTable(name = "message_has_photo", joinColumns = { @JoinColumn(name = "message_id") }, 
 		    inverseJoinColumns = { @JoinColumn(name = "photo_id")} )
 	@OneToMany(fetch=FetchType.LAZY, 
@@ -218,6 +222,5 @@ public class Message {
 		this.replyTo = replyTo;
 	}
 
-	
 	
 }

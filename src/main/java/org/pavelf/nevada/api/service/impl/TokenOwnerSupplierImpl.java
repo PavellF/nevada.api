@@ -53,15 +53,14 @@ public class TokenOwnerSupplierImpl implements TokenOwnerSupplier {
 				}).orElse(null);
 	}
 		
-	private Map<String, String> mapTokenScopes(Token token) {
-		Map<String, String> map = new HashMap<>();
-		map.put(Scope.PHOTO , token.getPhotoAccess().toString());
-		map.put(Scope.ACCOUNT , token.getAccountAccess().toString());
-		map.put(Scope.CHAT , token.getChatAccess().toString());
-		map.put(Scope.FRIENDS , token.getFriendsAccess().toString());
-		map.put(Scope.MESSAGE, token.getMessagesAccess().toString());
-		map.put(Scope.NOTIFICATION , token.getNotificationsAccess().toString());
-		map.put(Scope.STREAM, token.getStreamAccess().toString());
+	private Map<String, Integer> mapTokenScopes(Token token) {
+		Map<String, Integer> map = new HashMap<>();
+		map.put(Scope.PHOTO , token.getPhotoAccess().getLevel());
+		map.put(Scope.ACCOUNT , token.getAccountAccess().getLevel());
+		map.put(Scope.FRIENDS , token.getFriendsAccess().getLevel());
+		map.put(Scope.MESSAGE, token.getMessagesAccess().getLevel());
+		map.put(Scope.NOTIFICATION , token.getNotificationsAccess().getLevel());
+		map.put(Scope.STREAM, token.getStreamAccess().getLevel());
 		return map;
 	}
 		

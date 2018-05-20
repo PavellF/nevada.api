@@ -11,8 +11,20 @@ import com.fasterxml.jackson.databind.ser.std.EnumSerializer;
  * */
 public enum Access {
 
-	NONE,
-	READ,
-	READ_WRITE;
+	NONE (0),
+	READ (1),
+	READ_WRITE (2);
+	
+	private final int level;
+
+	private Access(int level) {
+		this.level = level;
+	}
+
+	public int getLevel() {
+		return level;
+	}
+	
+	
 	
 }

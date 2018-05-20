@@ -15,14 +15,14 @@ import java.util.Set;
 public class Token {
 
 	private final char[] token;
-	private final Map<String, String> scopesAccess;
+	private final Map<String, Integer> scopesAccess;
 	private final boolean isSuper;
 	private final Optional<User> user;
 	
 	/**
 	 * @throws IllegalArcumentException if null passed (except for user).
 	 * */
-	public Token(char[] token, Map<String, String> scopesAccess, boolean isSuper, User user) {
+	public Token(char[] token, Map<String, Integer> scopesAccess, boolean isSuper, User user) {
 		if (token == null || scopesAccess == null) {
 			throw new IllegalArgumentException();
 		}
@@ -42,16 +42,15 @@ public class Token {
 	/**
 	 * Whether at least one scope have access level;
 	 * */
-	public boolean hasAccess(String acccessLevel, String... scopes) {
-		
-		if (scopes == null || acccessLevel == null) {
+	public boolean hasAccess(int acccessLevel, String... scopes) {
+		if (scopes == null) {
 			return false;
 		}
 		
 		for (String scope : scopes) { 
-			String tokenScope = scopesAccess.get(scope);
+			Integer tokenScope = scopesAccess.get(scope);
 			
-			if (tokenScope != null && tokenScope.equals(acccessLevel)) {
+			if (tokenScope != null && tokenScope <= acccessLevel) {
 				return true;
 			}
 		}

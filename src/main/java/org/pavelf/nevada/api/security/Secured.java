@@ -29,8 +29,9 @@ public @interface Secured {
 	
 	/**
 	 * Application specific access level that describe set of actions.
-	 * Application may want to have distinct class with constant Strings to describe access levels.
+	 * Greater number describes less restrictions.
+	 * Application may want to have distinct class with constant integers to describe access levels.
 	 * */
-	String access();
+	int access();
 	
 }

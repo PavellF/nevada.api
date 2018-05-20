@@ -35,31 +35,16 @@ public class Photo {
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
 	@NotNull
-	@JoinColumn(name = "owner_id")
+	@JoinColumn(name = "owner_id", insertable = false, updatable = false)
 	private Profile owner; 
 	
-	@Column(name="visibility_level")
-	@NotNull
-	@Enumerated(javax.persistence.EnumType.STRING)
-	private Visibility visibility;
+	@Column(name = "owner_id")
+	private int ownerId;
 	
 	@Column(name="date")
 	@NotNull
 	@Past
 	private Instant postDate;
-	
-	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
-	@NotNull
-	@JoinColumn(name = "album_id", insertable = false, updatable = false)
-	private Album album;
-	
-	//@OneToMany(fetch=FetchType.LAZY, cascade = { }, orphanRemoval = false)
-	//@NotNull
-	//@JoinTable(name = )
-	private transient Set<Tag> tags;
-	
-	@Column(name = "album_id")
-	private int albumId;
 	
 	@Column(name="small")
 	@NotNull
@@ -117,14 +102,6 @@ public class Photo {
 		this.owner = owner;
 	}
 
-	public Visibility getVisibility() {
-		return visibility;
-	}
-
-	public void setVisibility(Visibility visibility) {
-		this.visibility = visibility;
-	}
-
 	public Instant getPostDate() {
 		return postDate;
 	}
@@ -157,36 +134,20 @@ public class Photo {
 		this.original = original;
 	}
 
-	public Album getAlbum() {
-		return album;
-	}
-
-	public void setAlbum(Album album) {
-		this.album = album;
-	}
-
-	public int getAlbumId() {
-		return albumId;
-	}
-
-	public void setAlbumId(int albumId) {
-		this.albumId = albumId;
-	}
-
-	public Set<Tag> getTags() {
-		return tags;
-	}
-
-	public void setTags(Set<Tag> tags) {
-		this.tags = tags;
-	}
-
 	public String getMessage() {
 		return message;
 	}
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public int getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(int ownerId) {
+		this.ownerId = ownerId;
 	}
 
 }

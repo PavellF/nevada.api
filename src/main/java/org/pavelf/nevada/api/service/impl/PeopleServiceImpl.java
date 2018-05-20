@@ -19,14 +19,13 @@ public class PeopleServiceImpl implements PeopleService {
 	}
 
 	@Override
-	public PersonDTO register(PersonDTO person) {
+	public Integer register(PersonDTO person, Version version) {
 		Person newPerson = new Person();
 		newPerson.setFullName(person.getFullName());
 		newPerson.setGender(person.getGender());
 		newPerson.setLocation(person.getLocation());
 		
-		person.setId(peopleRepository.save(newPerson).getId());
-		return person;
+		return peopleRepository.save(newPerson).getId();
 	}
 
 }

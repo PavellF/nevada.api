@@ -6,9 +6,9 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 
-import org.pavelf.nevada.api.controller.VersioningHeaderInterceptor;
 import org.pavelf.nevada.api.exception.ExceptionCases;
 import org.pavelf.nevada.api.exception.WebApplicationException;
+import org.pavelf.nevada.api.interceptor.VersioningHeaderInterceptor;
 import org.pavelf.nevada.api.logging.Logger;
 import org.pavelf.nevada.api.logging.LoggerFactory;
 import org.pavelf.nevada.api.security.IpTokenInterceptor;

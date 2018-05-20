@@ -2,6 +2,7 @@ package org.pavelf.nevada.api.service.impl;
 
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -10,8 +11,10 @@ import org.pavelf.nevada.api.domain.ParsedMessage;
 import org.pavelf.nevada.api.domain.TagDTO;
 import org.pavelf.nevada.api.domain.Version;
 import org.pavelf.nevada.api.persistence.domain.Message;
+import org.pavelf.nevada.api.persistence.domain.Photo;
 import org.pavelf.nevada.api.persistence.domain.Tag;
 import org.pavelf.nevada.api.persistence.repository.MessageRepository;
+import org.pavelf.nevada.api.persistence.repository.PhotoRepository;
 import org.pavelf.nevada.api.persistence.repository.ProfileRepository;
 import org.pavelf.nevada.api.persistence.repository.TagRepository;
 import org.pavelf.nevada.api.service.MessageParser;
@@ -25,52 +28,48 @@ import org.springframework.transaction.annotation.Transactional;
 public class MessageServiceImpl implements MessageService {
 
 	private MessageRepository messageRepository;
-	private MessageParser parser;
 	private ProfileRepository profileRepository;
-	private TagsService tagsService;
+	private PhotoRepository photoRepository;
 	private TagRepository tagRepository;
+	private MessageParser parser;
 	
-	@Autowired
-	public MessageServiceImpl(MessageRepository messageRepository,
-			MessageParser parser, ProfileRepository profileRepository,
-			TagsService tagsService, TagRepository tagRepository) {
-		this.messageRepository = messageRepository;
-		this.parser = parser;
-		this.profileRepository = profileRepository;
-		this.tagsService = tagsService;
-		this.tagRepository = tagRepository;
-	}
-
-
 	@Override
 	@Transactional
-	public MessageDTO post(MessageDTO message) {
+	public Integer post(MessageDTO message, Version version) {
+		if (message == null || version == null) {
+			throw new IllegalArgumentException();
+		}
+		
 		Message newMessage = new Message();
 		newMessage.setAuthor(profileRepository.getOne(message.getAuthorId()));
 		newMessage.setArchived(false);
 		
 		ParsedMessage parsed = parser.parse(message.getContent());
 		
-		newMessage.setTags(tagsService.addAllTag(parsed.getMessageTags())
-				.stream().map(tagDto -> tagRepository.getOne(tagDto.getTagName()))
+		newMessage.setTags(parsed.getMessageTags().stream()
+				.map(tagDto -> tagRepository.getOne(tagDto.getTagName()))
 				.collect(Collectors.toSet()));
+		
 		
 		newMessage.setContent(parsed.getParsed());
 		newMessage.setDate(Instant.now());
-		
-		Version version = message.getVersion();
-		
-		if (version.isPrincipalVersion() || version.isSuperVersion()) {
-			newMessage.setPriority(message.getPriority());
-		} else {
-			newMessage.setPriority((short) 0);
-		}
-		
+		newMessage.setPriority(message.getPriority());
 		newMessage.setRating(0);
 		newMessage.setReplyTo(message.getReplyTo());
-		message.setId(messageRepository.save(newMessage).getId());
 		
-		return message;
+		if (message.getPhotoIds() != null) {
+			Set<Photo> photos = message.getPhotoIds().stream()
+					.map(photoRepository::getOne).collect(Collectors.toSet());
+			newMessage.setPhotos(photos);
+		}
+		
+		return messageRepository.save(newMessage).getId();
+	}
+
+	@Override
+	public List<MessageDTO> getList(Set<Integer> ids, Version version) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -66,23 +66,24 @@ public class Token {
 	@Column(name="is_super_token")
 	private boolean superToken;
 	
-	@Column(name="chat_access")
-	@NotNull
-	@Enumerated(javax.persistence.EnumType.STRING)
-	private Access chatAccess;
-	
 	@Column(name="stream_access")
 	@NotNull
 	@Enumerated(javax.persistence.EnumType.STRING)
 	private Access streamAccess;
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
-	@JoinColumn(name = "belongs_to_profile")
+	@JoinColumn(name = "belongs_to_profile", insertable = false, updatable = false)
 	private Profile profile; 
 	
+	@Column(name = "belongs_to_profile")
+	private int belongsToProfile;
+	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
-	@JoinColumn(name = "issued_by")
+	@JoinColumn(name = "issued_by", insertable = false, updatable = false)
 	private Application ussuedBy; 
+	
+	@Column(name = "issued_by")
+	private int issuedBy;
 
 	/**
 	 * Does NOT trigger lazy loading. Always returns empty string.
@@ -189,14 +190,6 @@ public class Token {
 		this.ussuedBy = ussuedBy;
 	}
 
-	public Access getChatAccess() {
-		return chatAccess;
-	}
-
-	public void setChatAccess(Access chatAccess) {
-		this.chatAccess = chatAccess;
-	}
-
 	public Access getStreamAccess() {
 		return streamAccess;
 	}
@@ -211,6 +204,22 @@ public class Token {
 
 	public void setSuperToken(boolean superToken) {
 		this.superToken = superToken;
+	}
+
+	public int getBelongsToProfile() {
+		return belongsToProfile;
+	}
+
+	public void setBelongsToProfile(int belongsToProfile) {
+		this.belongsToProfile = belongsToProfile;
+	}
+
+	public int getIssuedBy() {
+		return issuedBy;
+	}
+
+	public void setIssuedBy(int issuedBy) {
+		this.issuedBy = issuedBy;
 	}
 	
 	

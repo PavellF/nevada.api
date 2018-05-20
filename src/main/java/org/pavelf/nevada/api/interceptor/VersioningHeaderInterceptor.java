@@ -1,4 +1,4 @@
-package org.pavelf.nevada.api.controller;
+package org.pavelf.nevada.api.interceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

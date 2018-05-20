@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -19,7 +20,6 @@ import javax.validation.constraints.Size;
 //@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) //need it because of ONEToOne rel
 public class Person {
 
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	@Id
 	private int id;
@@ -35,6 +35,10 @@ public class Person {
 	@Column(name = "gender")
 	@Size(min = 1, max = 128)
 	private String gender;
+	
+	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
+	@PrimaryKeyJoinColumn
+	private Profile profile;
 	
 	public Person() { }
 	

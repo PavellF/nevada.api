@@ -25,7 +25,27 @@ public interface ExceptionCases {
 			ExceptionCase.of(5, "One of required properties in the body was not set.", 
 					HttpStatus.BAD_REQUEST);
 	
-	public static final ExceptionCase USER_NOT_FOUND =
+	public static final ExceptionCase UNRECOGNIZED_USER =
 			ExceptionCase.of(6, "Could not recognize bounded user.", 
 					HttpStatus.FORBIDDEN);
+	
+	public static final ExceptionCase UNRECOGNIZED_APPLICATION =
+			ExceptionCase.of(7, "Could not recognize applicaion.", 
+					HttpStatus.FORBIDDEN);
+	
+	public static final ExceptionCase BANNED_APPLICATION =
+			ExceptionCase.of(8, "Specified application can not perform requests due suspend.", 
+					HttpStatus.FORBIDDEN);
+	
+	public static final ExceptionCase INVALID_BODY_PROPERTY =
+			ExceptionCase.of(9, "Some of body property is invalid(e.g. invalid time).", 
+					HttpStatus.BAD_REQUEST);
+	
+	public static final ExceptionCase ACCESS_DENIED =
+			ExceptionCase.of(10, "Have no permission to access this entity.", 
+					HttpStatus.FORBIDDEN);
+	
+	public static final ExceptionCase OUT_OF_BOUND_VALUE =
+			ExceptionCase.of(11, "Some value exeeds its limit.", 
+					HttpStatus.BAD_REQUEST);
 }

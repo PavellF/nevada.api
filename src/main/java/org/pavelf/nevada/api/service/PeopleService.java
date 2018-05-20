@@ -13,8 +13,9 @@ public interface PeopleService {
 	/**
 	 * Registers new person in the application.
 	 * @param person person to register.
-	 * @return never {@code null} PersonDTO object. Some fields may be mutated.
+	 * @param version of object to register.
+	 * @return never {@code null}, generated id.
 	 * */
-	public PersonDTO register(PersonDTO person);
+	public Integer register(PersonDTO person, Version version);
 	
 }

@@ -16,6 +16,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -52,12 +53,18 @@ public class Profile {
 	private String email;
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { CascadeType.ALL }, optional = true)
-	@JoinColumn(name = "about")
+	@JoinColumn(name = "about", insertable = false, updatable = false)
 	private Message about;
 	
+	@Column(name = "about")
+	private int aboutId;
+	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { CascadeType.ALL }, optional = true)
-	@JoinColumn(name="user_pic")
+	@JoinColumn(name="user_pic", insertable = false, updatable = false)
 	private Photo picture;
+	
+	@Column(name = "user_pic")
+	private int pictureId;
 	
 	@Min(0)
 	@Column(name="popularity")
@@ -66,9 +73,13 @@ public class Profile {
 	@Column(name="rating")
 	private int rating;
 	
-	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
-	@JoinColumn(name = "belongs_to")
+	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
+	@JoinTable(name = "people", joinColumns = { @JoinColumn(name = "id") }, 
+    inverseJoinColumns = { @JoinColumn(name = "id")} )
 	private Person person; 
+	
+	@Column(name="suspended_until")
+	private Instant suspendedUntil;
 	
 	public Profile() { }
 
@@ -175,6 +186,30 @@ public class Profile {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public int getAboutId() {
+		return aboutId;
+	}
+
+	public void setAboutId(int aboutId) {
+		this.aboutId = aboutId;
+	}
+
+	public int getPictureId() {
+		return pictureId;
+	}
+
+	public void setPictureId(int pictureId) {
+		this.pictureId = pictureId;
+	}
+
+	public Instant getSuspendedUntil() {
+		return suspendedUntil;
+	}
+
+	public void setSuspendedUntil(Instant suspendedUntil) {
+		this.suspendedUntil = suspendedUntil;
 	}
 
 }

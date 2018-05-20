@@ -33,7 +33,6 @@ import org.pavelf.nevada.api.domain.PhotoDTO;
 import org.pavelf.nevada.api.domain.Picture;
 import org.pavelf.nevada.api.domain.Version;
 import org.pavelf.nevada.api.persistence.domain.Photo;
-import org.pavelf.nevada.api.persistence.repository.AlbumRepository;
 import org.pavelf.nevada.api.persistence.repository.PhotoRepository;
 import org.pavelf.nevada.api.persistence.repository.ProfileRepository;
 import org.pavelf.nevada.api.persistence.repository.TagRepository;
@@ -46,29 +45,22 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PhotoServiceImpl implements PhotoService {
 
-	private AlbumRepository albumRepository;
 	private ImageProcessor imageProcessor;
 	private ProfileRepository profileRepository;
 	private PhotoRepository photoRepository;
 	private TagRepository tagRepository;
-	private TagsService tagsService;
 	
 	@Transactional
 	@Override
-	public PhotoDTO post(PhotoDTO photo) {
-		if (photo == null) {
+	public Integer post(PhotoDTO photo, Version version) {
+		if (photo == null || version == null) {
 			throw new IllegalArgumentException();
 		}
 		
 		Photo newPhoto = new Photo();
-		newPhoto.setAlbum(albumRepository.getOne(photo.getAlbumId()));//check owner
 		newPhoto.setOriginal(photo.getOriginal());
 		newPhoto.setOwner(profileRepository.getOne(photo.getOwnerId()));//check owner
 		newPhoto.setPostDate(Instant.now());
-		newPhoto.setVisibility(photo.getVisibility());
-		
-		newPhoto.setTags(tagsService.addAllTag(photo.getTags()).stream().map(
-				tagDto -> tagRepository.getOne(tagDto.getTagName())).collect(Collectors.toSet()));
 		
 		Picture small = new Picture(photo.getOriginal(), 76, 76, true, 0.85f);
 		newPhoto.setSmall(imageProcessor.process(small).getData());
@@ -76,8 +68,7 @@ public class PhotoServiceImpl implements PhotoService {
 		Picture medium = new Picture(photo.getOriginal(), 340, 340, true, 1f);
 		newPhoto.setMedium(imageProcessor.process(medium).getData());
 		
-		photo.setId(photoRepository.save(newPhoto).getId());
-		return photo;
+		return photoRepository.save(newPhoto).getId();
 	}
 	
 	public static void main(String... args) throws IOException {

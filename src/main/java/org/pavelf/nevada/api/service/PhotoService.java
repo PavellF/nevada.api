@@ -13,8 +13,9 @@ public interface PhotoService {
 	/**
 	 * Creates new image.
 	 * @param photo image to save.
-	 * @return never {@code null} mutated PhotoDTO object.
+	 * @param version of object to post.
+	 * @return never {@code null} posted object id.
 	 * */
-	public PhotoDTO post(PhotoDTO photo);
+	public Integer post(PhotoDTO photo, Version version);
 	
 }

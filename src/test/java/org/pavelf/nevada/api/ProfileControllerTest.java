@@ -4,6 +4,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pavelf.nevada.api.domain.PersonDTO;
 import org.pavelf.nevada.api.domain.ProfileDTO;
+import org.pavelf.nevada.api.persistence.repository.LikeRepository;
+import org.pavelf.nevada.api.persistence.repository.MessageRepository;
+import org.pavelf.nevada.api.persistence.repository.ProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -36,10 +39,23 @@ public class ProfileControllerTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
+    
+    @Autowired
+    private ProfileRepository pr;
+    
+    @Autowired
+    private MessageRepository mr;
+    
+    @Autowired
+    private LikeRepository lr;
 	
 	@Test
 	public void controllerShouldAcceptPostedJsonObject() throws Exception {
-		final String endpoint = "http://localhost:" + port + "/profiles";
+		
+		mr.getAllLikesForMessage(1);
+		
+		
+		/*final String endpoint = "http://localhost:" + port + "/profiles";
 		ProfileDTO profile = new ProfileDTO();
 		profile.setEmail("test@testing.com");
 		profile.setPassword(new char [] { 's', 'e', 'c', 'r', 'e', 't' });
@@ -67,6 +83,8 @@ public class ProfileControllerTest {
 		
 		Assertions.assertThat(returnedHeaders).containsAllEntriesOf(headers);
 		Assertions.assertThat(returnedStatus).isEqualTo(HttpStatus.CREATED);
+		*/
+		
 		
 		
 		

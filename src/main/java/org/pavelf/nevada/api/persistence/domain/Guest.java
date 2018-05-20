@@ -1,8 +1,9 @@
 package org.pavelf.nevada.api.persistence.domain;
 
+import java.time.Instant;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -11,30 +12,32 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.Past;
 
 @Entity
-@Table(name="albums")
-public class Album {
+@Table(name="guests")
+public class Guest {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id")
 	private int id;
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
-	@JoinColumn(name = "owner_id")
-	private Profile ownerId;
-	
-	@Column(name="title")
-	@Size(min=3, max=64)
 	@NotNull
-	private String title;
+	@JoinColumn(name = "who", insertable = false, updatable = false)
+	private Profile who; 
 	
-	@Column(name="visibility_level")
+	@Column(name = "who")
+	private int whoId;
+	
+	@Column(name = "hidden")
+	private boolean hidden;
+	
+	@Column(name="when")
 	@NotNull
-	@Enumerated(javax.persistence.EnumType.STRING)
-	private Visibility visibility;
+	@Past
+	private Instant when;
 	
 	/**
 	 * Does NOT trigger lazy loading. Always returns empty string.
@@ -56,7 +59,6 @@ public class Album {
 	 * Does NOT trigger lazy loading. Always throws.
 	 * @throws UnsupportedOperationException
 	 * */
-	
 	@Override
 	public boolean equals(Object obj) {
 		throw new UnsupportedOperationException();
@@ -70,28 +72,36 @@ public class Album {
 		this.id = id;
 	}
 
-	public Profile getOwnerId() {
-		return ownerId;
+	public Profile getWho() {
+		return who;
 	}
 
-	public void setOwnerId(Profile ownerId) {
-		this.ownerId = ownerId;
+	public void setWho(Profile who) {
+		this.who = who;
 	}
 
-	public String getTitle() {
-		return title;
+	public int getWhoId() {
+		return whoId;
 	}
 
-	public void setTitle(String title) {
-		this.title = title;
+	public void setWhoId(int whoId) {
+		this.whoId = whoId;
 	}
 
-	public Visibility getVisibility() {
-		return visibility;
+	public boolean isHidden() {
+		return hidden;
 	}
 
-	public void setVisibility(Visibility visibility) {
-		this.visibility = visibility;
+	public void setHidden(boolean hidden) {
+		this.hidden = hidden;
+	}
+
+	public Instant getWhen() {
+		return when;
+	}
+
+	public void setWhen(Instant when) {
+		this.when = when;
 	}
 	
 	
