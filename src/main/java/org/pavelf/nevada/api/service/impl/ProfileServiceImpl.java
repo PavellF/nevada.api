@@ -1,33 +1,18 @@
 package org.pavelf.nevada.api.service.impl;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.JoinColumn;
-
+import org.hibernate.criterion.Example;
 import org.pavelf.nevada.api.HttpUtil;
 import org.pavelf.nevada.api.HttpUtil.Algorithm;
-import org.pavelf.nevada.api.domain.MessageDTO;
-import org.pavelf.nevada.api.domain.PersonDTO;
-import org.pavelf.nevada.api.persistence.domain.Like;
-import org.pavelf.nevada.api.persistence.domain.Message;
-import org.pavelf.nevada.api.persistence.domain.Person;
 import org.pavelf.nevada.api.persistence.domain.Profile;
 import org.pavelf.nevada.api.domain.ProfileDTO;
 import org.pavelf.nevada.api.domain.Version;
 import org.pavelf.nevada.api.persistence.repository.MessageRepository;
-import org.pavelf.nevada.api.persistence.repository.PeopleRepository;
 import org.pavelf.nevada.api.persistence.repository.PhotoRepository;
 import org.pavelf.nevada.api.persistence.repository.ProfileRepository;
-import org.pavelf.nevada.api.service.MessageService;
-import org.pavelf.nevada.api.service.PeopleService;
-import org.pavelf.nevada.api.service.PhotoService;
 import org.pavelf.nevada.api.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,10 +22,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProfileServiceImpl implements ProfileService {
 
 	private ProfileRepository principalRepository;
+	private MessageRepository messageRepository;
+	private PhotoRepository photoRepository;
 	
 	@Autowired
-	public ProfileServiceImpl(ProfileRepository principalRepository) {
+	public ProfileServiceImpl(ProfileRepository principalRepository,
+			MessageRepository messageRepository,
+			PhotoRepository photoRepository) {
 		this.principalRepository = principalRepository;
+		this.messageRepository = messageRepository;
+		this.photoRepository = photoRepository;
 	}
 
 	@Transactional
@@ -102,6 +93,41 @@ public class ProfileServiceImpl implements ProfileService {
 					.withUsername(val.getUsername());
 					 return profileDTO.build();
 			}).collect(Collectors.toSet());
+	}
+
+	@Override
+	public boolean update(ProfileDTO profile, Version version) {
+		if (profile == null || version == null || profile.getId() == null) {
+			throw new IllegalArgumentException("Null is not allowed.");
+		}
+		
+		Profile newProfile = new Profile();
+		newProfile.setId(profile.getId());
+		newProfile.setAbout(messageRepository.getOne(profile.getAboutId()));
+		newProfile.setEmail(profile.getEmail());
+		newProfile.setPassword(HttpUtil.hash(Algorithm.MD5, profile.getPassword()).toCharArray());
+		newProfile.setPicture(photoRepository.getOne(profile.getPictureId()));
+		newProfile.setPopularity(profile.getPopularity());
+		newProfile.setRating(profile.getRating());
+		newProfile.setSuspendedUntil(profile.getSuspendedUntil());
+		newProfile.setEmail(profile.getEmail());
+		principalRepository.save(newProfile);
+		
+		return true;
+	}
+
+	@Override
+	public boolean arePasswordsEqual(char[] password, int profileId) {
+		if (password == null) {
+			return false;
+		}
+		return principalRepository.
+				countByIdAndPassword(profileId, HttpUtil.hash(Algorithm.MD5, password)) == 1;
+	}
+
+	@Override
+	public boolean isSuspended(int profileId) {
+		return principalRepository.isSuspended(profileId, Instant.now()) == 1;
 	}
 
 	

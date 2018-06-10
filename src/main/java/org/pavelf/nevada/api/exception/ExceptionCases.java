@@ -48,4 +48,20 @@ public interface ExceptionCases {
 	public static final ExceptionCase OUT_OF_BOUND_VALUE =
 			ExceptionCase.of(11, "Some value exeeds its limit.", 
 					HttpStatus.BAD_REQUEST);
+	
+	public static final ExceptionCase BODY_REQUIRED =
+			ExceptionCase.of(12, "Request body is required to perform this action.", 
+					HttpStatus.BAD_REQUEST);
+	
+	public static final ExceptionCase FAILED_UPDATE =
+			ExceptionCase.of(13, "Could not update entity.", 
+					HttpStatus.INTERNAL_SERVER_ERROR);
+	
+	public static final ExceptionCase NO_PREVIOUS_PASSWORD =
+			ExceptionCase.of(14, "Need current password in order to update existing one.", 
+					HttpStatus.FORBIDDEN);
+	
+	public static final ExceptionCase BANNED_PROFILE =
+			ExceptionCase.of(15, "This profile cn not perform requests.", 
+					HttpStatus.FORBIDDEN);
 }

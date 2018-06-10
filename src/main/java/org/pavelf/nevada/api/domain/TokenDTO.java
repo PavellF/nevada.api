@@ -35,13 +35,12 @@ public class TokenDTO implements Serializable {
 	private Access friendsAccess;
 	private Access accountAccess;
 	private Access notificationsAccess;
+	private Access applicationAccess;
 	private Boolean superToken;
 	private Access chatAccess;
 	private Access streamAccess;
 	private Integer profileId;
 	private Integer applicationId;
-	
-	private TokenDTO() { }
 
 	private TokenDTO(Builder builder) {
 		this.id = builder.id;
@@ -52,6 +51,7 @@ public class TokenDTO implements Serializable {
 		this.friendsAccess = builder.friendsAccess;
 		this.accountAccess = builder.accountAccess;
 		this.notificationsAccess = builder.notificationsAccess;
+		this.applicationAccess = builder.applicationAccess;
 		this.superToken = builder.superToken;
 		this.chatAccess = builder.chatAccess;
 		this.streamAccess = builder.streamAccess;
@@ -59,37 +59,10 @@ public class TokenDTO implements Serializable {
 		this.applicationId = builder.applicationId;
 	}
 	
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("TokenDTO [id=");
-		builder.append(id);
-		builder.append(", token=");
-		builder.append(token);
-		builder.append(", validUntil=");
-		builder.append(validUntil);
-		builder.append(", photoAccess=");
-		builder.append(photoAccess);
-		builder.append(", messagesAccess=");
-		builder.append(messagesAccess);
-		builder.append(", friendsAccess=");
-		builder.append(friendsAccess);
-		builder.append(", accountAccess=");
-		builder.append(accountAccess);
-		builder.append(", notificationsAccess=");
-		builder.append(notificationsAccess);
-		builder.append(", superToken=");
-		builder.append(superToken);
-		builder.append(", chatAccess=");
-		builder.append(chatAccess);
-		builder.append(", streamAccess=");
-		builder.append(streamAccess);
-		builder.append(", profileId=");
-		builder.append(profileId);
-		builder.append(", applicationId=");
-		builder.append(applicationId);
-		builder.append("]");
-		return builder.toString();
+	private TokenDTO() { }
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
 	}
 
 	public Integer getId() {
@@ -124,6 +97,10 @@ public class TokenDTO implements Serializable {
 		return notificationsAccess;
 	}
 
+	public Access getApplicationAccess() {
+		return applicationAccess;
+	}
+
 	public Boolean isSuperToken() {
 		return superToken;
 	}
@@ -142,6 +119,41 @@ public class TokenDTO implements Serializable {
 
 	public Integer getApplicationId() {
 		return applicationId;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("TokenDTO [id=");
+		builder.append(id);
+		builder.append(", token=");
+		builder.append(token);
+		builder.append(", validUntil=");
+		builder.append(validUntil);
+		builder.append(", photoAccess=");
+		builder.append(photoAccess);
+		builder.append(", messagesAccess=");
+		builder.append(messagesAccess);
+		builder.append(", friendsAccess=");
+		builder.append(friendsAccess);
+		builder.append(", accountAccess=");
+		builder.append(accountAccess);
+		builder.append(", notificationsAccess=");
+		builder.append(notificationsAccess);
+		builder.append(", applicationAccess=");
+		builder.append(applicationAccess);
+		builder.append(", superToken=");
+		builder.append(superToken);
+		builder.append(", chatAccess=");
+		builder.append(chatAccess);
+		builder.append(", streamAccess=");
+		builder.append(streamAccess);
+		builder.append(", profileId=");
+		builder.append(profileId);
+		builder.append(", applicationId=");
+		builder.append(applicationId);
+		builder.append("]");
+		return builder.toString();
 	}
 
 	/**
@@ -164,6 +176,7 @@ public class TokenDTO implements Serializable {
 		private Access friendsAccess;
 		private Access accountAccess;
 		private Access notificationsAccess;
+		private Access applicationAccess;
 		private Boolean superToken;
 		private Access chatAccess;
 		private Access streamAccess;
@@ -213,6 +226,11 @@ public class TokenDTO implements Serializable {
 			return this;
 		}
 
+		public Builder withApplicationAccess(Access applicationAccess) {
+			this.applicationAccess = applicationAccess;
+			return this;
+		}
+
 		public Builder withSuperToken(Boolean superToken) {
 			this.superToken = superToken;
 			return this;
@@ -242,6 +260,6 @@ public class TokenDTO implements Serializable {
 			return new TokenDTO(this);
 		}
 	}
-	
+
 	
 }

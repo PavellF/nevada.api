@@ -15,9 +15,8 @@ import javax.annotation.Generated;
  * @author Pavel F.
  * */
 @JsonInclude(Include.NON_NULL)
-public class ApplicationDTO implements Serializable {
+public class ApplicationDTO {
 
-	private static final long serialVersionUID = -6372746061385237123L;
 	private Integer id;
 	private String title;
 	private Instant since;

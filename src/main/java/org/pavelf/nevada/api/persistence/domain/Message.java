@@ -37,9 +37,12 @@ public class Message {
 	private int id;
 	
 	@ManyToOne(fetch=FetchType.LAZY, cascade = { }, optional=false)
-	@JoinColumn(name ="author", insertable = true, updatable = false)
+	@JoinColumn(name ="author", insertable = false, updatable = false)
 	@NotNull
 	private Profile author;
+	
+	@Column(name ="author")
+	private int authorId;
 	
 	@JoinTable(name = "liked_messages", joinColumns = { @JoinColumn(name = "liked_message_id") }, 
 		    inverseJoinColumns = { @JoinColumn(name = "like_id")} )
@@ -220,6 +223,14 @@ public class Message {
 
 	public void setReplyTo(Integer replyTo) {
 		this.replyTo = replyTo;
+	}
+
+	public int getAuthorId() {
+		return authorId;
+	}
+
+	public void setAuthorId(int authorId) {
+		this.authorId = authorId;
 	}
 
 	

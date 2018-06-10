@@ -1,6 +1,8 @@
 package org.pavelf.nevada.api.service.impl;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 import org.pavelf.nevada.api.HttpUtil;
 import org.pavelf.nevada.api.HttpUtil.Algorithm;
@@ -31,12 +33,12 @@ public class ApplicationServiceImpl implements ApplicationService {
 	@Transactional
 	public Integer create(ApplicationDTO application, Version version) {
 		if (application == null || version == null) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Nulls are not allowed.");
 		}
 		
 		Application newApplication = new Application();
 		newApplication.setProfile(profileRepository.getOne(application.getProfileId()));
-		newApplication.setAccessKey(HttpUtil.hash(Algorithm.MD5, application));
+		newApplication.setAccessKey(HttpUtil.hash(Algorithm.MD5, application.getTitle()));
 		newApplication.setSince(Instant.now());
 		newApplication.setSuspendedUntil(null);
 		newApplication.setTitle(application.getTitle());
@@ -46,9 +48,57 @@ public class ApplicationServiceImpl implements ApplicationService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public ApplicationDTO getExisting(int id, Version version) {
+	public Collection<ApplicationDTO> getAllForProfile(int profileId,
+			Version version) {
+		if (version == null) {
+			throw new IllegalArgumentException("Nulls are not allowed.");
+		}
+		return applicationRepository.getAllByBelongsTo(profileId).stream().map((Application a) -> {
+			return ApplicationDTO.builder().withAccessKey(a.getAccessKey())
+			.withId(a.getId())
+			.withProfileId(a.getBelongsTo())
+			.withSince(a.getSince())
+			.withSuspendedUntil(a.getSuspendedUntil())
+			.withTitle(a.getTitle()).build();
+		}).collect(Collectors.toList());
+	}
+
+	@Override
+	@Transactional
+	public boolean update(ApplicationDTO application, Version version) {
+		if (application == null || version == null) {
+			throw new IllegalArgumentException("Nulls are not allowed.");
+		}
 		
-		return null;
+		Application newApplication = new Application();
+		newApplication.setId(application.getId());
+		
+		if (application.getProfileId() != null) {
+			newApplication.setProfile(profileRepository.getOne(application.getProfileId()));
+		}
+		
+		final String newTitle = application.getTitle();
+		if (newTitle != null) {
+			newApplication.setTitle(newTitle);
+			newApplication.setAccessKey(HttpUtil.hash(Algorithm.MD5, newTitle));
+		}
+		
+		newApplication.setSuspendedUntil(application.getSuspendedUntil());
+		applicationRepository.save(newApplication);
+		
+		return true;
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public boolean isBelongsTo(int profileId, int applicationId) {
+		return applicationRepository.countByIdAndBelongsTo(applicationId, profileId) == 1;
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public boolean isSuspended(int applicationId) {
+		return applicationRepository.isSuspended(applicationId, Instant.now()) == 1;
 	}
 
 }

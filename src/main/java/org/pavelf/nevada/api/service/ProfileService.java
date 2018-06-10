@@ -43,5 +43,28 @@ public interface ProfileService {
 	 */
 	public Set<ProfileDTO> readAll(Set<Integer> ids, Version version);
 	
+	/**
+	 * Updates not null fields of given profile.
+	 * @param profile with new fields' values and id field set.
+	 * @param version of object to update.
+	 * @return never {@code null}, whether update was successful.
+	 * @throws IllegalArgumentException if {@code null} passed.
+	 * */
+	public boolean update(ProfileDTO profile, Version version);
+	
+	/**
+	 * Checks whether given password match current profile password.
+	 * @param password to compare.
+	 * @param profileId compare with this profile password.
+	 * @return whether passwords are equal.
+	 */
+	public boolean arePasswordsEqual(char[] password, int profileId);
+	
+	/**
+	 * Whether profile represented by this id was suspended and suspend time has not been 
+	 * elapsed yet.
+	 * @param profileId profile id.
+	 */
+	public boolean isSuspended(int profileId);
 	
 }

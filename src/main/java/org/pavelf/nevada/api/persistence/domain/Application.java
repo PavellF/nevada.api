@@ -42,9 +42,12 @@ public class Application {
 	private String accessKey;
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
-	@JoinColumn(name = "belongs_to_profile")
+	@JoinColumn(name = "belongs_to_profile", updatable = false, insertable = false)
 	@NotNull
 	private Profile profile; 
+	
+	@Column(name = "belongs_to_profile")
+	private int belongsTo;
 	
 	/**
 	 * Does NOT trigger lazy loading. Always returns empty string.
@@ -117,6 +120,14 @@ public class Application {
 
 	public void setSince(Instant since) {
 		this.since = since;
+	}
+
+	public int getBelongsTo() {
+		return belongsTo;
+	}
+
+	public void setBelongsTo(int belongsTo) {
+		this.belongsTo = belongsTo;
 	}
 
 }

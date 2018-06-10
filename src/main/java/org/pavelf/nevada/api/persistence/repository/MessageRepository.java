@@ -12,4 +12,6 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
 	//@Query("SELECT li.like_id FROM liked_messages AS li WHERE li.liked_message_id = ?1")
 	//public Set<Integer> getAllLikesForMessage(int id);
 	
+	public int countByIdAndAuthorId(int id, int authorId);
+	
 }

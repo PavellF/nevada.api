@@ -18,4 +18,11 @@ public interface PhotoService {
 	 * */
 	public Integer post(PhotoDTO photo, Version version);
 	
+	/**
+	 * @param profileId owner id.
+	 * @param photoId photo id.
+	 * @return Whether this photo belongs profile with given id.
+	 * */
+	public boolean isBelongsTo(int profileId, int photoId);
+	
 }

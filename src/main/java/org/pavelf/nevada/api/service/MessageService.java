@@ -31,4 +31,11 @@ public interface MessageService {
 	 * */
 	public List<MessageDTO> getList(Set<Integer> ids, Version version);
 	
+	/**
+	 * @param profileId owner id.
+	 * @param messageId photo id.
+	 * @return Whether this message belongs profile with given id.
+	 * */
+	public boolean isBelongsTo(int profileId, int messageId);	
+	
 }

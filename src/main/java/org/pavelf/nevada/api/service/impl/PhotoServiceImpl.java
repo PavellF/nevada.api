@@ -1,34 +1,10 @@
 package org.pavelf.nevada.api.service.impl;
 
-import java.awt.Graphics2D;
-
-import java.awt.image.BufferedImage;
-import java.awt.image.ImageConsumer;
-import java.awt.image.ImageFilter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.imageio.IIOImage;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
-import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.stream.ImageOutputStream;
-
-
 import org.pavelf.nevada.api.domain.PhotoDTO;
 import org.pavelf.nevada.api.domain.Picture;
 import org.pavelf.nevada.api.domain.Version;
@@ -38,7 +14,6 @@ import org.pavelf.nevada.api.persistence.repository.ProfileRepository;
 import org.pavelf.nevada.api.persistence.repository.TagRepository;
 import org.pavelf.nevada.api.service.ImageProcessor;
 import org.pavelf.nevada.api.service.PhotoService;
-import org.pavelf.nevada.api.service.TagsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,6 +54,11 @@ public class PhotoServiceImpl implements PhotoService {
 		Files.write(Paths.get("/Users/macuser/Desktop/h.jpeg"), img.getByteArray());
 		
     }
+
+	@Override
+	public boolean isBelongsTo(int profileId, int photoId) {
+		return this.photoRepository.countByIdAndOwnerId(photoId, profileId) == 1;
+	}
 
 	
 

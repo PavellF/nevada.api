@@ -12,7 +12,7 @@ public interface Scope {
 	public static final String FRIENDS = "friends";
 	public static final String ACCOUNT = "account";
 	public static final String NOTIFICATION = "notification";
-	public static final String CHAT = "chat";
+	public static final String APPLICATION = "application";
 	public static final String STREAM = "stream";
 	
 	

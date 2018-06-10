@@ -72,4 +72,9 @@ public class MessageServiceImpl implements MessageService {
 		return null;
 	}
 
+	@Override
+	public boolean isBelongsTo(int profileId, int messageId) {
+		return messageRepository.countByIdAndAuthorId(messageId, profileId) == 1;
+	}
+
 }

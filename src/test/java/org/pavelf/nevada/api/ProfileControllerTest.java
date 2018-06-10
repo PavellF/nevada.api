@@ -40,19 +40,12 @@ public class ProfileControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
     
-    @Autowired
-    private ProfileRepository pr;
-    
-    @Autowired
-    private MessageRepository mr;
-    
-    @Autowired
-    private LikeRepository lr;
+   
 	
 	@Test
 	public void controllerShouldAcceptPostedJsonObject() throws Exception {
 		
-		mr.getAllLikesForMessage(1);
+		
 		
 		
 		/*final String endpoint = "http://localhost:" + port + "/profiles";

@@ -1,5 +1,6 @@
 package org.pavelf.nevada.api.persistence.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.pavelf.nevada.api.persistence.domain.Token;
@@ -16,12 +17,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface TokenRepository extends JpaRepository<Token, Integer> {
 
-	/**
-     * Finds token by using the token string as a search criteria.
-     * @param token string representing token ,
-     * @return  token itself.
-     */
-	//public Optional<Token> findByToken(String token);
+	public List<Token> findAllByBelongsToProfile(int profileId);
+	
+	public List<Token> findAllByIssuedBy(int applicationId);
 	
 	/**
      * Finds token and its associated profile by using the token string as a search criteria.

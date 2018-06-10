@@ -10,10 +10,15 @@ import javax.validation.constraints.Past;
 
 import org.pavelf.nevada.api.persistence.domain.Profile;
 import org.pavelf.nevada.api.persistence.domain.Visibility;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import javax.annotation.Generated;
 import java.util.Collections;
 import java.util.Iterator;
 
+@JsonInclude(Include.NON_NULL)
 public class PhotoDTO {
 
 	private Integer id;

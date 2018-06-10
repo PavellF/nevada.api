@@ -40,6 +40,15 @@ public class User implements Principal {
 	public String getId() {
 		return id;
 	}
+	
+	/**
+	 * Tries convert id to string.
+	 * @return never {@code null}.
+	 * @throws NumberFormatException if id initially was not number.
+	 * */
+	public int getIdAsInt() {
+		return Integer.valueOf(id);
+	}
 
 	/**
 	 * @return never {@code null} or throw.

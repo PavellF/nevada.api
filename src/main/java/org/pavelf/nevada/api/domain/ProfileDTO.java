@@ -40,6 +40,8 @@ public class ProfileDTO {
 	
 	private char[] password;
 	
+	private char[] oldPassword;
+	
 	private Instant signDate;
 	
 	private String email;
@@ -53,13 +55,14 @@ public class ProfileDTO {
 	private Integer personId; 
 	
 	private Integer aboutId;
-
-	private ProfileDTO() { }
 	
+	private Instant suspendedUntil;
+
 	private ProfileDTO(Builder builder) {
 		this.id = builder.id;
 		this.username = builder.username;
 		this.password = builder.password;
+		this.oldPassword = builder.oldPassword;
 		this.signDate = builder.signDate;
 		this.email = builder.email;
 		this.pictureId = builder.pictureId;
@@ -67,32 +70,10 @@ public class ProfileDTO {
 		this.rating = builder.rating;
 		this.personId = builder.personId;
 		this.aboutId = builder.aboutId;
+		this.suspendedUntil = builder.suspendedUntil;
 	}
-	
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("ProfileDTO [id=");
-		builder.append(id);
-		builder.append(", username=");
-		builder.append(username);
-		builder.append(", signDate=");
-		builder.append(signDate);
-		builder.append(", email=");
-		builder.append(email);
-		builder.append(", pictureId=");
-		builder.append(pictureId);
-		builder.append(", popularity=");
-		builder.append(popularity);
-		builder.append(", rating=");
-		builder.append(rating);
-		builder.append(", personId=");
-		builder.append(personId);
-		builder.append(", aboutId=");
-		builder.append(aboutId);
-		builder.append("]");
-		return builder.toString();
-	}
+
+	private ProfileDTO() { }
 
 	public Integer getId() {
 		return id;
@@ -104,6 +85,10 @@ public class ProfileDTO {
 
 	public char[] getPassword() {
 		return password;
+	}
+
+	public char[] getOldPassword() {
+		return oldPassword;
 	}
 
 	public Instant getSignDate() {
@@ -134,6 +119,37 @@ public class ProfileDTO {
 		return aboutId;
 	}
 
+	public Instant getSuspendedUntil() {
+		return suspendedUntil;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("ProfileDTO [id=");
+		builder.append(id);
+		builder.append(", username=");
+		builder.append(username);
+		builder.append(", signDate=");
+		builder.append(signDate);
+		builder.append(", email=");
+		builder.append(email);
+		builder.append(", pictureId=");
+		builder.append(pictureId);
+		builder.append(", popularity=");
+		builder.append(popularity);
+		builder.append(", rating=");
+		builder.append(rating);
+		builder.append(", personId=");
+		builder.append(personId);
+		builder.append(", aboutId=");
+		builder.append(aboutId);
+		builder.append(", suspendedUntil=");
+		builder.append(suspendedUntil);
+		builder.append("]");
+		return builder.toString();
+	}
+
 	/**
 	 * Creates builder to build {@link ProfileDTO}.
 	 * @return created builder
@@ -149,6 +165,7 @@ public class ProfileDTO {
 		private Integer id;
 		private String username;
 		private char[] password;
+		private char[] oldPassword;
 		private Instant signDate;
 		private String email;
 		private Integer pictureId;
@@ -156,6 +173,7 @@ public class ProfileDTO {
 		private Integer rating;
 		private Integer personId;
 		private Integer aboutId;
+		private Instant suspendedUntil;
 
 		private Builder() {
 		}
@@ -172,6 +190,11 @@ public class ProfileDTO {
 
 		public Builder withPassword(char[] password) {
 			this.password = password;
+			return this;
+		}
+
+		public Builder withOldPassword(char[] oldPassword) {
+			this.oldPassword = oldPassword;
 			return this;
 		}
 
@@ -210,11 +233,15 @@ public class ProfileDTO {
 			return this;
 		}
 
+		public Builder withSuspendedUntil(Instant suspendedUntil) {
+			this.suspendedUntil = suspendedUntil;
+			return this;
+		}
+
 		public ProfileDTO build() {
 			return new ProfileDTO(this);
 		}
 	}
-
 	
 	
 }

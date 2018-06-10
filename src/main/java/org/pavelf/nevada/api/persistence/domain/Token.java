@@ -58,6 +58,11 @@ public class Token {
 	@Enumerated(javax.persistence.EnumType.STRING)
 	private Access accountAccess;
 	
+	@Column(name="application_access")
+	@NotNull
+	@Enumerated(javax.persistence.EnumType.STRING)
+	private Access applicationAccess;
+	
 	@Column(name="notifications_access")
 	@NotNull
 	@Enumerated(javax.persistence.EnumType.STRING)
@@ -80,7 +85,7 @@ public class Token {
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
 	@JoinColumn(name = "issued_by", insertable = false, updatable = false)
-	private Application ussuedBy; 
+	private Application issuedByApp; 
 	
 	@Column(name = "issued_by")
 	private int issuedBy;
@@ -183,11 +188,11 @@ public class Token {
 	}
 
 	public Application getUssuedBy() {
-		return ussuedBy;
+		return issuedByApp;
 	}
 
 	public void setUssuedBy(Application ussuedBy) {
-		this.ussuedBy = ussuedBy;
+		this.issuedByApp = ussuedBy;
 	}
 
 	public Access getStreamAccess() {
@@ -214,6 +219,14 @@ public class Token {
 		this.belongsToProfile = belongsToProfile;
 	}
 
+	public Application getIssuedByApp() {
+		return issuedByApp;
+	}
+
+	public void setIssuedByApp(Application issuedByApp) {
+		this.issuedByApp = issuedByApp;
+	}
+
 	public int getIssuedBy() {
 		return issuedBy;
 	}
@@ -221,6 +234,15 @@ public class Token {
 	public void setIssuedBy(int issuedBy) {
 		this.issuedBy = issuedBy;
 	}
+
+	public Access getApplicationAccess() {
+		return applicationAccess;
+	}
+
+	public void setApplicationAccess(Access applicationAccess) {
+		this.applicationAccess = applicationAccess;
+	}
+
 	
 	
 	

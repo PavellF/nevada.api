@@ -1,5 +1,9 @@
 package org.pavelf.nevada.api.service.impl;
 
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.pavelf.nevada.api.HttpUtil;
 import org.pavelf.nevada.api.HttpUtil.Algorithm;
 import org.pavelf.nevada.api.domain.TokenDTO;
@@ -19,6 +23,24 @@ public class TokenServiceImpl implements TokenService {
 	private TokenRepository tokenRepository;
 	private ProfileRepository profileRepository;
 	private ApplicationRepository applicationRepository;
+	
+	private final Function<? super Token, ? extends TokenDTO> tokenMapper = (Token val) -> {
+		return TokenDTO.builder()
+				.withId(val.getId())
+				.withAccountAccess(val.getAccountAccess())
+				.withApplicationId(val.getIssuedBy())
+				.withFriendsAccess(val.getFriendsAccess())
+				.withMessagesAccess(val.getMessagesAccess())
+				.withNotificationsAccess(val.getNotificationsAccess())
+				.withPhotoAccess(val.getNotificationsAccess())
+				.withProfileId(val.getBelongsToProfile())
+				.withStreamAccess(val.getStreamAccess())
+				.withSuperToken(val.isSuperToken())
+				.withToken(val.getToken())
+				.withApplicationAccess(val.getApplicationAccess())
+				.withValidUntil(val.getValidUntil())
+			.build();
+	};
 	
 	@Autowired
 	public TokenServiceImpl(TokenRepository tokenRepository,
@@ -44,6 +66,7 @@ public class TokenServiceImpl implements TokenService {
 		newToken.setProfile(profileRepository.getOne(token.getProfileId()));
 		newToken.setStreamAccess(token.getStreamAccess());
 		newToken.setSuperToken(token.isSuperToken());
+		newToken.setApplicationAccess(token.getApplicationAccess());
 		newToken.setToken(HttpUtil.hash(Algorithm.MD5, token));
 		newToken.setUssuedBy(applicationRepository.getOne(token.getApplicationId()));
 		newToken.setValidUntil(token.getValidUntil());
@@ -51,7 +74,7 @@ public class TokenServiceImpl implements TokenService {
 		return tokenRepository.save(newToken).getId();
 	}
 
-	@Override
+	/*@Override
 	@Transactional(readOnly=true)
 	public TokenDTO get(int id, Version version) {
 		return tokenRepository.findById(id).map(val -> 
@@ -71,11 +94,41 @@ public class TokenServiceImpl implements TokenService {
 			.build()
 		).orElse(null);
 	}
+*/
+
 
 	@Override
-	public void delete(int id) {
-		tokenRepository.deleteById(id);
+	public boolean update(TokenDTO token, Version version) {
+		if (token == null || version == null || token.getId() == null) {
+			throw new IllegalArgumentException("Null is not allowed.");
+		}
+		Token newToken = new Token();
+		newToken.setId(token.getId());
+		newToken.setValidUntil(token.getValidUntil());
+		
+		tokenRepository.save(newToken);
+		
+		return true;
+	}
 
+	@Override
+	public List<TokenDTO> getAllForProfile(int profileId, Version version) {
+		if (version == null) {
+			throw new IllegalArgumentException("Null is not allowed.");
+		}
+		
+		return tokenRepository.findAllByBelongsToProfile(profileId).stream()
+				.map(tokenMapper).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<TokenDTO> getAllForApplication(int applicationId, Version version) {
+		if (version == null) {
+			throw new IllegalArgumentException("Null is not allowed.");
+		}
+		
+		return tokenRepository.findAllByIssuedBy(applicationId).stream()
+				.map(tokenMapper).collect(Collectors.toList());
 	}
 
 }
