@@ -42,7 +42,7 @@ public interface ExceptionCases {
 					HttpStatus.BAD_REQUEST);
 	
 	public static final ExceptionCase ACCESS_DENIED =
-			ExceptionCase.of(10, "Have no permission to access this entity.", 
+			ExceptionCase.of(10, "Have no permission to access this endpoint.", 
 					HttpStatus.FORBIDDEN);
 	
 	public static final ExceptionCase OUT_OF_BOUND_VALUE =
@@ -64,4 +64,10 @@ public interface ExceptionCases {
 	public static final ExceptionCase BANNED_PROFILE =
 			ExceptionCase.of(15, "This profile cn not perform requests.", 
 					HttpStatus.FORBIDDEN);
+	
+	public static final ExceptionCase FORBIDDEN_BODY_PROPERTY =
+			ExceptionCase.of(16, "Some of body properties set are disallowed for this user.", 
+					HttpStatus.BAD_REQUEST);
+	
+	
 }

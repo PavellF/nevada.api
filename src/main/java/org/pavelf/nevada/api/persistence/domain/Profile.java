@@ -57,14 +57,14 @@ public class Profile {
 	private Message about;
 	
 	@Column(name = "about")
-	private int aboutId;
+	private Integer aboutId;
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { CascadeType.ALL }, optional = true)
 	@JoinColumn(name="user_pic", insertable = false, updatable = false)
 	private Photo picture;
 	
 	@Column(name = "user_pic")
-	private int pictureId;
+	private Integer pictureId;
 	
 	@Min(0)
 	@Column(name="popularity")
@@ -73,10 +73,12 @@ public class Profile {
 	@Column(name="rating")
 	private int rating;
 	
-	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
-	@JoinTable(name = "people", joinColumns = { @JoinColumn(name = "id") }, 
-    inverseJoinColumns = { @JoinColumn(name = "id")} )
+	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
+	@JoinColumn(name = "person_id", insertable = false, updatable = false)
 	private Person person; 
+	
+	@Column(name = "person_id")
+	private Integer personId;
 	
 	@Column(name="suspended_until")
 	private Instant suspendedUntil;
@@ -188,19 +190,19 @@ public class Profile {
 		this.username = username;
 	}
 
-	public int getAboutId() {
+	public Integer getAboutId() {
 		return aboutId;
 	}
 
-	public void setAboutId(int aboutId) {
+	public void setAboutId(Integer aboutId) {
 		this.aboutId = aboutId;
 	}
 
-	public int getPictureId() {
+	public Integer getPictureId() {
 		return pictureId;
 	}
 
-	public void setPictureId(int pictureId) {
+	public void setPictureId(Integer pictureId) {
 		this.pictureId = pictureId;
 	}
 
@@ -210,6 +212,14 @@ public class Profile {
 
 	public void setSuspendedUntil(Instant suspendedUntil) {
 		this.suspendedUntil = suspendedUntil;
+	}
+
+	public Integer getPersonId() {
+		return personId;
+	}
+
+	public void setPersonId(Integer personId) {
+		this.personId = personId;
 	}
 
 }

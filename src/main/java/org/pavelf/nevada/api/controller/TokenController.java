@@ -60,11 +60,9 @@ public class TokenController {
 			APPLICATION_ACCEPT_PREFIX+".token+xml"},
 			path="/tokens")
 	@Secured(access=Access.READ_WRITE, scope = Scope.ACCOUNT)
-	public ResponseEntity<TokenDTO> createToken(HttpEntity<TokenDTO> entity) {
+	public ResponseEntity<TokenDTO> createToken(HttpEntity<TokenDTO> entity,
+			@RequestHeader(HttpHeaders.CONTENT_TYPE) Version version) {
 		final TokenDTO posted = entity.getBody();
-		final Version version = new VersionImpl(
-				entity.getHeaders().getContentType().getParameter("version"));
-		
 		final Integer appId = posted.getApplicationId();
 		final Integer profileId = posted.getProfileId();
 		
@@ -94,10 +92,9 @@ public class TokenController {
 			APPLICATION_ACCEPT_PREFIX+".token+xml"},
 			path="/tokens")
 	@Secured(access=Access.READ_WRITE, scope = Scope.ACCOUNT)
-	public ResponseEntity<TokenDTO> updateToken(HttpEntity<TokenDTO> entity) {
+	public ResponseEntity<TokenDTO> updateToken(HttpEntity<TokenDTO> entity,
+			@RequestHeader(HttpHeaders.CONTENT_TYPE) Version version) {
 		final TokenDTO posted = entity.getBody();
-		final Version version = new VersionImpl(
-				entity.getHeaders().getContentType().getParameter("version"));
 		
 		if (tokenService.update(posted, version)) {
 			return ResponseEntity.noContent().build();
@@ -113,8 +110,7 @@ public class TokenController {
 	@Secured(access=Access.READ, scope = Scope.ACCOUNT)
 	public ResponseEntity<List<TokenDTO>> getTokens(@PathVariable("owner") Owner owner,
 			@PathVariable("owner_id") int id, 
-			@RequestHeader HttpHeaders headers) {
-		final Version version = new VersionImpl(headers.getAccept().get(0).getParameter("version"));
+			@RequestHeader(HttpHeaders.ACCEPT) Version version) {
 		
 		if (owner == Owner.PROFILE) {
 			

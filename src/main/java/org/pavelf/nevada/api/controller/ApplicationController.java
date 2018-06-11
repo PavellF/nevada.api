@@ -54,11 +54,10 @@ public class ApplicationController {
 	
 	@Secured(access=Access.READ_WRITE, scope = Scope.APPLICATION)
 	public ResponseEntity<ApplicationDTO> createApplication(
-			HttpEntity<ApplicationDTO> entity) {
+			HttpEntity<ApplicationDTO> entity, 
+			@RequestHeader(HttpHeaders.CONTENT_TYPE) Version version) {
 		
 		final ApplicationDTO posted = entity.getBody();
-		final Version version = new VersionImpl(
-				entity.getHeaders().getContentType().getParameter("version"));
 		final User issuer = principal.getToken().getUser().orElseThrow(() -> {
 			return new WebApplicationException(UNRECOGNIZED_USER);
 		});
@@ -80,7 +79,7 @@ public class ApplicationController {
 		
 		Integer id = applicationService.create(posted, version);
 		
-		return ResponseEntity.created(URI.create("/applications/" + id)).build();
+		return ResponseEntity.created(URI.create("profiles/"+profileId+"/applications")).build();
 	}
 	
 	@GetMapping(produces = { 
@@ -90,8 +89,7 @@ public class ApplicationController {
 	@Secured(access=Access.READ, scope = Scope.APPLICATION)
 	public ResponseEntity<Collection<ApplicationDTO>> getApplicationsOwnedByProfile(
 			@PathVariable("owner_id") int id, 
-			@RequestHeader HttpHeaders headers) { 
-		final Version version = new VersionImpl(headers.getAccept().get(0).getParameter("version"));
+			@RequestHeader(HttpHeaders.ACCEPT) Version version) { 
 		return ResponseEntity.ok(applicationService.getAllForProfile(id, version));
 	}
 	
@@ -101,11 +99,10 @@ public class ApplicationController {
 	path="/applications")
 	@Secured(access=Access.READ_WRITE, scope = Scope.APPLICATION)
 	public ResponseEntity<ApplicationDTO> updateApplication(
-			HttpEntity<ApplicationDTO> entity) {
+			HttpEntity<ApplicationDTO> entity,
+			@RequestHeader(HttpHeaders.CONTENT_TYPE) Version version) {
 		
 		final ApplicationDTO toUpdate = entity.getBody();
-		final Version version = 
-				new VersionImpl(entity.getHeaders().getContentType().getParameter("version"));
 		final User issuer = principal.getToken().getUser().orElseThrow(() -> {
 			return new WebApplicationException(UNRECOGNIZED_USER);
 		});

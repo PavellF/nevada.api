@@ -81,9 +81,8 @@ public class ProfileController {
 			APPLICATION_ACCEPT_PREFIX+".profile+xml"},
 			path = "/{id}")	
 	public ResponseEntity<ProfileDTO> getProfile(@PathVariable("id") int id, 
-			@RequestHeader HttpHeaders headers) { 
-		final Version version = new VersionImpl(headers.getAccept().get(0).getParameter("version"));
-		
+			HttpEntity<ProfileDTO> entity, 
+			@RequestHeader(HttpHeaders.ACCEPT) Version version) { 
 		if(!principal.isAuthorized()) {
 			return ResponseEntity.ok(profileService.read(id, true, version));
 		} 
@@ -92,7 +91,7 @@ public class ProfileController {
 			return new WebApplicationException(UNRECOGNIZED_USER);
 		});
 		
-		if (issuer.getId().equals(String.valueOf(id))) {
+		if (issuer.getIdAsInt() == id) {
 			return ResponseEntity.ok(profileService.read(id, false, version));
 		} else {
 			return ResponseEntity.ok(profileService.read(id, true, version));
@@ -103,10 +102,9 @@ public class ProfileController {
 			APPLICATION_ACCEPT_PREFIX+".profile+json", 
 			APPLICATION_ACCEPT_PREFIX+".profile+xml"})
 	@Secured(access = Access.READ_WRITE, scope = { Scope.ACCOUNT })
-	public ResponseEntity<ProfileDTO> postProfile(HttpEntity<ProfileDTO> entity) {
+	public ResponseEntity<ProfileDTO> postProfile(HttpEntity<ProfileDTO> entity,
+			@RequestHeader(HttpHeaders.CONTENT_TYPE) Version version) {
 		final ProfileDTO posted = entity.getBody();
-		final Version version = new VersionImpl(
-				entity.getHeaders().getContentType().getParameter("version"));
 		
 		if (posted == null) {
 			throw new WebApplicationException(BODY_REQUIRED);
@@ -119,12 +117,9 @@ public class ProfileController {
 	@GetMapping(produces = { 
 			APPLICATION_ACCEPT_PREFIX+".profile+json", 
 			APPLICATION_ACCEPT_PREFIX+".profile+xml"},
-			path = "/{ids}")	
-	
+			path = "/{ids}-**")	
 	public ResponseEntity<Set<ProfileDTO>> getProfiles(@PathVariable("ids") String ids, 
-			@RequestHeader HttpHeaders headers) { 
-		
-		final Version version = new VersionImpl(headers.getAccept().get(0).getParameter("version"));
+			@RequestHeader(HttpHeaders.ACCEPT) Version version) { 
 		
 		Set<Integer> profileIds = Pattern.compile("-")
 				.splitAsStream(ids)
@@ -145,10 +140,9 @@ public class ProfileController {
 			APPLICATION_ACCEPT_PREFIX+".profile+json", 
 			APPLICATION_ACCEPT_PREFIX+".profile+xml"})
 	@Secured(access = Access.READ_WRITE, 
-	scope = { Scope.ACCOUNT, Scope.MESSAGE, Scope.PHOTO })
+	scope = { Scope.ACCOUNT, Scope.PERSON_INFO })
 	public ResponseEntity<ProfileDTO> updateProfile(HttpEntity<ProfileDTO> entity, 
-			@RequestHeader HttpHeaders headers) {
-		final Version version = new VersionImpl(headers.getAccept().get(0).getParameter("version"));
+			@RequestHeader(HttpHeaders.CONTENT_TYPE) Version version) {
 		User issuer = principal.getToken().getUser().orElseThrow(() -> {
 			return new WebApplicationException(UNRECOGNIZED_USER);
 		});
@@ -183,7 +177,7 @@ public class ProfileController {
 			
 			if (superUserAllowedOnly = (!id.equals(issuer.getId()) || 
 					toUpdate.getPopularity() != null || 
-					toUpdate.getRating() != null)) {
+					toUpdate.getRating() != null || toUpdate.getPersonId() != null)) {
 				throw new WebApplicationException(ACCESS_DENIED);
 			}
 			

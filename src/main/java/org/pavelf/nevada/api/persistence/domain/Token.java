@@ -76,6 +76,11 @@ public class Token {
 	@Enumerated(javax.persistence.EnumType.STRING)
 	private Access streamAccess;
 	
+	@Column(name="person_info_access")
+	@NotNull
+	@Enumerated(javax.persistence.EnumType.STRING)
+	private Access personInfoAccess;
+	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
 	@JoinColumn(name = "belongs_to_profile", insertable = false, updatable = false)
 	private Profile profile; 
@@ -241,6 +246,14 @@ public class Token {
 
 	public void setApplicationAccess(Access applicationAccess) {
 		this.applicationAccess = applicationAccess;
+	}
+
+	public Access getPersonInfoAccess() {
+		return personInfoAccess;
+	}
+
+	public void setPersonInfoAccess(Access personInfoAccess) {
+		this.personInfoAccess = personInfoAccess;
 	}
 
 	

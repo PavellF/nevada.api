@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pavelf.nevada.api.domain.PersonDTO;
 import org.pavelf.nevada.api.domain.ProfileDTO;
+import org.pavelf.nevada.api.persistence.domain.Profile;
 import org.pavelf.nevada.api.persistence.repository.LikeRepository;
 import org.pavelf.nevada.api.persistence.repository.MessageRepository;
 import org.pavelf.nevada.api.persistence.repository.ProfileRepository;
@@ -40,26 +41,18 @@ public class ProfileControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
     
-   
-	
-	@Test
-	public void controllerShouldAcceptPostedJsonObject() throws Exception {
-		
-		
-		
-		
-		/*final String endpoint = "http://localhost:" + port + "/profiles";
-		ProfileDTO profile = new ProfileDTO();
-		profile.setEmail("test@testing.com");
-		profile.setPassword(new char [] { 's', 'e', 'c', 'r', 'e', 't' });
-		profile.setUsername("test");
-		profile.setPerson(new PersonDTO());
+   @Test
+	public void controllerShouldAcceptPostedProfile() throws Exception {
+		final String endpoint = "http://localhost:" + port + "/profiles";
+		ProfileDTO profile = ProfileDTO.builder()
+				.withEmail("test@testing.com")
+				.withPassword(new char [] { 's', 'e', 'c', 'r', 'e', 't' })
+				.withUsername("test").build();
 		
 		HttpHeaders headers = new HttpHeaders();
 		headers.set(HttpHeaders.CONTENT_TYPE, 
 				APPLICATION_ACCEPT_PREFIX+".profile+json;version=1.0");	
-		headers.set(HttpHeaders.ACCEPT, 
-				APPLICATION_ACCEPT_PREFIX+".profile+json;version=1.0");
+		headers.set(HttpHeaders.AUTHORIZATION, "fosof94nswf9wa");
 		
 		ResponseEntity<ProfileDTO> response = restTemplate.exchange(
 				endpoint, HttpMethod.POST, new HttpEntity<>(profile, headers), ProfileDTO.class);
@@ -69,18 +62,48 @@ public class ProfileControllerTest {
 		HttpStatus returnedStatus = response.getStatusCode();
 		
 		Assertions.assertThat(returnedBody).isNull();
+		Assertions.assertThat(returnedStatus).isEqualTo(HttpStatus.CREATED);
+		Assertions.assertThat(returnedHeaders.getContentLength()).isEqualTo(0);
+		Assertions.assertThat(returnedHeaders.getLocation()).isNotNull();
+	 }
+   
+   	@Test
+	public void controllerShouldReturnPostedProfileWithNoSensetiveInfo() throws Exception {
+   		final String endpoint = "http://localhost:" + port + "/profiles";
+		ProfileDTO profile = ProfileDTO.builder()
+				.withEmail("controllerShouldReturnPostedProfile@testing.com")
+				.withPassword("secret".toCharArray())
+				.withUsername("controllerShouldReturnPostedProfile").build();
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.set(HttpHeaders.CONTENT_TYPE, 
+				APPLICATION_ACCEPT_PREFIX+".profile+xml;version=1.0");	
+		headers.set(HttpHeaders.AUTHORIZATION, "fosof94nswf9wa");
+		
+		ResponseEntity<ProfileDTO> response = restTemplate.exchange(
+				endpoint, HttpMethod.POST, new HttpEntity<>(profile, headers), ProfileDTO.class);
 		
 		headers = new HttpHeaders();
-		headers.setContentLength(0);
-		headers.setLocation(URI.create("/profiles/1"));
+		headers.set(HttpHeaders.ACCEPT, 
+					APPLICATION_ACCEPT_PREFIX+".profile+xml;version=1.0");	
+		headers.set(HttpHeaders.AUTHORIZATION, "fosof94nswf9wa");
 		
-		Assertions.assertThat(returnedHeaders).containsAllEntriesOf(headers);
-		Assertions.assertThat(returnedStatus).isEqualTo(HttpStatus.CREATED);
-		*/
+		response = restTemplate.exchange(
+				response.getHeaders().getLocation(), 
+				HttpMethod.GET, 
+				new HttpEntity<>(profile, headers), 
+				ProfileDTO.class);
 		
-		
-		
-		
-    }
+		Assertions.assertThat(response.getBody()).isNotNull();
+		Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		Assertions.assertThat(response.getBody().getEmail()).isNull();
+		Assertions.assertThat(response.getBody().getId()).isNotNull();
+   	}
 	
+   	
+   	
+   	
+   	
+   	
+   	
 }

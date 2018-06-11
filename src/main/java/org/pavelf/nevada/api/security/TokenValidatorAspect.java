@@ -10,6 +10,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import org.pavelf.nevada.api.exception.ExceptionCases;
+import org.pavelf.nevada.api.exception.WebApplicationException;
 import org.pavelf.nevada.api.logging.Logger;
 import org.pavelf.nevada.api.logging.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +49,8 @@ public class TokenValidatorAspect {
 	 * Decides whether request token has appropriate access to the controller method annotated with
 	 * {@link Secured}.
 	 * */
-	@Around("@annotation(secured)")
-	public void process(ProceedingJoinPoint pjp, Secured secured) throws Throwable {
+	@Before("@annotation(secured)")
+	public void process(Secured secured) throws Throwable {
 		String ip = request.getRemoteAddr();
 		boolean proceed = false;
 		
@@ -57,12 +59,12 @@ public class TokenValidatorAspect {
 			proceed = token.hasAccess(secured.access(), secured.scope());
 		}
 		
-		if (proceed) {
-			log.info(ip + " Token has neccessary access level. Proceed..");
-			pjp.proceed();
+		if (!proceed) {
+			log.info(ip + " Token is disallowed to call this method.");
+			throw new WebApplicationException(ExceptionCases.ACCESS_DENIED);
 		} 
 		
-		log.info(ip + " Token is disallowed to call this method.");
+		log.info(ip + " Token has neccessary access level. Proceed..");
 	}
 	
 	

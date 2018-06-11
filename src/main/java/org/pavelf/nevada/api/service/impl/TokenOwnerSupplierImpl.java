@@ -61,6 +61,9 @@ public class TokenOwnerSupplierImpl implements TokenOwnerSupplier {
 		map.put(Scope.MESSAGE, token.getMessagesAccess().getLevel());
 		map.put(Scope.NOTIFICATION , token.getNotificationsAccess().getLevel());
 		map.put(Scope.STREAM, token.getStreamAccess().getLevel());
+		map.put(Scope.ACCOUNT, token.getAccountAccess().getLevel());
+		map.put(Scope.PERSON_INFO, token.getPersonInfoAccess().getLevel());
+		
 		return map;
 	}
 		

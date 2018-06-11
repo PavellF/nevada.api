@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -29,6 +30,12 @@ public class StreamPost {
 	@NotNull
 	@JoinColumn(name = "author", insertable = false, updatable = false)
 	private Profile author;
+	
+	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
+	@JoinTable(name = "profile_has_stream_post", 
+		joinColumns = { @JoinColumn(name = "stream_post_id") }, 
+		inverseJoinColumns = { @JoinColumn(name = "profile_id")})
+	private Profile associatedProfile;
 	
 	@Column(name = "author")
 	private int authorId;
@@ -164,6 +171,14 @@ public class StreamPost {
 
 	public void setLastChange(Instant lastChange) {
 		this.lastChange = lastChange;
+	}
+
+	public Profile getAssociatedProfile() {
+		return associatedProfile;
+	}
+
+	public void setAssociatedProfile(Profile associatedProfile) {
+		this.associatedProfile = associatedProfile;
 	}
 	
 	

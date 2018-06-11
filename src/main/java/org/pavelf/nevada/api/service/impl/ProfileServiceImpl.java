@@ -105,6 +105,7 @@ public class ProfileServiceImpl implements ProfileService {
 		newProfile.setId(profile.getId());
 		newProfile.setAbout(messageRepository.getOne(profile.getAboutId()));
 		newProfile.setEmail(profile.getEmail());
+		newProfile.setPersonId(profile.getPersonId());
 		newProfile.setPassword(HttpUtil.hash(Algorithm.MD5, profile.getPassword()).toCharArray());
 		newProfile.setPicture(photoRepository.getOne(profile.getPictureId()));
 		newProfile.setPopularity(profile.getPopularity());

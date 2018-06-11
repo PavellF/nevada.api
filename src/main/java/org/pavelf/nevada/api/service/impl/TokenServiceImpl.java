@@ -36,6 +36,7 @@ public class TokenServiceImpl implements TokenService {
 				.withProfileId(val.getBelongsToProfile())
 				.withStreamAccess(val.getStreamAccess())
 				.withSuperToken(val.isSuperToken())
+				.withPersonInfoAccess(val.getPersonInfoAccess())
 				.withToken(val.getToken())
 				.withApplicationAccess(val.getApplicationAccess())
 				.withValidUntil(val.getValidUntil())

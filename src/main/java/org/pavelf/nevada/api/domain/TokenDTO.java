@@ -39,6 +39,7 @@ public class TokenDTO implements Serializable {
 	private Boolean superToken;
 	private Access chatAccess;
 	private Access streamAccess;
+	private Access personInfoAccess;
 	private Integer profileId;
 	private Integer applicationId;
 
@@ -55,15 +56,12 @@ public class TokenDTO implements Serializable {
 		this.superToken = builder.superToken;
 		this.chatAccess = builder.chatAccess;
 		this.streamAccess = builder.streamAccess;
+		this.personInfoAccess = builder.personInfoAccess;
 		this.profileId = builder.profileId;
 		this.applicationId = builder.applicationId;
 	}
-	
-	private TokenDTO() { }
 
-	public static long getSerialversionuid() {
-		return serialVersionUID;
-	}
+	private TokenDTO() { }
 
 	public Integer getId() {
 		return id;
@@ -113,6 +111,10 @@ public class TokenDTO implements Serializable {
 		return streamAccess;
 	}
 
+	public Access getPersonInfoAccess() {
+		return personInfoAccess;
+	}
+
 	public Integer getProfileId() {
 		return profileId;
 	}
@@ -148,6 +150,8 @@ public class TokenDTO implements Serializable {
 		builder.append(chatAccess);
 		builder.append(", streamAccess=");
 		builder.append(streamAccess);
+		builder.append(", personInfoAccess=");
+		builder.append(personInfoAccess);
 		builder.append(", profileId=");
 		builder.append(profileId);
 		builder.append(", applicationId=");
@@ -180,6 +184,7 @@ public class TokenDTO implements Serializable {
 		private Boolean superToken;
 		private Access chatAccess;
 		private Access streamAccess;
+		private Access personInfoAccess;
 		private Integer profileId;
 		private Integer applicationId;
 
@@ -246,6 +251,11 @@ public class TokenDTO implements Serializable {
 			return this;
 		}
 
+		public Builder withPersonInfoAccess(Access personInfoAccess) {
+			this.personInfoAccess = personInfoAccess;
+			return this;
+		}
+
 		public Builder withProfileId(Integer profileId) {
 			this.profileId = profileId;
 			return this;
@@ -261,5 +271,6 @@ public class TokenDTO implements Serializable {
 		}
 	}
 
+	
 	
 }

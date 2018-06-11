@@ -14,6 +14,7 @@ public interface Scope {
 	public static final String NOTIFICATION = "notification";
 	public static final String APPLICATION = "application";
 	public static final String STREAM = "stream";
+	public static final String PERSON_INFO = "person_info";
 	
 	
 }
