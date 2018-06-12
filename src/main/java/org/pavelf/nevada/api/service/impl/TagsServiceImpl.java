@@ -40,4 +40,11 @@ public class TagsServiceImpl implements TagsService {
 		return tags;
 	}
 
+	@Override
+	public Set<String> assosiateWithStreamPostAndAddAllTags(Set<TagDTO> tags,
+			int postId, Version version) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

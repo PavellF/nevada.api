@@ -27,6 +27,9 @@ public class ProfilePreferences {
 	@Enumerated(javax.persistence.EnumType.STRING)
 	private Visibility canPostOnMyStream;
 	
+	@Column(name="premoderate_followers")
+	private boolean premoderateFollowers;
+	
 	/**
 	 * Does NOT trigger lazy loading. Always returns empty string.
 	 * */
@@ -74,6 +77,14 @@ public class ProfilePreferences {
 
 	public void setCanPostOnMyStream(Visibility canPostOnMyStream) {
 		this.canPostOnMyStream = canPostOnMyStream;
+	}
+
+	public boolean isPremoderateFollowers() {
+		return premoderateFollowers;
+	}
+
+	public void setPremoderateFollowers(boolean premoderateFollowers) {
+		this.premoderateFollowers = premoderateFollowers;
 	}
 	
 }

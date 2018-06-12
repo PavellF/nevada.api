@@ -2,6 +2,7 @@ package org.pavelf.nevada.api.persistence.domain;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Basic;
@@ -15,6 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.Lob;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
@@ -73,7 +75,7 @@ public class Profile {
 	@Column(name="rating")
 	private int rating;
 	
-	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
+	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = true, orphanRemoval = true)
 	@JoinColumn(name = "person_id", insertable = false, updatable = false)
 	private Person person; 
 	
@@ -82,6 +84,12 @@ public class Profile {
 	
 	@Column(name="suspended_until")
 	private Instant suspendedUntil;
+	
+	@JoinTable(name = "profile_has_stream_post",
+			joinColumns = { @JoinColumn(name = "profile_id") }, 
+		    inverseJoinColumns = { @JoinColumn(name = " stream_post_id")} )
+	@OneToMany(fetch=FetchType.LAZY, cascade = {}, orphanRemoval = false)
+	private List<StreamPost> posts;
 	
 	public Profile() { }
 
@@ -220,6 +228,14 @@ public class Profile {
 
 	public void setPersonId(Integer personId) {
 		this.personId = personId;
+	}
+
+	public List<StreamPost> getPosts() {
+		return posts;
+	}
+
+	public void setPosts(List<StreamPost> posts) {
+		this.posts = posts;
 	}
 
 }

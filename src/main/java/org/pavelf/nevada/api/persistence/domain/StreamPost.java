@@ -11,6 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -31,11 +32,17 @@ public class StreamPost {
 	@JoinColumn(name = "author", insertable = false, updatable = false)
 	private Profile author;
 	
-	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
+	@ManyToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
 	@JoinTable(name = "profile_has_stream_post", 
 		joinColumns = { @JoinColumn(name = "stream_post_id") }, 
 		inverseJoinColumns = { @JoinColumn(name = "profile_id")})
 	private Profile associatedProfile;
+	
+	@ManyToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
+	@JoinTable(name = "stream_post_has_tag", 
+		joinColumns = { @JoinColumn(name = "stream_post_id") }, 
+		inverseJoinColumns = { @JoinColumn(name = "tag")})
+	private Tag associatedTag;
 	
 	@Column(name = "author")
 	private int authorId;
@@ -179,6 +186,14 @@ public class StreamPost {
 
 	public void setAssociatedProfile(Profile associatedProfile) {
 		this.associatedProfile = associatedProfile;
+	}
+
+	public Tag getAssociatedTag() {
+		return associatedTag;
+	}
+
+	public void setAssociatedTag(Tag associatedTag) {
+		this.associatedTag = associatedTag;
 	}
 	
 	

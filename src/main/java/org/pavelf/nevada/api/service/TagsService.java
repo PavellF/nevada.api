@@ -27,4 +27,14 @@ public interface TagsService {
 	 * */
 	public Set<TagDTO> addAllTag(Set<TagDTO> tags);
 	
+	/**
+	 * Adds(if not exist) and associates all given tags with stream post.
+	 * @param tags tags to add.
+	 * @param version of entity to create.
+	 * @param postId to associate.
+	 * @return added tags never {@code null}. May be empty set.
+	 * */
+	public Set<String> assosiateWithStreamPostAndAddAllTags(Set<TagDTO> tags, 
+			int postId, Version version);
+	
 }

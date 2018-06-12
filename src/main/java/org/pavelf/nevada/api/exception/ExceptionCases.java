@@ -69,5 +69,8 @@ public interface ExceptionCases {
 			ExceptionCase.of(16, "Some of body properties set are disallowed for this user.", 
 					HttpStatus.BAD_REQUEST);
 	
-	
+	public static final ExceptionCase INVALID_REQUEST_PARAM =
+			ExceptionCase.of(17, 
+					"Some of request params are invalid, maybe some values out of bound.", 
+					HttpStatus.BAD_REQUEST);
 }

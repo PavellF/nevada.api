@@ -8,14 +8,12 @@ import java.util.List;
 
 import org.pavelf.nevada.api.domain.Access;
 import org.pavelf.nevada.api.domain.Destination;
-import org.pavelf.nevada.api.domain.Owner;
-import org.pavelf.nevada.api.domain.ProfileDTO;
 import org.pavelf.nevada.api.domain.ProfilePreferencesDTO;
 import org.pavelf.nevada.api.domain.Scope;
 import org.pavelf.nevada.api.domain.StreamPostDTO;
 import org.pavelf.nevada.api.domain.Version;
-import org.pavelf.nevada.api.domain.VersionImpl;
 import org.pavelf.nevada.api.exception.WebApplicationException;
+import org.pavelf.nevada.api.persistence.domain.Sorting;
 import org.pavelf.nevada.api.persistence.domain.Visibility;
 import org.pavelf.nevada.api.security.Secured;
 import org.pavelf.nevada.api.security.TokenContext;
@@ -23,6 +21,7 @@ import org.pavelf.nevada.api.security.User;
 import org.pavelf.nevada.api.service.ProfilePreferencesService;
 import org.pavelf.nevada.api.service.ProfileService;
 import org.pavelf.nevada.api.service.StreamPostService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +31,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -41,7 +41,18 @@ public class StreamPostController {
 	private StreamPostService streamPostService;
 	private ProfilePreferencesService profilePreferencesService;
 	private ProfileService profileService;
-	//getall for given author
+	
+	@Autowired
+	public StreamPostController(TokenContext principal,
+			StreamPostService streamPostService,
+			ProfilePreferencesService profilePreferencesService,
+			ProfileService profileService) {
+		this.principal = principal;
+		this.streamPostService = streamPostService;
+		this.profilePreferencesService = profilePreferencesService;
+		this.profileService = profileService;
+	}
+
 	@GetMapping(produces = { 
 			APPLICATION_ACCEPT_PREFIX+".post+json", 
 			APPLICATION_ACCEPT_PREFIX+".post+xml"},
@@ -49,12 +60,21 @@ public class StreamPostController {
 	@Secured(access = Access.READ, scope = { Scope.STREAM})
 	public ResponseEntity<List<StreamPostDTO>> getStreamPosts(
 			@PathVariable("id") int id,
-			@RequestHeader(HttpHeaders.ACCEPT) Version version) { 
+			@RequestHeader(HttpHeaders.ACCEPT) Version version,
+			@RequestParam(name = "start", defaultValue= "0") int start,
+			@RequestParam(name = "count", defaultValue= "15") int count,
+			@RequestParam(name = "order", defaultValue= "TIME_ASC") Sorting order) { 
+		
 		final User issuer = principal.getToken().getUser().orElseThrow(() -> 
 		new WebApplicationException(UNRECOGNIZED_USER));
 		
+		if (count > 75) {
+			new WebApplicationException(INVALID_REQUEST_PARAM);
+		}
+		
 		if (principal.getToken().isSuper() || issuer.getIdAsInt() == id) {
-			return ResponseEntity.ok(streamPostService.getAllForAuthor(id, version));
+			return ResponseEntity.ok(streamPostService.
+					getAllForAuthor(id, version, start, count, order));
 		}
 		
 		throw new WebApplicationException(ACCESS_DENIED);
@@ -65,25 +85,43 @@ public class StreamPostController {
 			APPLICATION_ACCEPT_PREFIX+".post+xml"},
 			path = "/{destination}/{destination_id}/posts")	
 	public ResponseEntity<List<StreamPostDTO>> getStreamPostsForDestination(
-			@PathVariable("owner") Owner owner,
-			@PathVariable("id") int ownerId,
-			@RequestHeader(HttpHeaders.ACCEPT) Version version) { 
+			@PathVariable("destination") Destination destination,
+			@PathVariable("destination_id") String destinationId,
+			@RequestHeader(HttpHeaders.ACCEPT) Version version,
+			@RequestParam(name = "start", defaultValue= "0") int start,
+			@RequestParam(name = "count", defaultValue= "15") int count,
+			@RequestParam(name = "order", defaultValue= "TIME_ASC") Sorting order) { 
 		
 		final User issuer = principal.getToken().getUser().orElseThrow(() -> 
 		new WebApplicationException(UNRECOGNIZED_USER));
 		
-		if (owner == Owner.PROFILE) {
-			if (issuer.getIdAsInt() == ownerId || principal.getToken().isSuper()) {
-				return ResponseEntity.ok(streamPostService.getAllForProfile(ownerId, version));
+		if (count > 75) {
+			new WebApplicationException(INVALID_REQUEST_PARAM);
+		}
+		
+		if (destination == Destination.PROFILE) {
+			
+			if (issuer.getId().equals(destinationId) || principal.getToken().isSuper()) {
+				return ResponseEntity.ok(streamPostService
+						.getAllForProfile(Integer.valueOf(destinationId), version, start, count, order));
+				
 			} else {
+				
 				boolean areFriends = false; 
 				if (areFriends) {
-					
+					return ResponseEntity.ok(streamPostService
+							.getAllForProfile(Integer.valueOf(destinationId), version, start, count, order, 
+									Visibility.ALL, Visibility.FRIENDS));
 				} else {
-					
+					return ResponseEntity.ok(streamPostService.getAllForProfile(
+							Integer.valueOf(destinationId), version, start, count, order, Visibility.ALL));
 				}
 				
 			}
+		} else if (destination == Destination.TAG) {
+			
+			return ResponseEntity.ok(streamPostService
+					.getAllForTag(destinationId, version, start, count, order));
 		}
 		
 		return ResponseEntity.badRequest().build();
@@ -142,7 +180,7 @@ public class StreamPostController {
 					}
 				case FRIENDS: {
 					//check if users are friends
-					} break;
+					} 
 				case ME: {
 						throw new WebApplicationException(ACCESS_DENIED);
 					} 
@@ -161,13 +199,50 @@ public class StreamPostController {
 	@Secured(access = Access.READ_WRITE, scope = { Scope.STREAM})
 	public ResponseEntity<StreamPostDTO> updateStreamPost(
 			HttpEntity<StreamPostDTO> entity,
-			@PathVariable("owner") Owner owner,
-			@PathVariable("id") int ownerId,
+			@PathVariable("destination") Destination destination,
+			@PathVariable("destination_id") int destinationId,
 			@RequestHeader(HttpHeaders.CONTENT_TYPE) Version version) {
-		final User issuer = principal.getToken().getUser().orElseThrow(() -> {
-			return new WebApplicationException(UNRECOGNIZED_USER);
-		});
-		return null;
+		
+		final StreamPostDTO posted = entity.getBody();
+		final User issuer = principal.getToken().getUser().orElseThrow(() -> 
+			new WebApplicationException(UNRECOGNIZED_USER));
+		final int issuerId = issuer.getIdAsInt();
+		//check if owner blocked this user
+		if (posted == null) {
+			throw new WebApplicationException(BODY_REQUIRED);
+		}
+		
+		if (principal.getToken().isSuper()) {
+			if(streamPostService.update(posted, version)) {
+				return ResponseEntity.noContent().build();
+			}
+			throw new WebApplicationException(FAILED_UPDATE);
+		}
+		
+		if (posted.getPopularity() != null) {
+			throw new WebApplicationException(ACCESS_DENIED);
+		}
+		
+		if (Destination.PROFILE == destination) {
+			// stream owner can only change priority and visibility
+			if (issuerId == destinationId && posted.getContent() == null) {
+				if(streamPostService.update(posted, version)) {
+					return ResponseEntity.noContent().build();
+				}
+				throw new WebApplicationException(FAILED_UPDATE);
+			}
+			//post owner can change only content and visibility
+			
+			if (streamPostService.belongsTo(issuerId, posted.getId()) 
+					&& posted.getPriority() == null) {
+				if(streamPostService.update(posted, version)) {
+					return ResponseEntity.noContent().build();
+				}
+				throw new WebApplicationException(FAILED_UPDATE);
+			}
+		}
+		
+		throw new WebApplicationException(ACCESS_DENIED);
 	}
 	
 	@DeleteMapping(path = "/{destination}/{destination_id}/posts/{id}")
@@ -190,15 +265,5 @@ public class StreamPostController {
 		
 		throw new WebApplicationException(ACCESS_DENIED);
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 }

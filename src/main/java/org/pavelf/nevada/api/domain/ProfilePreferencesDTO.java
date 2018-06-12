@@ -15,12 +15,16 @@ public class ProfilePreferencesDTO {
 
 	private Integer profileId;
 	private Visibility canPostOnMyStream;
+	private boolean premoderateFollowers;
 	
 	public Integer getProfileId() {
 		return profileId;
 	}
 	public Visibility getCanPostOnMyStream() {
 		return canPostOnMyStream;
+	}
+	public boolean isPremoderateFollowers() {
+		return premoderateFollowers;
 	}
 	
 }

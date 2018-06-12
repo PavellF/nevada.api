@@ -1,0 +1,36 @@
+ 
+/profiles - POST, PUT
+/profiles/{id} - GET
+/profiles/{ids}-** - GET
+
+/applications - POST, PUT
+/profiles/{owner_id}/applications/ - GET
+
+/tokens - POST, PUT 
+/{owner}/{owner_id}/tokens - GET
+
+/profile/{id}/posts - GET
+/{destination}/{destination_id}/posts - POST, GET, PUT
+/{destination}/{destination_id}/posts/{id} - DELETE
+
+/profiles/{owner_id}/followers - GET
+/followers - POST, PUT
+/followers/{id} - DELETE
+/profiles/{owner_id}/followed - GET
+
+/{destination}/{destination_id}/guests - GET
+
+/{owner}/{owner_id}/persons - POST, GET, PUT
+
+/profiles/{id}/profilePreferences - PUT
+
+/profiles/{id}/likes - GET //should return liked objects
+/{destination}/{destination_id}/{owner}/{owner_id}/likes - POST, PUT, GET
+/{destination}/{destination_id}/{owner}/{owner_id}/likes/{id} - DELETE
+
+/profiles/{id}/messages - GET //should return liked objects
+/{destination}/{destination_id}/{owner}/{owner_id}/messages - POST, PUT, GET
+/{destination}/{destination_id}/{owner}/{owner_id}/messages/{id} - POST
+
+/profiles/{id}/photos - GET //should return liked objects
+/{destination}/{destination_id}/{owner}/{owner_id}/photos - POST, PUT, GET

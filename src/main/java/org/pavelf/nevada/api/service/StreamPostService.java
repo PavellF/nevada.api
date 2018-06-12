@@ -2,10 +2,11 @@ package org.pavelf.nevada.api.service;
 
 import java.util.List;
 
-import org.pavelf.nevada.api.domain.QueryDescriptor;
 import org.pavelf.nevada.api.domain.StreamPostDTO;
 import org.pavelf.nevada.api.domain.Version;
+import org.pavelf.nevada.api.persistence.domain.Sorting;
 import org.pavelf.nevada.api.persistence.domain.StreamPost;
+import org.pavelf.nevada.api.persistence.domain.Visibility;
 
 /**
  * Defines set of actions for {@code StreamPost}.
@@ -18,23 +19,44 @@ public interface StreamPostService {
 	 * Finds all posts associated with given profile.
 	 * @param profileId that represents profile.
 	 * @param version of object to fetch.
-	 * @param descriptor describes fetch options.
+	 * @param start describes relative post number from which list should start.
+	 * @param count number of objects.
+	 * @param sorting filed name and direction of sorting.
+	 * @param levels posts with given visibility levels to return. 
+	 * If none specified all levels will be returned. 
 	 * @return collection of retrieved posts. May be empty, never {@code null}.
 	 * @throws IllegalArgumentException if {@code null} passed.
 	 * */
 	public List<StreamPostDTO> getAllForProfile(int profileId, Version version, 
-			QueryDescriptor descriptor);
+			int start, int count, Sorting sorting, Visibility... levels);
+	
+	/**
+	 * Finds all posts associated with given tag.
+	 * @param tag tagname.
+	 * @param version of object to fetch.
+	 * @param start describes relative post number from which list should start.
+	 * @param count number of objects.
+	 * @param sorting filed name and direction of sorting.
+	 * @return collection of retrieved posts. May be empty, never {@code null}.
+	 * @throws IllegalArgumentException if {@code null} passed.
+	 * */
+	public List<StreamPostDTO> getAllForTag(String tag, Version version, 
+			int start, int count, Sorting sorting);
 	
 	/**
 	 * Finds all posts associated with given author.
 	 * @param authorId that represents author.
 	 * @param version of object to fetch.
-	 * @param descriptor describes fetch options.
+	 * @param start describes relative post number from which list should start.
+	 * @param count number of objects.
+	 * @param sorting filed name and direction of sorting.
+	 * @param levels posts with given visibility levels to return. 
+	 * If none specified all levels will be returned. 
 	 * @return collection of retrieved posts. May be empty, never {@code null}.
 	 * @throws IllegalArgumentException if {@code null} passed.
 	 * */
 	public List<StreamPostDTO> getAllForAuthor(int authorId, Version version,
-			QueryDescriptor descriptor);
+			int start, int count, Sorting sorting, Visibility... levels);
 	
 	/**
 	 * Creates new post on some profile stream.
@@ -47,11 +69,19 @@ public interface StreamPostService {
 	public Integer createOnProfile(StreamPostDTO post, int profileId, Version version);
 	
 	/**
+	 * Updates post.
+	 * @param post itself.
+	 * @param version of object.
+	 * @return Whether object was updated.
+	 * @throws IllegalArgumentException if {@code null} passed.
+	 * */
+	public boolean update(StreamPostDTO post, Version version);
+	
+	/**
 	 * Erases {@code StreamPost} from storage.
 	 * @param postId to delete.
-	 * @return whether post was deleted.
 	 * */
-	public boolean deleteStreamPost(int postId);
+	public void deleteStreamPost(int postId);
 	
 	/**
 	 * Whether this post belongs to this profile.

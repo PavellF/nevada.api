@@ -13,8 +13,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="friendship")
-public class Friendship {
+@Table(name="followers")
+public class Follower {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,18 +22,18 @@ public class Friendship {
 	private int id;
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
-	@JoinColumn(name = "user_id", insertable = false, updatable = false)
-	private Profile user;
+	@JoinColumn(name = "follower_id", insertable = false, updatable = false)
+	private Profile follower;
 	
-	@Column(name = "user_id")
-	private int userId;
+	@Column(name = "follower_id")
+	private int followerId;
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
-	@JoinColumn(name = "friend_id", insertable = false, updatable = false)
-	private Profile friend;
+	@JoinColumn(name = "followed_id", insertable = false, updatable = false)
+	private Profile followed;
 	
-	@Column(name = "friend_id")
-	private int friendId;
+	@Column(name = "followed_id")
+	private int followedId;
 	
 	@Column(name="since")
 	private Instant since;
@@ -74,6 +74,38 @@ public class Friendship {
 		this.id = id;
 	}
 
+	public Profile getFollower() {
+		return follower;
+	}
+
+	public void setFollower(Profile follower) {
+		this.follower = follower;
+	}
+
+	public int getFollowerId() {
+		return followerId;
+	}
+
+	public void setFollowerId(int followerId) {
+		this.followerId = followerId;
+	}
+
+	public Profile getFollowed() {
+		return followed;
+	}
+
+	public void setFollowed(Profile followed) {
+		this.followed = followed;
+	}
+
+	public int getFollowedId() {
+		return followedId;
+	}
+
+	public void setFollowedId(int followedId) {
+		this.followedId = followedId;
+	}
+
 	public Instant getSince() {
 		return since;
 	}
@@ -90,36 +122,5 @@ public class Friendship {
 		this.mutual = mutual;
 	}
 
-	public Profile getUser() {
-		return user;
-	}
-
-	public void setUser(Profile user) {
-		this.user = user;
-	}
-
-	public int getUserId() {
-		return userId;
-	}
-
-	public void setUserId(int userId) {
-		this.userId = userId;
-	}
-
-	public Profile getFriend() {
-		return friend;
-	}
-
-	public void setFriend(Profile friend) {
-		this.friend = friend;
-	}
-
-	public int getFriendId() {
-		return friendId;
-	}
-
-	public void setFriendId(int friendId) {
-		this.friendId = friendId;
-	}
 	
 }

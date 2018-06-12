@@ -19,7 +19,7 @@ public class StreamPostDTO {
 	private String content;
 	private Integer rating;
 	private Integer popularity;
-	private Integer priority;
+	private Short priority;
 	private Visibility visibility;
 	private Instant lastChange;
 
@@ -55,7 +55,7 @@ public class StreamPostDTO {
 	public Integer getPopularity() {
 		return popularity;
 	}
-	public Integer getPriority() {
+	public Short getPriority() {
 		return priority;
 	}
 	public Visibility getVisibility() {
@@ -108,7 +108,7 @@ public class StreamPostDTO {
 		private String content;
 		private Integer rating;
 		private Integer popularity;
-		private Integer priority;
+		private Short priority;
 		private Visibility visibility;
 		private Instant lastChange;
 
@@ -145,7 +145,7 @@ public class StreamPostDTO {
 			return this;
 		}
 
-		public Builder withPriority(Integer priority) {
+		public Builder withPriority(Short priority) {
 			this.priority = priority;
 			return this;
 		}

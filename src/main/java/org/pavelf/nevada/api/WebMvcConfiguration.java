@@ -9,7 +9,7 @@ import java.time.temporal.TemporalUnit;
 import org.pavelf.nevada.api.domain.VersionConverter;
 import org.pavelf.nevada.api.exception.ExceptionCases;
 import org.pavelf.nevada.api.exception.WebApplicationException;
-import org.pavelf.nevada.api.interceptor.VersioningHeaderInterceptor;
+
 import org.pavelf.nevada.api.logging.Logger;
 import org.pavelf.nevada.api.logging.LoggerFactory;
 import org.pavelf.nevada.api.security.IpTokenInterceptor;
@@ -38,8 +38,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 	    				(String token) -> {
 	    					throw new WebApplicationException(ExceptionCases.MULTIPLE_IP_REQUESTS);
 	    				})).order(1);
-	    //registry.addInterceptor(new VersioningHeaderInterceptor(logger)).order(0);
-	}
+	 }
 	
 	@Override
     public void addFormatters(FormatterRegistry registry) {
