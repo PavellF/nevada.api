@@ -8,11 +8,16 @@ import org.hibernate.criterion.Example;
 import org.pavelf.nevada.api.HttpUtil;
 import org.pavelf.nevada.api.HttpUtil.Algorithm;
 import org.pavelf.nevada.api.persistence.domain.Profile;
+import org.pavelf.nevada.api.persistence.domain.Visibility;
 import org.pavelf.nevada.api.domain.ProfileDTO;
+import org.pavelf.nevada.api.domain.ProfilePreferencesDTO;
 import org.pavelf.nevada.api.domain.Version;
+import org.pavelf.nevada.api.domain.ProfilePreferencesDTO.Builder;
 import org.pavelf.nevada.api.persistence.repository.MessageRepository;
+import org.pavelf.nevada.api.persistence.repository.PeopleRepository;
 import org.pavelf.nevada.api.persistence.repository.PhotoRepository;
 import org.pavelf.nevada.api.persistence.repository.ProfileRepository;
+import org.pavelf.nevada.api.service.ProfilePreferencesService;
 import org.pavelf.nevada.api.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -25,14 +30,21 @@ public class ProfileServiceImpl implements ProfileService {
 	private ProfileRepository principalRepository;
 	private MessageRepository messageRepository;
 	private PhotoRepository photoRepository;
+	private ProfilePreferencesService profilePreferencesService;
+	private final Builder applicationDefaultProfilePreferences = 
+			ProfilePreferencesDTO.builder()
+			.withCanPostOnMyStream(Visibility.ME)
+			.withPremoderateFollowers(false);
 	
 	@Autowired
 	public ProfileServiceImpl(ProfileRepository principalRepository,
 			MessageRepository messageRepository,
-			PhotoRepository photoRepository) {
+			PhotoRepository photoRepository,
+			ProfilePreferencesService profilePreferencesService) {
 		this.principalRepository = principalRepository;
 		this.messageRepository = messageRepository;
 		this.photoRepository = photoRepository;
+		this.profilePreferencesService = profilePreferencesService;
 	}
 
 	@Transactional
@@ -44,12 +56,19 @@ public class ProfileServiceImpl implements ProfileService {
 		
 		Profile newProfile = new Profile();
 		newProfile.setEmail(profile.getEmail());	
-		newProfile.setPassword(HttpUtil.hash(Algorithm.MD5, profile.getPassword()).toCharArray());
+		newProfile.setPassword(HttpUtil.hash(Algorithm.MD5, 
+				profile.getPassword()).toCharArray());
 		newProfile.setUsername(profile.getUsername());
 		newProfile.setSignDate(Instant.now());
 		newProfile.setPopularity(0);
 		newProfile.setRating(0);
-		return principalRepository.save(newProfile).getId();
+		
+		Integer id = principalRepository.save(newProfile).getId();
+		
+		profilePreferencesService.create(
+				applicationDefaultProfilePreferences.build(id), version);
+		
+		return id;
 	}
 
 	@Override
@@ -63,7 +82,6 @@ public class ProfileServiceImpl implements ProfileService {
 			ProfileDTO.Builder profileDTO = ProfileDTO.builder()
 					.withAboutId(val.getAboutId())
 					.withId(val.getId())
-					.withPersonId(val.getId())
 					.withPictureId(val.getPictureId())
 					.withPopularity(val.getPopularity())
 					.withRating(val.getRating())
@@ -86,7 +104,6 @@ public class ProfileServiceImpl implements ProfileService {
 			ProfileDTO.Builder profileDTO = ProfileDTO.builder()
 					.withAboutId(val.getAboutId())
 					.withId(val.getId())
-					.withPersonId(val.getId())
 					.withPictureId(val.getPictureId())
 					.withPopularity(val.getPopularity())
 					.withRating(val.getRating())
@@ -102,15 +119,29 @@ public class ProfileServiceImpl implements ProfileService {
 			throw new IllegalArgumentException("Null is not allowed.");
 		}
 		
+		final char[] password = profile.getPassword();
+		Integer messageId = profile.getAboutId();
+		Integer photoId = profile.getPictureId();
+		
 		Profile newProfile = new Profile();
 		newProfile.setId(profile.getId());
-		newProfile.setAbout(messageRepository.getOne(profile.getAboutId()));
 		newProfile.setEmail(profile.getEmail());
-		newProfile.setPersonId(profile.getPersonId());
-		newProfile.setPassword(HttpUtil.hash(Algorithm.MD5, profile.getPassword()).toCharArray());
-		newProfile.setPicture(photoRepository.getOne(profile.getPictureId()));
+		
+		if (photoId != null) {
+			newProfile.setPicture(photoRepository.getOne(photoId));
+		}
+		
+		if (messageId != null) {
+			newProfile.setAbout(messageRepository.getOne(messageId));
+		}
+		
+		if (password != null) {
+			newProfile.setPassword(HttpUtil
+					.hash(Algorithm.MD5, profile.getPassword())
+					.toCharArray());
+		}
+		
 		newProfile.setPopularity(profile.getPopularity());
-		newProfile.setRating(profile.getRating());
 		newProfile.setSuspendedUntil(profile.getSuspendedUntil());
 		newProfile.setEmail(profile.getEmail());
 		principalRepository.save(newProfile);

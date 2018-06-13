@@ -1,26 +1,24 @@
 package org.pavelf.nevada.api.persistence.domain;
 
+import java.io.Serializable;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
 import javax.persistence.JoinColumn;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinTable;
 import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Entity
 @Table(name="people")
-//@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) //need it because of ONEToOne rel
-public class Person {
+public class Person implements Serializable {
 
-	@Column(name = "id")
+	private static final long serialVersionUID = -5646355408258534431L;
+
+	@Column(name = "profile_id")
 	@Id
 	private int id;
 	
@@ -36,8 +34,9 @@ public class Person {
 	@Size(min = 1, max = 128)
 	private String gender;
 	
-	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
-	@PrimaryKeyJoinColumn
+	@OneToOne(targetEntity = Profile.class, fetch=FetchType.LAZY,
+			cascade = { })
+	@JoinColumn(name="profile_id", updatable = false, insertable = false)
 	private Profile profile;
 	
 	public Person() { }
@@ -107,4 +106,12 @@ public class Person {
 		this.person = person;
 	}
 */
+
+	public Profile getProfile() {
+		return profile;
+	}
+
+	public void setProfile(Profile profile) {
+		this.profile = profile;
+	}
 }

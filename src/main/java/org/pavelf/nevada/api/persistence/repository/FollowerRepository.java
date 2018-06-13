@@ -29,13 +29,11 @@ public interface FollowerRepository
 	@Query("SELECT f FROM Follower f "
 			+ "WHERE f.followerId = :profileID AND f.mutual = :mutual")
 	public List<Follower> findAllFollowed(@Param("profileID") int profileId,
-			@Param("mutual") boolean mutual,
-			Pageable pageable, Sort sort);
+			@Param("mutual") boolean mutual, Pageable pageable);
 	
 	@Query("SELECT f FROM Follower f "
 			+ "WHERE f.followedId = :profileID AND f.mutual = :mutual")
 	public List<Follower> findAllFollowers(@Param("profileID") int profileId,
-			@Param("mutual") boolean mutual,
-			Pageable pageable, Sort sort);
+			@Param("mutual") boolean mutual, Pageable pageable);
 	
 }

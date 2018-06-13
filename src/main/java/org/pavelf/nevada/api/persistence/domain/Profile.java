@@ -16,6 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
@@ -54,14 +55,14 @@ public class Profile {
 	@javax.validation.constraints.Email
 	private String email;
 	
-	@OneToOne(fetch=FetchType.LAZY, cascade = { CascadeType.ALL }, optional = true)
+	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
 	@JoinColumn(name = "about", insertable = false, updatable = false)
 	private Message about;
 	
 	@Column(name = "about")
 	private Integer aboutId;
 	
-	@OneToOne(fetch=FetchType.LAZY, cascade = { CascadeType.ALL }, optional = true)
+	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
 	@JoinColumn(name="user_pic", insertable = false, updatable = false)
 	private Photo picture;
 	
@@ -75,19 +76,16 @@ public class Profile {
 	@Column(name="rating")
 	private int rating;
 	
-	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = true, orphanRemoval = true)
-	@JoinColumn(name = "person_id", insertable = false, updatable = false)
-	private Person person; 
-	
-	@Column(name = "person_id")
-	private Integer personId;
+	//@OneToOne(fetch=FetchType.LAZY, cascade = { CascadeType.REMOVE }, 
+	//		optional = true, orphanRemoval = true, mappedBy="profile")
+	//private Person person; 
 	
 	@Column(name="suspended_until")
 	private Instant suspendedUntil;
 	
 	@JoinTable(name = "profile_has_stream_post",
 			joinColumns = { @JoinColumn(name = "profile_id") }, 
-		    inverseJoinColumns = { @JoinColumn(name = " stream_post_id")} )
+		    inverseJoinColumns = { @JoinColumn(name = "stream_post_id")} )
 	@OneToMany(fetch=FetchType.LAZY, cascade = {}, orphanRemoval = false)
 	private List<StreamPost> posts;
 	
@@ -157,14 +155,6 @@ public class Profile {
 		this.rating = rating;
 	}
 
-	public Person getPerson() {
-		return person;
-	}
-
-	public void setPerson(Person person) {
-		this.person = person;
-	}
-
 	/**
 	 * Does NOT trigger lazy loading. Always returns empty string.
 	 * */
@@ -220,14 +210,6 @@ public class Profile {
 
 	public void setSuspendedUntil(Instant suspendedUntil) {
 		this.suspendedUntil = suspendedUntil;
-	}
-
-	public Integer getPersonId() {
-		return personId;
-	}
-
-	public void setPersonId(Integer personId) {
-		this.personId = personId;
 	}
 
 	public List<StreamPost> getPosts() {

@@ -12,18 +12,21 @@ import org.pavelf.nevada.api.domain.ProfilePreferencesDTO;
 import org.pavelf.nevada.api.domain.Scope;
 import org.pavelf.nevada.api.domain.StreamPostDTO;
 import org.pavelf.nevada.api.domain.Version;
+import org.pavelf.nevada.api.exception.UnrecognizedUserException;
 import org.pavelf.nevada.api.exception.WebApplicationException;
 import org.pavelf.nevada.api.persistence.domain.Sorting;
 import org.pavelf.nevada.api.persistence.domain.Visibility;
 import org.pavelf.nevada.api.security.Secured;
 import org.pavelf.nevada.api.security.TokenContext;
 import org.pavelf.nevada.api.security.User;
+import org.pavelf.nevada.api.service.FollowersService;
 import org.pavelf.nevada.api.service.ProfilePreferencesService;
 import org.pavelf.nevada.api.service.ProfileService;
 import org.pavelf.nevada.api.service.StreamPostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,16 +44,18 @@ public class StreamPostController {
 	private StreamPostService streamPostService;
 	private ProfilePreferencesService profilePreferencesService;
 	private ProfileService profileService;
+	private FollowersService followersService;
 	
 	@Autowired
 	public StreamPostController(TokenContext principal,
 			StreamPostService streamPostService,
 			ProfilePreferencesService profilePreferencesService,
-			ProfileService profileService) {
+			ProfileService profileService, FollowersService followersService) {
 		this.principal = principal;
 		this.streamPostService = streamPostService;
 		this.profilePreferencesService = profilePreferencesService;
 		this.profileService = profileService;
+		this.followersService = followersService;
 	}
 
 	@GetMapping(produces = { 
@@ -65,8 +70,8 @@ public class StreamPostController {
 			@RequestParam(name = "count", defaultValue= "15") int count,
 			@RequestParam(name = "order", defaultValue= "TIME_ASC") Sorting order) { 
 		
-		final User issuer = principal.getToken().getUser().orElseThrow(() -> 
-		new WebApplicationException(UNRECOGNIZED_USER));
+		final User issuer = principal.getToken().getUser()
+				.orElseThrow(UnrecognizedUserException::new);
 		
 		if (count > 75) {
 			new WebApplicationException(INVALID_REQUEST_PARAM);
@@ -106,11 +111,12 @@ public class StreamPostController {
 						.getAllForProfile(Integer.valueOf(destinationId), version, start, count, order));
 				
 			} else {
-				
-				boolean areFriends = false; 
+				Integer destId = Integer.valueOf(destinationId);
+				boolean areFriends = followersService
+						.isFollow(issuer.getIdAsInt(), destId);
 				if (areFriends) {
 					return ResponseEntity.ok(streamPostService
-							.getAllForProfile(Integer.valueOf(destinationId), version, start, count, order, 
+							.getAllForProfile(destId, version, start, count, order, 
 									Visibility.ALL, Visibility.FRIENDS));
 				} else {
 					return ResponseEntity.ok(streamPostService.getAllForProfile(
@@ -169,17 +175,26 @@ public class StreamPostController {
 					throw new WebApplicationException(FORBIDDEN_BODY_PROPERTY);
 				}
 				//check if user allow other users post on his stream
-				ProfilePreferencesDTO prefs = 
-						profilePreferencesService.getForProfile(destinationId, version);
+				ProfilePreferencesDTO prefs = profilePreferencesService
+						.getForProfile(destinationId, version);
 				
 				switch (prefs.getCanPostOnMyStream()) {
 				case ALL: {
 					//check if owner blocked this user
-					this.streamPostService.createOnProfile(posted, destinationId, version);
-					return ResponseEntity.created(URI.create("profile/"+destinationId+"/posts")).build();
+					this.streamPostService
+					.createOnProfile(posted, destinationId, version);
+					return ResponseEntity.created(
+							URI.create("profile/"+destinationId+"/posts"))
+							.build();
 					}
 				case FRIENDS: {
-					//check if users are friends
+					if (followersService.isFollow(issuerId, destinationId)) {
+						this.streamPostService.createOnProfile(
+								posted, destinationId, version);
+						return ResponseEntity.created(
+								URI.create("profile/"+destinationId+"/posts"))
+								.build();
+					}
 					} 
 				case ME: {
 						throw new WebApplicationException(ACCESS_DENIED);
@@ -188,7 +203,7 @@ public class StreamPostController {
 			}
 		}
 		
-		return ResponseEntity.badRequest().build();
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 	}
 	
 	

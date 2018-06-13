@@ -9,6 +9,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -38,6 +40,12 @@ public class Guest {
 	@NotNull
 	@Past
 	private Instant when;
+	
+	@ManyToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
+	@JoinTable(name = "guest_to_profile", 
+		joinColumns = { @JoinColumn(name = "guest_id") }, 
+		inverseJoinColumns = { @JoinColumn(name = "target_profile_id")})
+	private Profile associatedProfile;
 	
 	/**
 	 * Does NOT trigger lazy loading. Always returns empty string.

@@ -78,8 +78,8 @@ public interface FollowersService {
 	
 	/**
 	 * Whether this user has specified already accepted follower.
-	 * @param followerId user id.
-	 * @param followedId his follower id.
+	 * @param followerId his follower id.
+	 * @param followedId user id.
 	 * @return whether this user has specified follower.
 	 * */
 	public boolean isFollow(int followerId, int followedId);

@@ -1,12 +1,5 @@
 package org.pavelf.nevada.api.domain;
 
-import javax.persistence.Column;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
-import static org.pavelf.nevada.api.Application.*;
-import javax.annotation.Generated;
-
 /**
  * Represents real-world person.
  * @since 1.0
@@ -18,37 +11,27 @@ public class PersonDTO {
 	private String fullName;
 	private String location;
 	private String gender;
-	private transient Version version;
+
+	private PersonDTO() { }
+
+	private PersonDTO(Builder builder) {
+		this.id = builder.id;
+		this.fullName = builder.fullName;
+		this.location = builder.location;
+		this.gender = builder.gender;
+	}
 	
 	public Integer getId() {
 		return id;
 	}
-	public void setId(Integer id) {
-		this.id = id;
-	}
 	public String getFullName() {
 		return fullName;
-	}
-	public void setFullName(String fullName) {
-		this.fullName = fullName;
 	}
 	public String getLocation() {
 		return location;
 	}
-	public void setLocation(String location) {
-		this.location = location;
-	}
 	public String getGender() {
 		return gender;
-	}
-	public void setGender(String gender) {
-		this.gender = gender;
-	}
-	public Version getVersion() {
-		return version;
-	}
-	public void setVersion(Version version) {
-		this.version = version;
 	}
 	
 	@Override
@@ -62,11 +45,53 @@ public class PersonDTO {
 		builder.append(location);
 		builder.append(", gender=");
 		builder.append(gender);
-		builder.append(", version=");
-		builder.append(version);
 		builder.append("]");
 		return builder.toString();
 	}
+	
+	/**
+	 * Creates builder to build {@link PersonDTO}.
+	 * @return created builder
+	 */
+	public static Builder builder() {
+		return new Builder();
+	}
 
+	/**
+	 * Builder to build {@link PersonDTO}.
+	 */
+	public static final class Builder {
+		private Integer id;
+		private String fullName;
+		private String location;
+		private String gender;
+
+		private Builder() {
+		}
+
+		public Builder withId(Integer id) {
+			this.id = id;
+			return this;
+		}
+
+		public Builder withFullName(String fullName) {
+			this.fullName = fullName;
+			return this;
+		}
+
+		public Builder withLocation(String location) {
+			this.location = location;
+			return this;
+		}
+
+		public Builder withGender(String gender) {
+			this.gender = gender;
+			return this;
+		}
+
+		public PersonDTO build() {
+			return new PersonDTO(this);
+		}
+	}
 	
 }

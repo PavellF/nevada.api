@@ -12,7 +12,8 @@ public interface ProfileRepository extends JpaRepository<Profile, Integer> {
 
 	public int countByIdAndPassword(int id, String password);
 	
-	@Query("SELECT COUNT(p) FROM Profile p WHERE p.id = ?1 AND p.suspendedUntil > ?2")
+	@Query("SELECT COUNT(p) FROM Profile p "
+			+ "WHERE p.id = ?1 AND p.suspendedUntil > ?2")
 	public int isSuspended(int id, Instant date);
 	
 }

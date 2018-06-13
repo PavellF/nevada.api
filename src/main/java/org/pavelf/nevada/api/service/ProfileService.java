@@ -1,8 +1,5 @@
 package org.pavelf.nevada.api.service;
 
-import org.pavelf.nevada.api.persistence.domain.Like;
-import org.pavelf.nevada.api.persistence.domain.Message;
-
 import java.util.Set;
 
 import org.pavelf.nevada.api.domain.ProfileDTO;
@@ -61,10 +58,16 @@ public interface ProfileService {
 	public boolean arePasswordsEqual(char[] password, int profileId);
 	
 	/**
-	 * Whether profile represented by this id was suspended and suspend time has not been 
-	 * elapsed yet.
+	 * Whether profile represented by this id was suspended and suspend 
+	 * time has not been elapsed yet.
 	 * @param profileId profile id.
 	 */
 	public boolean isSuspended(int profileId);
+	
+	/**
+	 * Whether profile represented by this id has associated profile.
+	 * @param profileId profile id.
+	 */
+	//public boolean hasAssociatedPerson(int profileId);
 	
 }

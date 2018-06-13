@@ -58,13 +58,6 @@ public class Message {
 	 orphanRemoval = false	)
 	private Set<Photo> photos;
 	
-	@JoinTable(name = "message_has_tag", joinColumns = { @JoinColumn(name = "message_id") }, 
-		    inverseJoinColumns = { @JoinColumn(name = "tag_name")} )
-	@OneToMany(fetch=FetchType.LAZY, 
-	cascade = { },
-	 orphanRemoval = false	)
-	private Set<Tag> tags;
-	
 	@Column(name="date")
 	@NotNull
 	@Past
@@ -207,14 +200,6 @@ public class Message {
 
 	public void setPhotos(Set<Photo> photos) {
 		this.photos = photos;
-	}
-
-	public Set<Tag> getTags() {
-		return tags;
-	}
-
-	public void setTags(Set<Tag> tags) {
-		this.tags = tags;
 	}
 
 	public Integer getReplyTo() {

@@ -52,8 +52,6 @@ public class ProfileDTO {
 	
 	private Integer rating;
 	
-	private Integer personId; 
-	
 	private Integer aboutId;
 	
 	private Instant suspendedUntil;
@@ -68,7 +66,6 @@ public class ProfileDTO {
 		this.pictureId = builder.pictureId;
 		this.popularity = builder.popularity;
 		this.rating = builder.rating;
-		this.personId = builder.personId;
 		this.aboutId = builder.aboutId;
 		this.suspendedUntil = builder.suspendedUntil;
 	}
@@ -111,10 +108,6 @@ public class ProfileDTO {
 		return rating;
 	}
 
-	public Integer getPersonId() {
-		return personId;
-	}
-
 	public Integer getAboutId() {
 		return aboutId;
 	}
@@ -140,8 +133,6 @@ public class ProfileDTO {
 		builder.append(popularity);
 		builder.append(", rating=");
 		builder.append(rating);
-		builder.append(", personId=");
-		builder.append(personId);
 		builder.append(", aboutId=");
 		builder.append(aboutId);
 		builder.append(", suspendedUntil=");
@@ -171,7 +162,6 @@ public class ProfileDTO {
 		private Integer pictureId;
 		private Integer popularity;
 		private Integer rating;
-		private Integer personId;
 		private Integer aboutId;
 		private Instant suspendedUntil;
 
@@ -220,11 +210,6 @@ public class ProfileDTO {
 
 		public Builder withRating(Integer rating) {
 			this.rating = rating;
-			return this;
-		}
-
-		public Builder withPersonId(Integer personId) {
-			this.personId = personId;
 			return this;
 		}
 

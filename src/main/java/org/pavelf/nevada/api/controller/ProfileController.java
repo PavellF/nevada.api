@@ -28,17 +28,23 @@ import org.pavelf.nevada.api.domain.Access;
 import org.pavelf.nevada.api.domain.MessageDTO;
 import org.pavelf.nevada.api.domain.PersonDTO;
 import org.pavelf.nevada.api.domain.ProfileDTO;
+import org.pavelf.nevada.api.domain.ProfilePreferencesDTO;
+import org.pavelf.nevada.api.domain.ProfilePreferencesDTO.Builder;
 import org.pavelf.nevada.api.domain.Scope;
 import org.pavelf.nevada.api.domain.TokenDTO;
 import org.pavelf.nevada.api.domain.Version;
 import org.pavelf.nevada.api.domain.VersionImpl;
 import static org.pavelf.nevada.api.exception.ExceptionCases.*;
+
+import org.pavelf.nevada.api.exception.UnrecognizedUserException;
 import org.pavelf.nevada.api.exception.WebApplicationException;
+import org.pavelf.nevada.api.persistence.domain.Visibility;
 import org.pavelf.nevada.api.security.TokenContext;
 import org.pavelf.nevada.api.security.User;
 import org.pavelf.nevada.api.service.MessageService;
 import org.pavelf.nevada.api.service.PeopleService;
 import org.pavelf.nevada.api.service.PhotoService;
+import org.pavelf.nevada.api.service.ProfilePreferencesService;
 import org.pavelf.nevada.api.service.ProfileService;
 import org.pavelf.nevada.api.security.Secured;
 import org.pavelf.nevada.api.security.TokenContext;
@@ -59,6 +65,7 @@ public class ProfileController {
 	private PhotoService photoService;
 	private MessageService messageService;
 	
+	
 	@Autowired
 	public ProfileController(TokenContext principal,
 			ProfileService profileService, PhotoService photoService,
@@ -68,7 +75,7 @@ public class ProfileController {
 		this.photoService = photoService;
 		this.messageService = messageService;
 	}
-
+	
 	/*
 	 * Produces xml or json representation of the user profile.
 	 * Expected headers: 
@@ -102,7 +109,8 @@ public class ProfileController {
 			APPLICATION_ACCEPT_PREFIX+".profile+json", 
 			APPLICATION_ACCEPT_PREFIX+".profile+xml"})
 	@Secured(access = Access.READ_WRITE, scope = { Scope.ACCOUNT })
-	public ResponseEntity<ProfileDTO> postProfile(HttpEntity<ProfileDTO> entity,
+	public ResponseEntity<ProfileDTO> postProfile(
+			HttpEntity<ProfileDTO> entity,
 			@RequestHeader(HttpHeaders.CONTENT_TYPE) Version version) {
 		final ProfileDTO posted = entity.getBody();
 		
@@ -143,11 +151,9 @@ public class ProfileController {
 	scope = { Scope.ACCOUNT, Scope.PERSON_INFO })
 	public ResponseEntity<ProfileDTO> updateProfile(HttpEntity<ProfileDTO> entity, 
 			@RequestHeader(HttpHeaders.CONTENT_TYPE) Version version) {
-		User issuer = principal.getToken().getUser().orElseThrow(() -> {
-			return new WebApplicationException(UNRECOGNIZED_USER);
-		});
+		final User issuer = principal.getToken().getUser()
+				.orElseThrow(UnrecognizedUserException::new);
 		
-		String id = null;
 		final ProfileDTO toUpdate = entity.getBody();
 		
 		if (toUpdate == null) {
@@ -157,55 +163,55 @@ public class ProfileController {
 		if (toUpdate.getId() == null) {
 			throw new WebApplicationException(REQUIRED_BODY_PROPERTY);
 		}
-		
-		id = toUpdate.getId().toString();
-		
-		boolean superUserAllowedOnly = true;
+		//can change anything but rating
 		if (principal.getToken().isSuper()) {
-			
+			profileService.update(entity.getBody(), version);
+			return ResponseEntity.noContent().build();
+		} 
+		
+		if (toUpdate.getPopularity() != null 
+				|| issuer.getIdAsInt() != toUpdate.getId()) {
+			throw new WebApplicationException(ACCESS_DENIED);
+		}
+		
+		//can change anything but rating, popularity
+		if (principal.getToken().hasAccess(2, Scope.ACCOUNT)) {
 			if (toUpdate.getPassword() != null) {
 				final char[] oldPassword = toUpdate.getOldPassword();
 				if (oldPassword == null) {
 					throw new WebApplicationException(NO_PREVIOUS_PASSWORD);
 				}
-				if(!profileService.arePasswordsEqual(oldPassword, toUpdate.getId())) {
+				if(!profileService.arePasswordsEqual(
+						oldPassword, toUpdate.getId())) {
 					throw new WebApplicationException(ACCESS_DENIED);
 				}
 			}
 			
-		} else if (principal.getToken().hasAccess(2, Scope.ACCOUNT)) {
-			
-			if (superUserAllowedOnly = (!id.equals(issuer.getId()) || 
-					toUpdate.getPopularity() != null || 
-					toUpdate.getRating() != null || toUpdate.getPersonId() != null)) {
-				throw new WebApplicationException(ACCESS_DENIED);
-			}
-			
-		} else {
-			
-			if (superUserAllowedOnly
-				|| toUpdate.getPassword() != null || toUpdate.getEmail() != null 
-				|| toUpdate.getUsername() != null) {
-				throw new WebApplicationException(ACCESS_DENIED);
-			}
+			profileService.update(entity.getBody(), version);
+			return ResponseEntity.noContent().build();
 		}
 		
+		if (toUpdate.getPassword() != null 
+				|| toUpdate.getEmail() != null 
+				|| toUpdate.getUsername() != null) {
+			throw new WebApplicationException(ACCESS_DENIED);
+		} 
+		
 		if (toUpdate.getPictureId() != null) {
-			if (!photoService.isBelongsTo(toUpdate.getId(), toUpdate.getPictureId())) {
+			if (!photoService.isBelongsTo(toUpdate.getId(), 
+					toUpdate.getPictureId())) {
 				throw new WebApplicationException(ACCESS_DENIED);
 			}
 		}
 		
 		if (toUpdate.getAboutId() != null) {
-			if (!messageService.isBelongsTo(toUpdate.getId(), toUpdate.getAboutId())) {
+			if (!messageService.isBelongsTo(toUpdate.getId(), 
+					toUpdate.getAboutId())) {
 				throw new WebApplicationException(ACCESS_DENIED);
 			}
 		}
 		
-		if (!profileService.update(entity.getBody(), version)) {
-			throw new WebApplicationException(FAILED_UPDATE);
-		}
-		
+		profileService.update(entity.getBody(), version);
 		return ResponseEntity.noContent().build();
 	}
 	

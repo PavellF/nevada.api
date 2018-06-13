@@ -49,12 +49,12 @@ public class FollowersServiceImpl implements FollowersService {
 			throw new IllegalArgumentException("Nulls are disallowed.");
 		}
 		
-		Pageable pageRequest = PageRequest.of(start, count);
 		Sort sort = Sort.by(sorting.getDirection(), 
 				sorting.getDomainProperty());
+		Pageable pageRequest = PageRequest.of(start, count, sort);
 		
 		return followerRepository
-				.findAllFollowers(profileId, mutualOnly, pageRequest, sort)
+				.findAllFollowers(profileId, mutualOnly, pageRequest)
 				.stream().map(mapper).collect(Collectors.toList());
 	}
 
@@ -65,12 +65,12 @@ public class FollowersServiceImpl implements FollowersService {
 			throw new IllegalArgumentException("Nulls are disallowed.");
 		}
 		
-		Pageable pageRequest = PageRequest.of(start, count);
 		Sort sort = Sort.by(sorting.getDirection(), 
 				sorting.getDomainProperty());
+		Pageable pageRequest = PageRequest.of(start, count, sort);
 		
 		return followerRepository
-				.findAllFollowed(profileId, mutualOnly, pageRequest, sort)
+				.findAllFollowed(profileId, mutualOnly, pageRequest)
 				.stream().map(mapper).collect(Collectors.toList());
 	}
 

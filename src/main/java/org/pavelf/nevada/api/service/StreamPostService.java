@@ -66,7 +66,8 @@ public interface StreamPostService {
 	 * @return id of newly created {@code StreamPost}. Never {@code null}.
 	 * @throws IllegalArgumentException if {@code null} passed.
 	 * */
-	public Integer createOnProfile(StreamPostDTO post, int profileId, Version version);
+	public Integer createOnProfile(StreamPostDTO post, 
+			int profileId, Version version);
 	
 	/**
 	 * Updates post.

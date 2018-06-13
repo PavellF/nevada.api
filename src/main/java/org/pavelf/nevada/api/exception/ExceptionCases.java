@@ -73,4 +73,5 @@ public interface ExceptionCases {
 			ExceptionCase.of(17, 
 					"Some of request params are invalid, maybe some values out of bound.", 
 					HttpStatus.BAD_REQUEST);
+	
 }

@@ -69,19 +69,22 @@ public class StreamPostServiceImpl implements StreamPostService {
 			throw new IllegalArgumentException("Null is not allowed.");
 		}
 		
-		Pageable pageRequest = PageRequest.of(start, count);
-		Sort sort = Sort.by(sorting.getDirection(), sorting.getDomainProperty());
+		Sort sort = Sort.by(
+				sorting.getDirection(), sorting.getDomainProperty());
+		Pageable pageRequest = PageRequest.of(start, count, sort);
 		
 		if (levels == null || levels.length == 0) {
-			return streamPostRepository.findAllAssociatedWithProfile(profileId, pageRequest, sort)
+			return streamPostRepository
+					.findAllAssociatedWithProfile(profileId, pageRequest)
 					.stream().map(mapper).collect(Collectors.toList());
 		}
 		
 		List<String> levelsValues = 
 				Stream.of(levels).map(Visibility::toString).collect(Collectors.toList());
 		
-		return streamPostRepository.findAllAssociatedWithProfile(profileId, levelsValues, pageRequest, 
-				sort).stream().map(mapper).collect(Collectors.toList());
+		return streamPostRepository
+				.findAllAssociatedWithProfile(profileId, levelsValues, pageRequest)
+				.stream().map(mapper).collect(Collectors.toList());
 	}
 
 	@Override
@@ -92,19 +95,22 @@ public class StreamPostServiceImpl implements StreamPostService {
 		if (sorting == null || version == null) {
 			throw new IllegalArgumentException("Null is not allowed.");
 		}
+		Sort sort = Sort.by(
+				sorting.getDirection(), sorting.getDomainProperty());
+		Pageable pageRequest = PageRequest.of(start, count, sort);
 		
-		Pageable pageRequest = PageRequest.of(start, count);
-		Sort sort = Sort.by(sorting.getDirection(), sorting.getDomainProperty());
 		
 		if (levels == null || levels.length == 0) {
-			return streamPostRepository.findAllByAuthorId(authorId, pageRequest, sort)
+			return streamPostRepository
+					.findAllByAuthorId(authorId, pageRequest)
 					.stream().map(mapper).collect(Collectors.toList());
 		}
 		
 		List<String> levelsValues = 
 				Stream.of(levels).map(Visibility::toString).collect(Collectors.toList());
 		
-		return streamPostRepository.findAllByAuthorId(authorId, levelsValues, pageRequest, sort)
+		return streamPostRepository
+				.findAllByAuthorId(authorId, levelsValues, pageRequest)
 				.stream().map(mapper).collect(Collectors.toList());
 	}
 
@@ -180,10 +186,11 @@ public class StreamPostServiceImpl implements StreamPostService {
 		if (sorting == null || version == null || tag == null) {
 			throw new IllegalArgumentException("Null is not allowed.");
 		}
+		Sort sort = Sort.by(
+				sorting.getDirection(), sorting.getDomainProperty());
+		Pageable pageRequest = PageRequest.of(start, count, sort);
 		
-		Pageable pageRequest = PageRequest.of(start, count);
-		Sort sort = Sort.by(sorting.getDirection(), sorting.getDomainProperty());
-		return streamPostRepository.findAllByTag(tag, pageRequest, sort)
+		return streamPostRepository.findAllByTag(tag, pageRequest)
 				.stream().map(mapper).collect(Collectors.toList());
 	}
 
