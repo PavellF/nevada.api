@@ -18,6 +18,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Size;
 
+/**
+ * ORM mapping {@code @Entity} that represents stream post.
+ * @author Pavel F.
+ * @since 1.0
+ * */
 @Entity
 @Table(name="stream_post")
 public class StreamPost {
@@ -70,6 +75,11 @@ public class StreamPost {
 	@NotNull
 	@Enumerated(javax.persistence.EnumType.STRING)
 	private Visibility visibility;
+	
+	@Column(name="commentable")
+	@NotNull
+	@Enumerated(javax.persistence.EnumType.STRING)
+	private Visibility commentable; 
 	
 	@Column(name="last_change")
 	@NotNull
@@ -194,6 +204,14 @@ public class StreamPost {
 
 	public void setAssociatedTag(Tag associatedTag) {
 		this.associatedTag = associatedTag;
+	}
+
+	public Visibility getCommentable() {
+		return commentable;
+	}
+
+	public void setCommentable(Visibility commentable) {
+		this.commentable = commentable;
 	}
 	
 	

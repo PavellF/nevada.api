@@ -46,6 +46,8 @@ public class StreamPostServiceImpl implements StreamPostService {
 				.withPopularity(s.getPopularity())
 				.withRating(s.getRating())
 				.withVisibility(s.getVisibility())
+				.withIsLiked(isLiked)
+				.withCommentable(s.getCommentable())
 				.withPriority(s.getPriority()).build();
 		return toMap;
 	};
@@ -115,6 +117,7 @@ public class StreamPostServiceImpl implements StreamPostService {
 	}
 
 	@Override
+	@Transactional
 	public Integer createOnProfile(StreamPostDTO post, int profileId,
 			Version version) {
 		
@@ -122,15 +125,16 @@ public class StreamPostServiceImpl implements StreamPostService {
 			throw new IllegalArgumentException("Null is not allowed.");
 		}
 		
-		
 		StreamPost streamPost = new StreamPost();
-		streamPost.setAssociatedProfile(this.profileRepository.getOne(profileId));
+		streamPost.setAssociatedProfile(
+				this.profileRepository.getOne(profileId));
 		streamPost.setAuthorId(post.getAuthorId());
 		streamPost.setDate(Instant.now());
 		streamPost.setPopularity(0);
 		streamPost.setPriority(post.getPriority());
 		streamPost.setRating(0);
 		streamPost.setVisibility(post.getVisibility());
+		streamPost.setCommentable(post.getCommentable());
 		
 		ParsedMessage pm = this.messageParser.parse(post.getContent());
 		
@@ -138,12 +142,14 @@ public class StreamPostServiceImpl implements StreamPostService {
 		
 		Integer id  = streamPostRepository.save(streamPost).getId();
 		
-		tagsService.assosiateWithStreamPostAndAddAllTags(pm.getMessageTags(), id, version);
+		tagsService.assosiateWithStreamPostAndAddAllTags(
+				pm.getMessageTags(), id, version);
 		
 		return id;
 	}
 
 	@Override
+	@Transactional
 	public boolean update(StreamPostDTO post, Version version) {
 		
 		if (post == null || version == null) {
@@ -168,6 +174,7 @@ public class StreamPostServiceImpl implements StreamPostService {
 	}
 
 	@Override
+	@Transactional
 	public void deleteStreamPost(int postId) {
 		streamPostRepository.deleteById(postId);
 	}
@@ -192,6 +199,20 @@ public class StreamPostServiceImpl implements StreamPostService {
 		
 		return streamPostRepository.findAllByTag(tag, pageRequest)
 				.stream().map(mapper).collect(Collectors.toList());
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public boolean profileHasPost(int profileId, int postId) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public StreamPostDTO getById(int postId, Version version) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

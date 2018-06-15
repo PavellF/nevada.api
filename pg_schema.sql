@@ -78,14 +78,6 @@ CREATE TABLE IF NOT EXISTS tokens (
      PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS people (
-        id SERIAL NOT NULL,
-        full_name VARCHAR(128) DEFAULT NULL,
-        gender VARCHAR(64) DEFAULT NULL,
-        location VARCHAR(128) DEFAULT NULL,
-        PRIMARY KEY (ID)
-    );
-
 CREATE TABLE IF NOT EXISTS profiles (
         id SERIAL NOT NULL,
         email VARCHAR(128) NOT NULL,
@@ -96,9 +88,16 @@ CREATE TABLE IF NOT EXISTS profiles (
         popularity INTEGER DEFAULT 0,
         rating INTEGER DEFAULT 0,
         about INTEGER DEFAULT NULL,
-        person_id INTEGER DEFAULT NULL,
         suspended_until TIMESTAMP DEFAULT NULL,
         PRIMARY KEY (id)
+    );
+    
+CREATE TABLE IF NOT EXISTS people (
+        profile_id INTEGER NOT NULL REFERENCES profiles(id),
+        full_name VARCHAR(128) DEFAULT NULL,
+        gender VARCHAR(64) DEFAULT NULL,
+        location VARCHAR(128) DEFAULT NULL,
+        PRIMARY KEY (profile_id)
     );
 
 CREATE TABLE IF NOT EXISTS applications (
@@ -139,6 +138,7 @@ CREATE TABLE IF NOT EXISTS stream_post (
         popularity INTEGER DEFAULT 0,
         priority SMALLINT DEFAULT 0,
         visibility VARCHAR(36) NOT NULL,
+        commentable VARCHAR(36) NOT NULL,
         last_change TIMESTAMP DEFAULT NULL,
         PRIMARY KEY (id)
 );
@@ -237,25 +237,10 @@ ALTER TABLE IF EXISTS message_has_photo
        FOREIGN KEY (photo_id)
        REFERENCES photos;
 
-ALTER TABLE IF EXISTS message_has_tag
-       ADD CONSTRAINT fk_message_has_tag_message_id
-       FOREIGN KEY (message_id)
-       REFERENCES messages;
-
-ALTER TABLE IF EXISTS message_has_tag
-       ADD CONSTRAINT fk_message_has_tag_tag_name
-       FOREIGN KEY (tag_name)
-       REFERENCES tags;
-
 ALTER TABLE IF EXISTS profiles
        ADD CONSTRAINT fk_profiles_about
        FOREIGN KEY (about)
        REFERENCES messages;
-
-ALTER TABLE IF EXISTS profiles
-       ADD CONSTRAINT fk_profiles_person_id
-       FOREIGN KEY (person_id)
-       REFERENCES people;
 
 ALTER TABLE IF EXISTS messages
        ADD CONSTRAINT fk_messages_author
@@ -288,9 +273,8 @@ ALTER TABLE IF EXISTS stream_post
        REFERENCES profiles;
        
 INSERT INTO profiles (id, email, password, username, sign_date, user_pic, 
-popularity, rating, about, person_id, suspended_until) VALUES (
-DEFAULT,'root@test.org','test','root',NOW(),DEFAULT,0,0,DEFAULT,DEFAULT
-, DEFAULT); 
+popularity, rating, about, suspended_until) VALUES (
+DEFAULT,'root@test.org','test','root',NOW(),DEFAULT,0,0,DEFAULT,DEFAULT); 
 INSERT INTO applications (id,title,suspended_until,since,access_key,
 belongs_to_profile) VALUES (DEFAULT,'root',DEFAULT,NOW(),'adhi43kmhf',1);
        

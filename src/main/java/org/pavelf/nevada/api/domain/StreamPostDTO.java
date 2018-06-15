@@ -22,6 +22,8 @@ public class StreamPostDTO {
 	private Short priority;
 	private Visibility visibility;
 	private Instant lastChange;
+	private Visibility commentable;
+	private Integer userRating;
 
 	private StreamPostDTO() { }
 	
@@ -35,6 +37,8 @@ public class StreamPostDTO {
 		this.priority = builder.priority;
 		this.visibility = builder.visibility;
 		this.lastChange = builder.lastChange;
+		this.commentable = builder.commentable;
+		this.userRating = builder.userRating;
 	}
 	
 	public Integer getId() {
@@ -64,6 +68,12 @@ public class StreamPostDTO {
 	public Instant getLastChange() {
 		return lastChange;
 	}
+	public Visibility getCommentable() {
+		return commentable;
+	}
+	public Integer getUserRating() {
+		return userRating;
+	}
 	
 	@Override
 	public String toString() {
@@ -86,10 +96,13 @@ public class StreamPostDTO {
 		builder.append(visibility);
 		builder.append(", lastChange=");
 		builder.append(lastChange);
+		builder.append(", commentable=");
+		builder.append(commentable);
+		builder.append(", userRating=");
+		builder.append(userRating);
 		builder.append("]");
 		return builder.toString();
 	}
-	
 	/**
 	 * Creates builder to build {@link StreamPostDTO}.
 	 * @return created builder
@@ -111,6 +124,8 @@ public class StreamPostDTO {
 		private Short priority;
 		private Visibility visibility;
 		private Instant lastChange;
+		private Visibility commentable;
+		private Integer userRating;
 
 		private Builder() {
 		}
@@ -160,10 +175,20 @@ public class StreamPostDTO {
 			return this;
 		}
 
+		public Builder withCommentable(Visibility commentable) {
+			this.commentable = commentable;
+			return this;
+		}
+
+		public Builder withUserRating(Integer userRating) {
+			this.userRating = userRating;
+			return this;
+		}
+
 		public StreamPostDTO build() {
 			return new StreamPostDTO(this);
 		}
 	}
-	
+
 	
 }

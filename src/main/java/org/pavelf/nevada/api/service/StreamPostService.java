@@ -5,7 +5,6 @@ import java.util.List;
 import org.pavelf.nevada.api.domain.StreamPostDTO;
 import org.pavelf.nevada.api.domain.Version;
 import org.pavelf.nevada.api.persistence.domain.Sorting;
-import org.pavelf.nevada.api.persistence.domain.StreamPost;
 import org.pavelf.nevada.api.persistence.domain.Visibility;
 
 /**
@@ -16,47 +15,48 @@ import org.pavelf.nevada.api.persistence.domain.Visibility;
 public interface StreamPostService {
 
 	/**
-	 * Finds all posts associated with given profile.
+	 * Finds all posts associated with given profile and 
+	 * returns additional field with rating caller rated some messages.
 	 * @param profileId that represents profile.
-	 * @param version of object to fetch.
-	 * @param start describes relative post number from which list should start.
-	 * @param count number of objects.
-	 * @param sorting filed name and direction of sorting.
+	 * @param pageAndSort parameters of list to fetch.
+	 * @param requestingId requestingId represents caller.
 	 * @param levels posts with given visibility levels to return. 
-	 * If none specified all levels will be returned. 
+	 * 		  If none specified all levels will be returned. 
 	 * @return collection of retrieved posts. May be empty, never {@code null}.
-	 * @throws IllegalArgumentException if {@code null} passed.
+	 * @throws IllegalArgumentException if 
+	 *         {@code null} passed except {@code requestingId}.
 	 * */
-	public List<StreamPostDTO> getAllForProfile(int profileId, Version version, 
-			int start, int count, Sorting sorting, Visibility... levels);
+	public List<StreamPostDTO> getAllForProfile(int profileId,  
+			PageAndSort pageAndSort,Integer requestingId, Visibility... levels);
 	
 	/**
-	 * Finds all posts associated with given tag.
+	 * Finds all posts associated with given tag and 
+	 * returns additional field with rating caller rated some messages.
 	 * @param tag tagname.
-	 * @param version of object to fetch.
-	 * @param start describes relative post number from which list should start.
-	 * @param count number of objects.
-	 * @param sorting filed name and direction of sorting.
+	 * @param pageAndSort parameters of list to fetch.
+	 * @param requestingId requestingId represents caller.
 	 * @return collection of retrieved posts. May be empty, never {@code null}.
-	 * @throws IllegalArgumentException if {@code null} passed.
+	 * @throws IllegalArgumentException if 
+	 *         {@code null} passed except {@code requestingId}.
 	 * */
-	public List<StreamPostDTO> getAllForTag(String tag, Version version, 
-			int start, int count, Sorting sorting);
+	public List<StreamPostDTO> getAllForTag(String tag, PageAndSort pageAndSort,
+			Integer requestingId);
 	
 	/**
-	 * Finds all posts associated with given author.
+	 * Finds all posts associated with given author and 
+	 * returns additional field with rating caller rated some messages.
 	 * @param authorId that represents author.
-	 * @param version of object to fetch.
-	 * @param start describes relative post number from which list should start.
-	 * @param count number of objects.
-	 * @param sorting filed name and direction of sorting.
+	 * @param pageAndSort parameters of list to fetch.
+	 * @param requestingId requestingId represents caller.
 	 * @param levels posts with given visibility levels to return. 
 	 * If none specified all levels will be returned. 
 	 * @return collection of retrieved posts. May be empty, never {@code null}.
-	 * @throws IllegalArgumentException if {@code null} passed.
+	 * @throws IllegalArgumentException if 
+	 *         {@code null} passed except {@code requestingId}.
 	 * */
-	public List<StreamPostDTO> getAllForAuthor(int authorId, Version version,
-			int start, int count, Sorting sorting, Visibility... levels);
+	public List<StreamPostDTO> getAllForAuthor(int authorId, 
+			Integer requestingId, PageAndSort pageAndSort, 
+			Visibility... levels);
 	
 	/**
 	 * Creates new post on some profile stream.
@@ -85,9 +85,26 @@ public interface StreamPostService {
 	public void deleteStreamPost(int postId);
 	
 	/**
-	 * Whether this post belongs to this profile.
+	 * Whether this post author is this profile.
 	 * @param profileId that represents profile.
 	 * @param postId to check.
 	 * */
 	public boolean belongsTo(int profileId, int postId);
+	
+	/**
+	 * Whether this profile owns this post 
+	 * (author is not necessary the same person).
+	 * @param profileId that represents with owns relationship.
+	 * @param postId post identifier.
+	 * */
+	public boolean profileHasPost(int profileId, int postId);
+	
+	/**
+	 * Obtains stream post by its identifier.
+	 * @param postId post identifier.
+	 * @param version of object.
+	 * @return post if found or {@code null}.
+	 * @throws IllegalArgumentException if {@code null} passed.
+	 * */
+	public StreamPostDTO getById(int postId, Version version);
 }

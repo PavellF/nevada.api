@@ -1,13 +1,8 @@
 package org.pavelf.nevada.api.domain;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.Collections;
-import javax.annotation.Generated;
 
 /**
  * Represents text message with attachments.
@@ -25,14 +20,13 @@ public class MessageDTO {
 	private Short priority;
 	private Boolean archived;
 	private String content;
-	private Set<Integer> likeIds;
-	private List<Integer> photoIds;
-	private Boolean canLike;
-	private List<Integer> repliesIds;
+	private Boolean isLiked;
 	private Integer replyTo;
+	private Owner ownerType;
+	private Integer ownerId;
+	private Destination destinationType;
+	private Integer destinationId;
 
-	private MessageDTO() { }
-	
 	private MessageDTO(Builder builder) {
 		this.id = builder.id;
 		this.authorId = builder.authorId;
@@ -42,53 +36,72 @@ public class MessageDTO {
 		this.priority = builder.priority;
 		this.archived = builder.archived;
 		this.content = builder.content;
-		this.likeIds = builder.likeIds;
-		this.photoIds = builder.photoIds;
-		this.canLike = builder.canLike;
-		this.repliesIds = builder.repliesIds;
+		this.isLiked = builder.isLiked;
 		this.replyTo = builder.replyTo;
+		this.ownerType = builder.ownerType;
+		this.ownerId = builder.ownerId;
+		this.destinationType = builder.destinationType;
+		this.destinationId = builder.destinationId;
 	}
-	
+
+	private MessageDTO() { }
+
 	public Integer getId() {
 		return id;
 	}
+
 	public Integer getAuthorId() {
 		return authorId;
 	}
+
 	public Instant getDate() {
 		return date;
 	}
+
 	public Instant getLastChange() {
 		return lastChange;
 	}
+
 	public Integer getRating() {
 		return rating;
 	}
+
 	public Short getPriority() {
 		return priority;
 	}
+
 	public Boolean getArchived() {
 		return archived;
 	}
+
 	public String getContent() {
 		return content;
 	}
-	public Set<Integer> getLikeIds() {
-		return likeIds;
+
+	public Boolean getIsLiked() {
+		return isLiked;
 	}
-	public List<Integer> getPhotoIds() {
-		return photoIds;
-	}
-	public Boolean getCanLike() {
-		return canLike;
-	}
-	public List<Integer> getRepliesIds() {
-		return repliesIds;
-	}
+
 	public Integer getReplyTo() {
 		return replyTo;
 	}
-	
+
+	public Owner getOwnerType() {
+		return ownerType;
+	}
+
+	public Integer getOwnerId() {
+		return ownerId;
+	}
+
+	public Destination getDestinationType() {
+		return destinationType;
+	}
+
+	public Integer getDestinationId() {
+		return destinationId;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -108,20 +121,22 @@ public class MessageDTO {
 		builder.append(archived);
 		builder.append(", content=");
 		builder.append(content);
-		builder.append(", likeIds=");
-		builder.append(likeIds);
-		builder.append(", photoIds=");
-		builder.append(photoIds);
-		builder.append(", canLike=");
-		builder.append(canLike);
-		builder.append(", repliesIds=");
-		builder.append(repliesIds);
+		builder.append(", isLiked=");
+		builder.append(isLiked);
 		builder.append(", replyTo=");
 		builder.append(replyTo);
+		builder.append(", ownerType=");
+		builder.append(ownerType);
+		builder.append(", ownerId=");
+		builder.append(ownerId);
+		builder.append(", destinationType=");
+		builder.append(destinationType);
+		builder.append(", destinationId=");
+		builder.append(destinationId);
 		builder.append("]");
 		return builder.toString();
 	}
-	
+
 	/**
 	 * Creates builder to build {@link MessageDTO}.
 	 * @return created builder
@@ -129,7 +144,7 @@ public class MessageDTO {
 	public static Builder builder() {
 		return new Builder();
 	}
-	
+
 	/**
 	 * Builder to build {@link MessageDTO}.
 	 */
@@ -142,11 +157,12 @@ public class MessageDTO {
 		private Short priority;
 		private Boolean archived;
 		private String content;
-		private Set<Integer> likeIds = Collections.emptySet();
-		private List<Integer> photoIds = Collections.emptyList();
-		private Boolean canLike;
-		private List<Integer> repliesIds = Collections.emptyList();
+		private Boolean isLiked;
 		private Integer replyTo;
+		private Owner ownerType;
+		private Integer ownerId;
+		private Destination destinationType;
+		private Integer destinationId;
 
 		private Builder() {
 		}
@@ -191,23 +207,8 @@ public class MessageDTO {
 			return this;
 		}
 
-		public Builder withLikeIds(Set<Integer> likeIds) {
-			this.likeIds = likeIds;
-			return this;
-		}
-
-		public Builder withPhotoIds(List<Integer> photoIds) {
-			this.photoIds = photoIds;
-			return this;
-		}
-
-		public Builder withCanLike(Boolean canLike) {
-			this.canLike = canLike;
-			return this;
-		}
-
-		public Builder withRepliesIds(List<Integer> repliesIds) {
-			this.repliesIds = repliesIds;
+		public Builder withIsLiked(Boolean isLiked) {
+			this.isLiked = isLiked;
 			return this;
 		}
 
@@ -216,10 +217,30 @@ public class MessageDTO {
 			return this;
 		}
 
+		public Builder withOwnerType(Owner ownerType) {
+			this.ownerType = ownerType;
+			return this;
+		}
+
+		public Builder withOwnerId(Integer ownerId) {
+			this.ownerId = ownerId;
+			return this;
+		}
+
+		public Builder withDestinationType(Destination destinationType) {
+			this.destinationType = destinationType;
+			return this;
+		}
+
+		public Builder withDestinationId(Integer destinationId) {
+			this.destinationId = destinationId;
+			return this;
+		}
+
 		public MessageDTO build() {
 			return new MessageDTO(this);
 		}
 	}
-
+	
 	
 }

@@ -7,7 +7,7 @@ import org.pavelf.nevada.api.domain.MessageDTO;
 import org.pavelf.nevada.api.domain.Version;
 
 /**
- * General interface for interactions with messages.
+ * General interface for interactions with user messages.
  * @since 1.0
  * @author Pavel F.
  * */
@@ -20,7 +20,19 @@ public interface MessageService {
 	 * @return never {@code null}, generated identifier.
 	 * @throws IllegalArgumentException if null passed.
 	 */
-	public Integer post(MessageDTO message, Version version);
+	public Integer saveUnderStreamPost(int streamPostId,
+			MessageDTO message, Version version);
+	
+	
+	/**
+	 * Finds all messages ever posted by this user.
+	 * @param profileId profile identifier.
+	 * @param params fetch options.
+	 * @return never {@code null}, may be empty {@code List}.
+	 * @throws IllegalArgumentException if null passed.
+	 * */
+	public List<MessageDTO> getAllForProfile(int profileId, 
+			PageAndSort params, boolean archivedIncluded);
 	
 	/**
 	 * Gets list of messages with given id.
@@ -29,7 +41,8 @@ public interface MessageService {
 	 * @return never {@link null} may be empty list.
 	 * @throws IllegalArgumentException if null passed.
 	 * */
-	public List<MessageDTO> getList(Set<Integer> ids, Version version);
+	public List<MessageDTO> getListForStreamPost(int postId,
+			PageAndSort params, boolean archivedIncluded);
 	
 	/**
 	 * @param profileId owner id.
@@ -37,5 +50,9 @@ public interface MessageService {
 	 * @return Whether this message belongs profile with given id.
 	 * */
 	public boolean isBelongsTo(int profileId, int messageId);	
+	
+	public boolean isPostedUnderPost(int postId, int messageId); 
+	
+	public void update(MessageDTO message, Version version);
 	
 }

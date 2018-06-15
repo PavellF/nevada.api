@@ -20,6 +20,7 @@ import org.pavelf.nevada.api.security.Secured;
 import org.pavelf.nevada.api.security.TokenContext;
 import org.pavelf.nevada.api.security.User;
 import org.pavelf.nevada.api.service.FollowersService;
+import org.pavelf.nevada.api.service.PageAndSort;
 import org.pavelf.nevada.api.service.ProfilePreferencesService;
 import org.pavelf.nevada.api.service.ProfileService;
 import org.pavelf.nevada.api.service.StreamPostService;
@@ -62,24 +63,17 @@ public class StreamPostController {
 			APPLICATION_ACCEPT_PREFIX+".post+json", 
 			APPLICATION_ACCEPT_PREFIX+".post+xml"},
 			path = "/profile/{id}/posts")	
-	@Secured(access = Access.READ, scope = { Scope.STREAM})
+	@Secured(access = Access.READ, scope = { Scope.STREAM })
 	public ResponseEntity<List<StreamPostDTO>> getStreamPosts(
 			@PathVariable("id") int id,
-			@RequestHeader(HttpHeaders.ACCEPT) Version version,
-			@RequestParam(name = "start", defaultValue= "0") int start,
-			@RequestParam(name = "count", defaultValue= "15") int count,
-			@RequestParam(name = "order", defaultValue= "TIME_ASC") Sorting order) { 
+			PageAndSort pageAndSort) { 
 		
 		final User issuer = principal.getToken().getUser()
 				.orElseThrow(UnrecognizedUserException::new);
 		
-		if (count > 75) {
-			new WebApplicationException(INVALID_REQUEST_PARAM);
-		}
-		
 		if (principal.getToken().isSuper() || issuer.getIdAsInt() == id) {
 			return ResponseEntity.ok(streamPostService.
-					getAllForAuthor(id, version, start, count, order));
+					getAllForAuthor(id, null, pageAndSort));
 		}
 		
 		throw new WebApplicationException(ACCESS_DENIED);
@@ -91,43 +85,41 @@ public class StreamPostController {
 			path = "/{destination}/{destination_id}/posts")	
 	public ResponseEntity<List<StreamPostDTO>> getStreamPostsForDestination(
 			@PathVariable("destination") Destination destination,
-			@PathVariable("destination_id") String destinationId,
-			@RequestHeader(HttpHeaders.ACCEPT) Version version,
-			@RequestParam(name = "start", defaultValue= "0") int start,
-			@RequestParam(name = "count", defaultValue= "15") int count,
-			@RequestParam(name = "order", defaultValue= "TIME_ASC") Sorting order) { 
-		
-		final User issuer = principal.getToken().getUser().orElseThrow(() -> 
-		new WebApplicationException(UNRECOGNIZED_USER));
-		
-		if (count > 75) {
-			new WebApplicationException(INVALID_REQUEST_PARAM);
-		}
+			@PathVariable("destination_id") int destinationId,
+			PageAndSort pageAndSort) { 
 		
 		if (destination == Destination.PROFILE) {
 			
-			if (issuer.getId().equals(destinationId) || principal.getToken().isSuper()) {
-				return ResponseEntity.ok(streamPostService
-						.getAllForProfile(Integer.valueOf(destinationId), version, start, count, order));
+			if (principal.isAuthorized()) {
+				final User issuer = principal.getToken().getUser()
+				.orElseThrow(UnrecognizedUserException::new);
 				
-			} else {
-				Integer destId = Integer.valueOf(destinationId);
-				boolean areFriends = followersService
-						.isFollow(issuer.getIdAsInt(), destId);
-				if (areFriends) {
-					return ResponseEntity.ok(streamPostService
-							.getAllForProfile(destId, version, start, count, order, 
-									Visibility.ALL, Visibility.FRIENDS));
-				} else {
-					return ResponseEntity.ok(streamPostService.getAllForProfile(
-							Integer.valueOf(destinationId), version, start, count, order, Visibility.ALL));
+				if (issuer.getIdAsInt() == destinationId || 
+				principal.getToken().isSuper()) {
+			
+				return ResponseEntity.ok(streamPostService.getAllForProfile(
+						Integer.valueOf(destinationId), pageAndSort, null));
+			
 				}
-				
 			}
+			
+			final Integer destId = Integer.valueOf(destinationId);
+			final Integer issuerId = issuer.getIdAsInt();
+			boolean areFriends = followersService
+						.isFollow(issuerId, destId);
+			if (areFriends) {
+				return ResponseEntity.ok(streamPostService
+						.getAllForProfile(destId, pageAndSort, issuerId,
+								Visibility.ALL, Visibility.FRIENDS));
+			} else {
+				return ResponseEntity.ok(streamPostService.getAllForProfile(
+						destId, pageAndSort, issuerId, Visibility.ALL));
+			}
+				
 		} else if (destination == Destination.TAG) {
 			
 			return ResponseEntity.ok(streamPostService
-					.getAllForTag(destinationId, version, start, count, order));
+					.getAllForTag(destinationId, pageAndSort, ));
 		}
 		
 		return ResponseEntity.badRequest().build();
@@ -246,7 +238,7 @@ public class StreamPostController {
 				}
 				throw new WebApplicationException(FAILED_UPDATE);
 			}
-			//post owner can change only content and visibility
+			//post owner can not change priority
 			
 			if (streamPostService.belongsTo(issuerId, posted.getId()) 
 					&& posted.getPriority() == null) {

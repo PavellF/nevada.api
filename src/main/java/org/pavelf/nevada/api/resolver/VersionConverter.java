@@ -1,5 +1,7 @@
-package org.pavelf.nevada.api.domain;
+package org.pavelf.nevada.api.resolver;
 
+import org.pavelf.nevada.api.domain.Version;
+import org.pavelf.nevada.api.domain.VersionImpl;
 import org.springframework.core.convert.converter.Converter;
 
 /**
