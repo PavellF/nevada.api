@@ -1,8 +1,13 @@
 package org.pavelf.nevada.api.persistence.domain;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
@@ -11,7 +16,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -27,26 +34,31 @@ import javax.validation.constraints.Size;
 @Table(name="stream_post")
 public class StreamPost {
 
+	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
+	@JoinTable(name = "like_stream_post", 
+		joinColumns = @JoinColumn(name = "stream_post_id"), 
+		inverseJoinColumns = @JoinColumn(name = "like_id"))
+	private Like currentUserLike;
+	
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private int id;
 	
-	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
-	@NotNull
+	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
 	@JoinColumn(name = "author", insertable = false, updatable = false)
 	private Profile author;
 	
 	@ManyToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
 	@JoinTable(name = "profile_has_stream_post", 
-		joinColumns = { @JoinColumn(name = "stream_post_id") }, 
-		inverseJoinColumns = { @JoinColumn(name = "profile_id")})
+		joinColumns = @JoinColumn(name = "stream_post_id"), 
+		inverseJoinColumns = @JoinColumn(name = "profile_id"))
 	private Profile associatedProfile;
 	
 	@ManyToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
 	@JoinTable(name = "stream_post_has_tag", 
-		joinColumns = { @JoinColumn(name = "stream_post_id") }, 
-		inverseJoinColumns = { @JoinColumn(name = "tag")})
+			joinColumns = @JoinColumn(name = "stream_post_id"), 
+			inverseJoinColumns = @JoinColumn(name = "tag"))
 	private Tag associatedTag;
 	
 	@Column(name = "author")
@@ -82,7 +94,6 @@ public class StreamPost {
 	private Visibility commentable; 
 	
 	@Column(name="last_change")
-	@NotNull
 	private Instant lastChange;
 	
 	/**
@@ -190,14 +201,6 @@ public class StreamPost {
 		this.lastChange = lastChange;
 	}
 
-	public Profile getAssociatedProfile() {
-		return associatedProfile;
-	}
-
-	public void setAssociatedProfile(Profile associatedProfile) {
-		this.associatedProfile = associatedProfile;
-	}
-
 	public Tag getAssociatedTag() {
 		return associatedTag;
 	}
@@ -213,6 +216,21 @@ public class StreamPost {
 	public void setCommentable(Visibility commentable) {
 		this.commentable = commentable;
 	}
-	
-	
+
+	public Profile getAssociatedProfile() {
+		return associatedProfile;
+	}
+
+	public void setAssociatedProfile(Profile associatedProfile) {
+		this.associatedProfile = associatedProfile;
+	}
+
+	public Like getCurrentUserLike() {
+		return currentUserLike;
+	}
+
+	public void setCurrentUserLike(Like currentUserLike) {
+		this.currentUserLike = currentUserLike;
+	}
+
 }

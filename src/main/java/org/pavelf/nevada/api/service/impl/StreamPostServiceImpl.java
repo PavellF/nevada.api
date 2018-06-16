@@ -14,6 +14,7 @@ import org.pavelf.nevada.api.persistence.domain.Visibility;
 import org.pavelf.nevada.api.persistence.repository.ProfileRepository;
 import org.pavelf.nevada.api.persistence.repository.StreamPostRepository;
 import org.pavelf.nevada.api.service.MessageParser;
+import org.pavelf.nevada.api.service.PageAndSort;
 import org.pavelf.nevada.api.service.StreamPostService;
 import org.pavelf.nevada.api.service.TagsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,67 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class StreamPostServiceImpl implements StreamPostService {
 
-	private StreamPostRepository streamPostRepository;
+	@Override
+	public List<StreamPostDTO> getAllForProfile(int profileId,
+			PageAndSort pageAndSort, Integer requestingId,
+			Visibility... levels) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<StreamPostDTO> getAllForTag(String tag, PageAndSort pageAndSort,
+			Integer requestingId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<StreamPostDTO> getAllForAuthor(int authorId,
+			Integer requestingId, PageAndSort pageAndSort,
+			Visibility... levels) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Integer createOnProfile(StreamPostDTO post, int profileId,
+			Version version) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean update(StreamPostDTO post, Version version) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void deleteStreamPost(int postId) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean belongsTo(int profileId, int postId) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean profileHasPost(int profileId, int postId) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public StreamPostDTO getById(int postId, Version version) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/*private StreamPostRepository streamPostRepository;
 	private ProfileRepository profileRepository;
 	private MessageParser messageParser;
 	private TagsService tagsService;
@@ -62,7 +123,7 @@ public class StreamPostServiceImpl implements StreamPostService {
 		this.tagsService = tagsService;
 	}
 
-	@Override
+	//@Override
 	@Transactional(readOnly = true)
 	public List<StreamPostDTO> getAllForProfile(int profileId, Version version,
 			int start, int count, Sorting sorting, Visibility... levels) {
@@ -89,7 +150,7 @@ public class StreamPostServiceImpl implements StreamPostService {
 				.stream().map(mapper).collect(Collectors.toList());
 	}
 
-	@Override
+	//@Override
 	@Transactional(readOnly = true)
 	public List<StreamPostDTO> getAllForAuthor(int authorId, Version version,
 			int start, int count, Sorting sorting, Visibility... levels) {
@@ -185,7 +246,7 @@ public class StreamPostServiceImpl implements StreamPostService {
 		return streamPostRepository.countByAuthorIdAndId(postId, profileId) == 1;
 	}
 
-	@Override
+	//@Override
 	@Transactional(readOnly = true)
 	public List<StreamPostDTO> getAllForTag(String tag, Version version,
 			int start, int count, Sorting sorting) {
@@ -214,5 +275,28 @@ public class StreamPostServiceImpl implements StreamPostService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public List<StreamPostDTO> getAllForProfile(int profileId,
+			PageAndSort pageAndSort, Integer requestingId,
+			Visibility... levels) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<StreamPostDTO> getAllForTag(String tag, PageAndSort pageAndSort,
+			Integer requestingId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<StreamPostDTO> getAllForAuthor(int authorId,
+			Integer requestingId, PageAndSort pageAndSort,
+			Visibility... levels) {
+		// TODO Auto-generated method stub
+		return null;
+	}*/
 
 }

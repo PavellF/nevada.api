@@ -16,6 +16,11 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 
+/**
+ * ORM {@code @Entity} that represent user like.
+ * @author Pavel F.
+ * @since 1.0
+ * */
 @Entity
 @Table(name="_likes")
 public class Like {
@@ -30,8 +35,13 @@ public class Like {
     inverseJoinColumns = { @JoinColumn(name = "liked_message_id")} )
 	private Message message;
 	
+	@ManyToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
+	@JoinTable(name = "like_stream_post", 
+	joinColumns = { @JoinColumn(name = "like_id") }, 
+    inverseJoinColumns = { @JoinColumn(name = "stream_post_id")} )
+	private StreamPost post;
+	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
-	@NotNull
 	@JoinColumn(name = "by_user", insertable = false, updatable = false)
 	private Profile likedBy;
 	
@@ -121,5 +131,13 @@ public class Like {
 
 	public void setLikedById(int likedById) {
 		this.likedById = likedById;
+	}
+
+	public StreamPost getPost() {
+		return post;
+	}
+
+	public void setPost(StreamPost post) {
+		this.post = post;
 	}
 }

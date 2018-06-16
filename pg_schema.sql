@@ -151,16 +151,19 @@ CREATE TABLE IF NOT EXISTS stream_post_has_photo (
 CREATE TABLE IF NOT EXISTS profile_has_stream_post (
         profile_id INTEGER NOT NULL REFERENCES profiles (id),
         stream_post_id INTEGER NOT NULL REFERENCES stream_post (id),
+        PRIMARY KEY  (profile_id, stream_post_id)
 );
 
 CREATE TABLE IF NOT EXISTS stream_post_has_tag (
         stream_post_id INTEGER NOT NULL REFERENCES stream_post (id),
-        tag VARCHAR NOT NULL REFERENCES tags (name)
+        tag VARCHAR NOT NULL REFERENCES tags (name),
+        PRIMARY KEY (stream_post_id, tag)
 );
 
 CREATE TABLE IF NOT EXISTS like_stream_post (
         stream_post_id INTEGER NOT NULL REFERENCES stream_post (id),
-        like_id INTEGER NOT NULL REFERENCES _likes (id)
+        like_id INTEGER NOT NULL REFERENCES _likes (id),
+        PRIMARY KEY (stream_post_id, like_id)
 );
 
 CREATE TABLE IF NOT EXISTS guest_to_profile (

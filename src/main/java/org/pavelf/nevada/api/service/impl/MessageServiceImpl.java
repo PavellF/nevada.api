@@ -19,6 +19,7 @@ import org.pavelf.nevada.api.persistence.repository.ProfileRepository;
 import org.pavelf.nevada.api.persistence.repository.TagRepository;
 import org.pavelf.nevada.api.service.MessageParser;
 import org.pavelf.nevada.api.service.MessageService;
+import org.pavelf.nevada.api.service.PageAndSort;
 import org.pavelf.nevada.api.service.TagsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,13 +28,52 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class MessageServiceImpl implements MessageService {
 
-	private MessageRepository messageRepository;
+	@Override
+	public Integer saveUnderStreamPost(int streamPostId, MessageDTO message,
+			Version version) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<MessageDTO> getAllForProfile(int profileId, PageAndSort params,
+			boolean archivedIncluded) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<MessageDTO> getListForStreamPost(int postId, PageAndSort params,
+			boolean archivedIncluded) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean isBelongsTo(int profileId, int messageId) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isPostedUnderPost(int postId, int messageId) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void update(MessageDTO message, Version version) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/*private MessageRepository messageRepository;
 	private ProfileRepository profileRepository;
 	private PhotoRepository photoRepository;
 	private TagRepository tagRepository;
 	private MessageParser parser;
 	
-	@Override
+	//@Override
 	@Transactional
 	public Integer post(MessageDTO message, Version version) {
 		if (message == null || version == null) {
@@ -66,7 +106,7 @@ public class MessageServiceImpl implements MessageService {
 		return messageRepository.save(newMessage).getId();
 	}
 
-	@Override
+	//@Override
 	public List<MessageDTO> getList(Set<Integer> ids, Version version) {
 		// TODO Auto-generated method stub
 		return null;
@@ -77,4 +117,37 @@ public class MessageServiceImpl implements MessageService {
 		return messageRepository.countByIdAndAuthorId(messageId, profileId) == 1;
 	}
 
+	@Override
+	public Integer saveUnderStreamPost(int streamPostId, MessageDTO message,
+			Version version) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<MessageDTO> getAllForProfile(int profileId, PageAndSort params,
+			boolean archivedIncluded) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<MessageDTO> getListForStreamPost(int postId, PageAndSort params,
+			boolean archivedIncluded) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean isPostedUnderPost(int postId, int messageId) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void update(MessageDTO message, Version version) {
+		// TODO Auto-generated method stub
+		
+	}
+*/
 }
