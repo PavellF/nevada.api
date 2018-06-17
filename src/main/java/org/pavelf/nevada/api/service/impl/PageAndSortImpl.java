@@ -1,15 +1,18 @@
 package org.pavelf.nevada.api.service.impl;
 
+import java.util.Optional;
+
 import org.pavelf.nevada.api.domain.Version;
 import org.pavelf.nevada.api.persistence.domain.Sorting;
 import org.pavelf.nevada.api.service.PageAndSort;
+import org.pavelf.nevada.api.service.PageAndSortExtended;
 
 /**
  * Basic implementation for {@code PageAndSort}. Immutable.
  * @author Pavel F.
  * @since 1.0
  * */
-public class PageAndSortImpl implements PageAndSort {
+public class PageAndSortImpl implements PageAndSortExtended {
 
 	private final int start;
 	private final int count;
@@ -28,12 +31,24 @@ public class PageAndSortImpl implements PageAndSort {
 	 * Creates new object.
 	 * @throws IllegalArgumentException if null passed.
 	 * */
-	public static PageAndSortImpl valueOf(int start, int count, 
+	public static PageAndSortExtended valueOf(int start, int count, 
 			Sorting sorting, Version version) {
 		if (sorting == null || version == null) {
 			throw new IllegalArgumentException();
 		}
 		return new PageAndSortImpl(start, count, sorting, version);
+	}
+	
+	/**
+	 * Creates new object of type {@code PageAndSort}.
+	 * @throws IllegalArgumentException if null passed.
+	 * */
+	public static PageAndSort valueOf(int start, int count, 
+			Sorting sorting) {
+		if (sorting == null) {
+			throw new IllegalArgumentException();
+		}
+		return new PageAndSortImpl(start, count, sorting, null);
 	}
 	
 	@Override
@@ -47,13 +62,13 @@ public class PageAndSortImpl implements PageAndSort {
 	}
 
 	@Override
-	public String getSortingParameter() {
-		return this.getSortingParameter();
+	public Optional<String> getSortBy() {
+		return Optional.ofNullable(this.sorting.getSortBy());
 	}
 
 	@Override
-	public String getSortingDirection() {
-		return this.sorting.getDirection().toString();
+	public Optional<String> getSortingDirection() {
+		return Optional.ofNullable(sorting.getDirection().toString());
 	}
 
 	@Override

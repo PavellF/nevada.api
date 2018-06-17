@@ -5,22 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Size;
@@ -32,15 +17,40 @@ import javax.validation.constraints.Size;
  * */
 @Entity
 @Table(name="stream_post")
+/*@SqlResultSetMapping(name="streamPostwCurrentUserLike",
+entities=@EntityResult(entityClass=StreamPost.class,
+    fields = {
+            @FieldResult(name="id", column = "sp.id"),
+            @FieldResult(name="authorId", column = "sp.author"),
+            @FieldResult(name="date", column = "sp.date"),
+            @FieldResult(name="content", column = "sp.content"), 
+            @FieldResult(name="rating", column = "sp.rating"),
+            @FieldResult(name="popularity", column = "sp.popularity"),
+            @FieldResult(name="priority", column = "sp.priority")
+            }))
+
+@NamedNativeQuery(name="selectStreamPostWithCurrentUserLike",
+query="SELECT sp.id, sp.author, sp.date, sp.content, sp.rating, " + 
+		"sp.popularity, sp.priority, sp.visibility, sp.commentable, " + 
+		"sp.last_change, l.rating, l.id, l.by_user, l.date " + 
+		"FROM stream_post AS sp " + 
+		"INNER JOIN profile_has_stream_post AS phsp " + 
+		"ON phsp.stream_post_id = sp.id " + 
+		"INNER JOIN like_stream_post AS lsp ON lsp.stream_post_id = sp.id " + 
+		"LEFT OUTER JOIN _likes AS l ON l.id = lsp.like_id " + 
+		"AND l.by_user = :currentUserId " + 
+		"WHERE phsp.profile_id = :profileID AND sp.visibility IN (:levels) "
+		+ "GROUP BY ?#{#pageable}", 
+resultSetMapping="streamPostwCurrentUserLike")*/
 public class StreamPost {
 
-	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
+	/*@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
 	@JoinTable(name = "like_stream_post", 
 		joinColumns = @JoinColumn(name = "stream_post_id"), 
-		inverseJoinColumns = @JoinColumn(name = "like_id"))
-	private Like currentUserLike;
+		inverseJoinColumns = @JoinColumn(name = "like_id"))*/
+	private transient Like currentUserLike;
 	
-	@Id
+	@Id	
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private int id;
@@ -53,13 +63,13 @@ public class StreamPost {
 	@JoinTable(name = "profile_has_stream_post", 
 		joinColumns = @JoinColumn(name = "stream_post_id"), 
 		inverseJoinColumns = @JoinColumn(name = "profile_id"))
-	private Profile associatedProfile;
+	private transient Profile associatedProfile;
 	
 	@ManyToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
 	@JoinTable(name = "stream_post_has_tag", 
 			joinColumns = @JoinColumn(name = "stream_post_id"), 
 			inverseJoinColumns = @JoinColumn(name = "tag"))
-	private Tag associatedTag;
+	private transient Tag associatedTag;
 	
 	@Column(name = "author")
 	private int authorId;

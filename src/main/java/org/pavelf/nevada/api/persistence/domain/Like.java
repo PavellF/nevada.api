@@ -33,13 +33,13 @@ public class Like {
 	@ManyToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
 	@JoinTable(name = "liked_messages", joinColumns = { @JoinColumn(name = "like_id") }, 
     inverseJoinColumns = { @JoinColumn(name = "liked_message_id")} )
-	private Message message;
+	private transient Message message;
 	
 	@ManyToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
 	@JoinTable(name = "like_stream_post", 
 	joinColumns = { @JoinColumn(name = "like_id") }, 
     inverseJoinColumns = { @JoinColumn(name = "stream_post_id")} )
-	private StreamPost post;
+	private transient StreamPost post;
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
 	@JoinColumn(name = "by_user", insertable = false, updatable = false)

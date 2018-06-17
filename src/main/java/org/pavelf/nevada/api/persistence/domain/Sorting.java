@@ -11,29 +11,26 @@ import org.springframework.data.domain.Sort.Direction;
  * */
 public enum Sorting {
 
-	TIME_ASC("id", ASC),
-	TIME_DESC("id", DESC),
+	TIME_ASC("time", ASC),
+	TIME_DESC("time", DESC),
 	POPULARITY_ASC("popularity", ASC),
 	POPULARITY_DESC("popularity", DESC),
 	RATING_ASC("rating", ASC),
 	RATING_DESC("rating", DESC);
 	
-	private final String domainProperty;
+	private final String sortBy;
 	private final Direction direction;
 	
-	private Sorting(String domainProperty, Direction direction) {
-		this.domainProperty = domainProperty;
-		this.direction = direction;
+	public String getSortBy() {
+		return sortBy;
 	}
-
-	public String getDomainProperty() {
-		return domainProperty;
-	}
-
-	public org.springframework.data.domain.Sort.Direction getDirection() {
+	public Direction getDirection() {
 		return direction;
 	}
 	
-	
+	private Sorting(String sortBy, Direction direction) {
+		this.sortBy = sortBy;
+		this.direction = direction;
+	}
 	
 }

@@ -155,21 +155,27 @@ CREATE TABLE IF NOT EXISTS profile_has_stream_post (
 );
 
 CREATE TABLE IF NOT EXISTS stream_post_has_tag (
+        id SERIAL NOT NULL PRIMARY KEY,
         stream_post_id INTEGER NOT NULL REFERENCES stream_post (id),
         tag VARCHAR NOT NULL REFERENCES tags (name),
-        PRIMARY KEY (stream_post_id, tag)
 );
 
 CREATE TABLE IF NOT EXISTS like_stream_post (
+        id SERIAL NOT NULL PRIMARY KEY,
         stream_post_id INTEGER NOT NULL REFERENCES stream_post (id),
         like_id INTEGER NOT NULL REFERENCES _likes (id),
-        PRIMARY KEY (stream_post_id, like_id)
 );
 
 CREATE TABLE IF NOT EXISTS guest_to_profile (
         target_profile_id INTEGER NOT NULL REFERENCES profiles (id),
         guest_id INTEGER NOT NULL REFERENCES guests (id)
 );
+
+ALTER TABLE IF EXISTS like_stream_post
+       ADD CONSTRAINT uniq_like_stream_post UNIQUE (stream_post_id, like_id);
+
+ALTER TABLE IF EXISTS stream_post_has_tag
+       ADD CONSTRAINT uniq_stream_post_has_tag UNIQUE (stream_post_id, tag);
 
 ALTER TABLE IF EXISTS tokens
        ADD CONSTRAINT uniq_tokens_token UNIQUE (token);

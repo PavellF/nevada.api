@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 @Table(name="profile_preferences")
 public class ProfilePreferences {
 
-	@Id
+	@Id//select then insert
     @Column(name = "profile_id")
 	private int profileId;
 	

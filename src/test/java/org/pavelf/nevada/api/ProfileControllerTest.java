@@ -10,18 +10,25 @@ import org.pavelf.nevada.api.persistence.domain.Like;
 import org.pavelf.nevada.api.persistence.domain.Profile;
 import org.pavelf.nevada.api.persistence.domain.Sorting;
 import org.pavelf.nevada.api.persistence.domain.StreamPost;
+import org.pavelf.nevada.api.persistence.domain.StreamPostLike;
+import org.pavelf.nevada.api.persistence.domain.StreamPostTag;
+import org.pavelf.nevada.api.persistence.domain.Tag;
 import org.pavelf.nevada.api.persistence.domain.Visibility;
 import org.pavelf.nevada.api.persistence.repository.AdvancedStreamPostRepository;
 import org.pavelf.nevada.api.persistence.repository.LikeRepository;
 import org.pavelf.nevada.api.persistence.repository.MessageRepository;
 import org.pavelf.nevada.api.persistence.repository.ProfileRepository;
+import org.pavelf.nevada.api.persistence.repository.StreamPostLikeRepository;
 import org.pavelf.nevada.api.persistence.repository.StreamPostRepository;
+import org.pavelf.nevada.api.persistence.repository.StreamPostTagRepository;
+import org.pavelf.nevada.api.persistence.repository.TagRepository;
 import org.pavelf.nevada.api.service.PageAndSort;
 import org.pavelf.nevada.api.service.impl.PageAndSortImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -67,7 +74,14 @@ public class ProfileControllerTest {
     
     @Autowired
     private AdvancedStreamPostRepository aspr;
+    @Autowired
+    private TagRepository tr;
     
+    @Autowired
+    private StreamPostTagRepository sptr;
+    
+    @Autowired 
+    private StreamPostLikeRepository splr;
     
     @Test
     
@@ -76,7 +90,6 @@ public class ProfileControllerTest {
     	Stream.generate(() -> {
     		StreamPost sp = new StreamPost();
     		sp.setAssociatedProfile(pr.getOne(1));
-    		//sp.setAssociatedProfile(pr.getOne(1));
     		sp.setAuthorId(1);
     		sp.setCommentable(Visibility.ALL);
     		sp.setContent("lol " + (int) (Math.random() * 100));
@@ -86,45 +99,65 @@ public class ProfileControllerTest {
     	}).limit(3).map(sp -> spr.save(sp).getId())
     	.forEach((Integer id) -> {
     		Like l = new Like();
+    		
     		l.setDate(Instant.now());
     		l.setLikedById(2);
     		l.setRating((short) 1);
-    		l.setPost(spr.getOne(id));
     		lr.save(l);
+    		StreamPostLike spl = new StreamPostLike();
+    		spl.setAssociatedLike(l.getId());
+    		spl.setAssociatedStreamPost(id);
+    		splr.save(spl);
+    		
     		l.setId(0);
     		l.setRating((short) 100);
     		lr.save(l);
+    		spl.setAssociatedLike(l.getId());
+    		spl.setAssociatedStreamPost(id);
+    		spl.setId(0);
+    		splr.save(spl);
     	});
     	
+    	Tag tag = new Tag();
+		tag.setName("wow");
+		tr.save(tag);
+		
+		tr.save(tag);
+		
+		StreamPostTag spTag = new StreamPostTag();
+		spTag.setAssociatedStreamPost(1);
+		spTag.setAssociatedTag("wow");
+		sptr.save(spTag);
+		spTag.setId(0);
+		spTag.setAssociatedStreamPost(2);
+		sptr.save(spTag);
+		
     	List<Visibility> levels = 
     			Stream.of(Visibility.FRIENDS, 
     					Visibility.ALL)
     			.collect(Collectors.toList());
     	Sort sort = Sort.by(Direction.ASC, "id");
-		Pageable pageRequest = PageRequest.of(0, 15, sort);
+		Pageable pageable = PageRequest.of(0, 15, sort);
     	
+		List<StreamPost> list1 = spr
+				.findAllByTagWithLikeInfo("wow", 2, pageable);
+		System.err.println(list1);
 		
+		
+		PageAndSort pas = PageAndSortImpl.valueOf(0, 1, Sorting.TIME_ASC);
+		
+		/*
     	List<StreamPost> list = 
     			aspr.getAllPostsAssociatedWithProfileWithLikeInfo
-    			(1, 2,levels, pageRequest);
+    			(1, 2,levels, pas);
     	System.out.println(list.toString());
-    	
+	*/
     	StreamPost a = spr.findById(2).get();
-    	System.err.println(spr.countByAuthorIdAndId(1, 1));
+    	System.err.println(spr.countPostBelongAuthor(1, 1));
     	System.err.println(port);
     	Thread.sleep(9000000);
     }
     
-    /*
-SELECT sp.id, sp.author, sp.date, sp.content, sp.rating, 
-			sp.popularity, sp.priority, sp.visibility, sp.commentable, 
-			sp.last_change, l.rating, l.id, l.by_user, l.date 
-			FROM stream_post AS sp 
-			INNER JOIN profile_has_stream_post AS phsp ON phsp.stream_post_id = sp.id
-			 INNER JOIN like_stream_post AS lsp ON lsp.stream_post_id = sp.id
-			 LEFT OUTER JOIN _likes AS l ON l.id = lsp.like_id AND l.by_user = 2
-			WHERE phsp.profile_id = 1 AND sp.visibility IN ('ALL', 'FRIENDS');
-     * */
     @Test
 	public void controllerShouldAcceptPostedProfile() throws Exception {
 		final String endpoint = "http://localhost:" + port + "/profiles";

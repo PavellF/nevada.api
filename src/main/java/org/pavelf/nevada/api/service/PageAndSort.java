@@ -1,6 +1,6 @@
 package org.pavelf.nevada.api.service;
 
-import org.pavelf.nevada.api.domain.Version;
+import java.util.Optional;
 
 /**
  * Encapsulates fetch options for list of objects.
@@ -22,18 +22,14 @@ public interface PageAndSort {
 	public int getCount();
 	
 	/**
-	 * Name of object parameter to use as sorting criteria.
+	 * Sorting type name to use as sorting criteria.
 	 * */
-	public String getSortingParameter();
+	public Optional<String> getSortBy();
 	
 	/**
 	 * Ascending or descending.
 	 * */
-	public String getSortingDirection();
+	public Optional<String> getSortingDirection();
 	
-	/**
-	 * Version of object
-	 * */
-	public Version getObjectVersion();
 	
 }
