@@ -11,11 +11,11 @@ import org.springframework.data.repository.query.Param;
 
 public interface GuestRepository 
 	extends JpaRepository<Guest, Integer> {
-
+/*
 	@Query("SELECT g FROM Guest g "
 			+ "WHERE g.associatedProfile = :profileID "
 			+ "AND g.hidden = :hidden")
 	public List<Guest> findAllForProfile(@Param("profileID") int profileId,
 			@Param("hidden") boolean hiddenOnly, Pageable pageable);
-	
+	*/
 }

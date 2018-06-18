@@ -1,53 +1,18 @@
 --DROP SCHEMA IF EXISTS public CASCADE;
 --CREATE SCHEMA public;
 
-DROP TYPE IF EXISTS ACCESS;
-CREATE TYPE ACCESS AS ENUM ('NONE', 'READ', 'READ_WRITE');
-
-DROP TYPE IF EXISTS VISIBILITY;
-CREATE TYPE VISIBILITY AS ENUM ('ALL', 'FRIENDS', 'ME');
-
-CREATE TABLE IF NOT EXISTS photos (
+CREATE TABLE IF NOT EXISTS profiles (
         id SERIAL NOT NULL,
-        date TIMESTAMP NOT NULL,
-        owner_id INTEGER NOT NULL,
-        message VARCHAR(512) DEFAULT NULL,
-        small BYTEA NOT NULL,
-        medium BYTEA NOT NULL,
-        original BYTEA NOT NULL,
-        PRIMARY KEY(id)
-);
-
-CREATE TABLE IF NOT EXISTS _likes (
-        id SERIAL NOT NULL,
-        date TIMESTAMP NOT NULL,
-        RATING SMALLINT DEFAULT 0,
-        BY_USER INTEGER NOT NULL,
-        PRIMARY KEY(id)
-    );
-
-CREATE TABLE IF NOT EXISTS liked_messages (
-        liked_message_id INTEGER NOT NULL,
-        like_id INTEGER NOT NULL,
-        PRIMARY KEY (liked_message_id, like_id)
-    );
-
-CREATE TABLE IF NOT EXISTS message_has_photo (
-        message_id INTEGER NOT NULL,
-        photo_id INTEGER NOT NULL,
-        PRIMARY KEY (message_id, photo_id)
-    );
-
-CREATE TABLE IF NOT EXISTS messages (
-        id SERIAL NOT NULL,
-        archived BOOLEAN DEFAULT FALSE,
-        content VARCHAR(16384) NOT NULL,
-        date TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
-        last_change TIMESTAMP DEFAULT NULL,
+        profile_id INTEGER DEFAULT NULL REFERENCES profiles(id),
+        email VARCHAR(128) NOT NULL,
+        password VARCHAR(1024) NOT NULL,
+        username VARCHAR(64) NOT NULL,
+        sign_date TIMESTAMP NOT NULL,
+        user_pic INTEGER DEFAULT NULL,
+        popularity INTEGER DEFAULT 0,
         rating INTEGER DEFAULT 0,
-        author INTEGER NOT NULL,
-        reply_to INTEGER DEFAULT NULL,
-        priority SMALLINT DEFAULT 0,
+        about INTEGER DEFAULT NULL,
+        suspended_until TIMESTAMP DEFAULT NULL,
         PRIMARY KEY (id)
     );
 
@@ -78,26 +43,13 @@ CREATE TABLE IF NOT EXISTS tokens (
      PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS profiles (
-        id SERIAL NOT NULL,
-        email VARCHAR(128) NOT NULL,
-        password VARCHAR(1024) NOT NULL,
-        username VARCHAR(64) NOT NULL,
-        sign_date TIMESTAMP NOT NULL,
-        user_pic INTEGER DEFAULT NULL,
-        popularity INTEGER DEFAULT 0,
-        rating INTEGER DEFAULT 0,
-        about INTEGER DEFAULT NULL,
-        suspended_until TIMESTAMP DEFAULT NULL,
-        PRIMARY KEY (id)
-    );
-    
 CREATE TABLE IF NOT EXISTS people (
-        profile_id INTEGER NOT NULL REFERENCES profiles(id),
+        id SERIAL NOT NULL,
+        profile_id INTEGER DEFAULT NULL REFERENCES profiles(id),
         full_name VARCHAR(128) DEFAULT NULL,
         gender VARCHAR(64) DEFAULT NULL,
         location VARCHAR(128) DEFAULT NULL,
-        PRIMARY KEY (profile_id)
+        PRIMARY KEY (id)
     );
 
 CREATE TABLE IF NOT EXISTS applications (
@@ -120,11 +72,13 @@ CREATE TABLE IF NOT EXISTS guests (
         who INTEGER NOT NULL,
         hidden BOOLEAN NOT NULL,
         when TIMESTAMP NOT NULL,
+        to_profile INTEGER DEFAULT NULL REFERENCES profiles(id),
         PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS profile_preferences (
-    profile_id SERIAL NOT NULL PRIMARY KEY REFERENCES profiles(id),
+    id SERIAL NOT NULL PRIMARY KEY,
+    profile_id INTEGER DEFAULT NULL REFERENCES profiles(id),
     can_post_on_my_stream VARCHAR(36) NOT NULL DEFAULT 'ME',
     premoderate_followers BOOLEAN NOT NULL DEFAULT 'FALSE'
 );
@@ -140,18 +94,8 @@ CREATE TABLE IF NOT EXISTS stream_post (
         visibility VARCHAR(36) NOT NULL,
         commentable VARCHAR(36) NOT NULL,
         last_change TIMESTAMP DEFAULT NULL,
+        on_profile INTEGER DEFAULT NULL REFERENCES profiles(id),
         PRIMARY KEY (id)
-);
-
-CREATE TABLE IF NOT EXISTS stream_post_has_photo (
-        stream_post_id INTEGER NOT NULL REFERENCES stream_post (id),
-        photo_id INTEGER NOT NULL REFERENCES photos (id)
-);
-
-CREATE TABLE IF NOT EXISTS profile_has_stream_post (
-        profile_id INTEGER NOT NULL REFERENCES profiles (id),
-        stream_post_id INTEGER NOT NULL REFERENCES stream_post (id),
-        PRIMARY KEY  (profile_id, stream_post_id)
 );
 
 CREATE TABLE IF NOT EXISTS stream_post_has_tag (
@@ -160,28 +104,48 @@ CREATE TABLE IF NOT EXISTS stream_post_has_tag (
         tag VARCHAR NOT NULL REFERENCES tags (name),
 );
 
-CREATE TABLE IF NOT EXISTS like_stream_post (
-        id SERIAL NOT NULL PRIMARY KEY,
-        stream_post_id INTEGER NOT NULL REFERENCES stream_post (id),
-        like_id INTEGER NOT NULL REFERENCES _likes (id),
+CREATE TABLE IF NOT EXISTS messages (
+        id SERIAL NOT NULL,
+        archived BOOLEAN DEFAULT FALSE,
+        content VARCHAR(16384) NOT NULL,
+        date TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+        last_change TIMESTAMP DEFAULT NULL,
+        rating INTEGER DEFAULT 0,
+        author INTEGER NOT NULL,
+        reply_to INTEGER DEFAULT NULL,
+        priority SMALLINT DEFAULT 0,
+        stream_post_message INTEGER DEFAULT NULL REFERENCES stream_post(id),
+        PRIMARY KEY (id)
+    );
+
+CREATE TABLE IF NOT EXISTS photos (
+        id SERIAL NOT NULL,
+        date TIMESTAMP NOT NULL,
+        owner_id INTEGER NOT NULL,
+        message VARCHAR(512) DEFAULT NULL,
+        small BYTEA NOT NULL,
+        medium BYTEA NOT NULL,
+        original BYTEA NOT NULL,
+        message_photo INTEGER DEFAULT NULL REFERENCES messages(id),
+        stream_post_photo INTEGER DEFAULT NULL REFERENCES stream_post(id),
+        PRIMARY KEY(id)
 );
 
-CREATE TABLE IF NOT EXISTS guest_to_profile (
-        target_profile_id INTEGER NOT NULL REFERENCES profiles (id),
-        guest_id INTEGER NOT NULL REFERENCES guests (id)
+CREATE TABLE IF NOT EXISTS _likes (
+        id SERIAL NOT NULL,
+        date TIMESTAMP NOT NULL,
+        rating SMALLINT DEFAULT 0,
+        by_user INTEGER NOT NULL,
+        liked_message INTEGER DEFAULT NULL REFERENCES messages(id),
+        liked_stream_post INTEGER DEFAULT NULL REFERENCES stream_post(id),
+        PRIMARY KEY(id)
 );
-
-ALTER TABLE IF EXISTS like_stream_post
-       ADD CONSTRAINT uniq_like_stream_post UNIQUE (stream_post_id, like_id);
 
 ALTER TABLE IF EXISTS stream_post_has_tag
        ADD CONSTRAINT uniq_stream_post_has_tag UNIQUE (stream_post_id, tag);
 
 ALTER TABLE IF EXISTS tokens
        ADD CONSTRAINT uniq_tokens_token UNIQUE (token);
-
-ALTER TABLE IF EXISTS liked_messages
-       ADD CONSTRAINT uniq_liked_messages_like_id UNIQUE (like_id);
 
 ALTER TABLE IF EXISTS profiles
        ADD CONSTRAINT uniq_profiles_email UNIQUE (email);
@@ -226,26 +190,6 @@ ALTER TABLE IF EXISTS _likes
        FOREIGN KEY (by_user)
        REFERENCES profiles;
 
-ALTER TABLE IF EXISTS liked_messages
-       ADD CONSTRAINT fk_liked_messages_liked_message_id
-       FOREIGN KEY (liked_message_id)
-       REFERENCES messages;
-
-ALTER TABLE IF EXISTS liked_messages
-       ADD CONSTRAINT fk_liked_messages_like_id
-       FOREIGN KEY (like_id)
-       REFERENCES _likes;
-
-ALTER TABLE IF EXISTS message_has_photo
-       ADD CONSTRAINT fk_message_has_photo_message_id
-       FOREIGN KEY (message_id)
-       REFERENCES messages;
-
-ALTER TABLE IF EXISTS message_has_photo
-       ADD CONSTRAINT fk_message_has_photo_photo_id
-       FOREIGN KEY (photo_id)
-       REFERENCES photos;
-
 ALTER TABLE IF EXISTS profiles
        ADD CONSTRAINT fk_profiles_about
        FOREIGN KEY (about)
@@ -280,19 +224,3 @@ ALTER TABLE IF EXISTS stream_post
        ADD CONSTRAINT fk_stream_post_author
        FOREIGN KEY (author)
        REFERENCES profiles;
-       
-INSERT INTO profiles (id, email, password, username, sign_date, user_pic, 
-popularity, rating, about, suspended_until) VALUES (
-DEFAULT,'root@test.org','test','root',NOW(),DEFAULT,0,0,DEFAULT,DEFAULT); 
-INSERT INTO applications (id,title,suspended_until,since,access_key,
-belongs_to_profile) VALUES (DEFAULT,'root',DEFAULT,NOW(),'adhi43kmhf',1);
-       
-INSERT INTO tokens (id,issued_by,belongs_to_profile,token,valid_until,
-photo_access,messages_access,friends_access,account_access,
-notifications_access,stream_access, application_access, person_info_access,is_super_token) VALUES (
-DEFAULT,1,1,'fosof94nswf9wa', NOW()+999999,'READ_WRITE','READ_WRITE',
-'READ_WRITE','READ_WRITE','READ_WRITE','READ_WRITE','READ_WRITE','READ_WRITE',TRUE);
-       
-       
-       
-       

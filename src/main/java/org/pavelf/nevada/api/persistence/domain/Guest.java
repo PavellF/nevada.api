@@ -23,10 +23,9 @@ public class Guest {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
-	private int id;
+	private Integer id;
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
-	@NotNull
 	@JoinColumn(name = "who", insertable = false, updatable = false)
 	private Profile who; 
 	
@@ -41,11 +40,8 @@ public class Guest {
 	@Past
 	private Instant when;
 	
-	@ManyToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
-	@JoinTable(name = "guest_to_profile", 
-		joinColumns = { @JoinColumn(name = "guest_id") }, 
-		inverseJoinColumns = { @JoinColumn(name = "target_profile_id")})
-	private Profile associatedProfile;
+	@Column(name = "to_profile")
+	private Integer toProfile;
 	
 	/**
 	 * Does NOT trigger lazy loading. Always returns empty string.
@@ -70,14 +66,6 @@ public class Guest {
 	@Override
 	public boolean equals(Object obj) {
 		throw new UnsupportedOperationException();
-	}
-
-	public int getId() {
-		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
 	}
 
 	public Profile getWho() {
@@ -110,6 +98,18 @@ public class Guest {
 
 	public void setWhen(Instant when) {
 		this.when = when;
+	}
+
+	public Integer getToProfile() {
+		return toProfile;
+	}
+
+	public void setToProfile(Integer toProfile) {
+		this.toProfile = toProfile;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
 	}
 	
 	

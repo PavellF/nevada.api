@@ -1,7 +1,6 @@
 package org.pavelf.nevada.api.persistence.domain;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -9,8 +8,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -28,25 +25,21 @@ public class Like {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
-	private int id;
+	private Integer id;
 	
-	@ManyToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
-	@JoinTable(name = "liked_messages", joinColumns = { @JoinColumn(name = "like_id") }, 
-    inverseJoinColumns = { @JoinColumn(name = "liked_message_id")} )
-	private transient Message message;
+	@Column(name = "liked_message")
+	private Integer likedMessage;
 	
-	@ManyToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
-	@JoinTable(name = "like_stream_post", 
-	joinColumns = { @JoinColumn(name = "like_id") }, 
-    inverseJoinColumns = { @JoinColumn(name = "stream_post_id")} )
-	private transient StreamPost post;
+	@Column(name = "liked_stream_post")
+	private Integer likedStreamPost;
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
 	@JoinColumn(name = "by_user", insertable = false, updatable = false)
 	private Profile likedBy;
 	
 	@Column(name = "by_user")
-	private int likedById;
+	@NotNull
+	private Integer likedById;
 	
 	@Column(name="date")
 	@NotNull
@@ -85,20 +78,28 @@ public class Like {
 		throw new UnsupportedOperationException();
 	}
 
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
-	public Message getMessage() {
-		return message;
+	public Integer getLikedMessage() {
+		return likedMessage;
 	}
 
-	public void setMessage(Message msg) {
-		this.message = msg;
+	public void setLikedMessage(Integer likedMessage) {
+		this.likedMessage = likedMessage;
+	}
+
+	public Integer getLikedStreamPost() {
+		return likedStreamPost;
+	}
+
+	public void setLikedStreamPost(Integer likedStreamPost) {
+		this.likedStreamPost = likedStreamPost;
 	}
 
 	public Profile getLikedBy() {
@@ -107,6 +108,14 @@ public class Like {
 
 	public void setLikedBy(Profile likedBy) {
 		this.likedBy = likedBy;
+	}
+
+	public Integer getLikedById() {
+		return likedById;
+	}
+
+	public void setLikedById(Integer likedById) {
+		this.likedById = likedById;
 	}
 
 	public Instant getDate() {
@@ -125,19 +134,5 @@ public class Like {
 		this.rating = rating;
 	}
 
-	public int getLikedById() {
-		return likedById;
-	}
 
-	public void setLikedById(int likedById) {
-		this.likedById = likedById;
-	}
-
-	public StreamPost getPost() {
-		return post;
-	}
-
-	public void setPost(StreamPost post) {
-		this.post = post;
-	}
 }

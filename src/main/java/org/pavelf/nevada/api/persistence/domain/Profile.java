@@ -33,7 +33,7 @@ public class Profile {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
-	private int id;
+	private Integer id;
 	
 	@Column(name="username")
 	@NotNull
@@ -76,27 +76,50 @@ public class Profile {
 	@Column(name="rating")
 	private int rating;
 	
-	//@OneToOne(fetch=FetchType.LAZY, cascade = { CascadeType.REMOVE }, 
-	//		optional = true, orphanRemoval = true, mappedBy="profile")
-	//private Person person; 
-	
 	@Column(name="suspended_until")
 	private Instant suspendedUntil;
 	
-	@JoinTable(name = "profile_has_stream_post",
-			joinColumns = { @JoinColumn(name = "profile_id") }, 
-		    inverseJoinColumns = { @JoinColumn(name = "stream_post_id")} )
-	@OneToMany(fetch=FetchType.LAZY, cascade = {}, orphanRemoval = false)
-	private List<StreamPost> posts;
-	
 	public Profile() { }
 
-	public int getId() {
+	/**
+	 * Does NOT trigger lazy loading. Always returns empty string.
+	 * */
+	@Override
+	public String toString() {
+		return "";
+	}
+
+	/**
+	 * Does NOT trigger lazy loading. Works similar to default implementation.
+	 * */
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+
+	/**
+	 * Does NOT trigger lazy loading. Always throws.
+	 * @throws UnsupportedOperationException
+	 * */
+	@Override
+	public boolean equals(Object obj) {
+		throw new UnsupportedOperationException();
+	}
+
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 	public char[] getPassword() {
@@ -131,12 +154,28 @@ public class Profile {
 		this.about = about;
 	}
 
+	public Integer getAboutId() {
+		return aboutId;
+	}
+
+	public void setAboutId(Integer aboutId) {
+		this.aboutId = aboutId;
+	}
+
 	public Photo getPicture() {
 		return picture;
 	}
 
 	public void setPicture(Photo picture) {
 		this.picture = picture;
+	}
+
+	public Integer getPictureId() {
+		return pictureId;
+	}
+
+	public void setPictureId(Integer pictureId) {
+		this.pictureId = pictureId;
 	}
 
 	public int getPopularity() {
@@ -155,55 +194,6 @@ public class Profile {
 		this.rating = rating;
 	}
 
-	/**
-	 * Does NOT trigger lazy loading. Always returns empty string.
-	 * */
-	@Override
-	public String toString() {
-		return "";
-	}
-
-	/**
-	 * Does NOT trigger lazy loading. Works similar to default implementation.
-	 * */
-	@Override
-	public int hashCode() {
-		return super.hashCode();
-	}
-
-	/**
-	 * Does NOT trigger lazy loading. Always throws.
-	 * @throws UnsupportedOperationException
-	 * */
-	@Override
-	public boolean equals(Object obj) {
-		throw new UnsupportedOperationException();
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public Integer getAboutId() {
-		return aboutId;
-	}
-
-	public void setAboutId(Integer aboutId) {
-		this.aboutId = aboutId;
-	}
-
-	public Integer getPictureId() {
-		return pictureId;
-	}
-
-	public void setPictureId(Integer pictureId) {
-		this.pictureId = pictureId;
-	}
-
 	public Instant getSuspendedUntil() {
 		return suspendedUntil;
 	}
@@ -212,12 +202,6 @@ public class Profile {
 		this.suspendedUntil = suspendedUntil;
 	}
 
-	public List<StreamPost> getPosts() {
-		return posts;
-	}
 
-	public void setPosts(List<StreamPost> posts) {
-		this.posts = posts;
-	}
-
+	
 }

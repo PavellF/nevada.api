@@ -28,7 +28,7 @@ public class Photo {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
-	private int id;
+	private Integer id;
 	
 	@Column(name = "message")
 	private String message;
@@ -61,6 +61,12 @@ public class Photo {
 	@Basic(fetch=FetchType.LAZY)
 	private byte[] original;
 	
+	@Column(name="message_photo")
+	private Integer associatedMessageId;
+	
+	@Column(name="stream_post_photo")
+	private Integer associatedStreamPostId;
+	
 	/**
 	 * Does NOT trigger lazy loading. Always returns empty string.
 	 * */
@@ -86,12 +92,20 @@ public class Photo {
 		throw new UnsupportedOperationException();
 	}
 
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
 	public Profile getOwner() {
@@ -100,6 +114,14 @@ public class Photo {
 
 	public void setOwner(Profile owner) {
 		this.owner = owner;
+	}
+
+	public int getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(int ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	public Instant getPostDate() {
@@ -134,20 +156,22 @@ public class Photo {
 		this.original = original;
 	}
 
-	public String getMessage() {
-		return message;
+	public Integer getAssociatedMessageId() {
+		return associatedMessageId;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
+	public void setAssociatedMessageId(Integer associatedMessageId) {
+		this.associatedMessageId = associatedMessageId;
 	}
 
-	public int getOwnerId() {
-		return ownerId;
+	public Integer getAssociatedStreamPostId() {
+		return associatedStreamPostId;
 	}
 
-	public void setOwnerId(int ownerId) {
-		this.ownerId = ownerId;
+	public void setAssociatedStreamPostId(Integer associatedStreamPostId) {
+		this.associatedStreamPostId = associatedStreamPostId;
 	}
+
+	
 
 }

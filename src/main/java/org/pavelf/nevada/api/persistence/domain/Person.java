@@ -6,6 +6,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.JoinColumn;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
@@ -14,13 +16,15 @@ import javax.validation.constraints.Size;
 
 @Entity
 @Table(name="people")
-public class Person implements Serializable {
+public class Person {
 
-	private static final long serialVersionUID = -5646355408258534431L;
-
-	@Column(name = "profile_id")
+	@Column(name = "id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Id
-	private int id;
+	private Integer id;	
+	
+	@Column(name = "profile_id")
+	private Integer associatedProfileId;
 	
 	@Column(name = "full_name")
 	@Size(min = 1, max = 128)
@@ -66,12 +70,20 @@ public class Person implements Serializable {
 		throw new UnsupportedOperationException();
 	}
 
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
+	}
+
+	public Integer getAssociatedProfileId() {
+		return associatedProfileId;
+	}
+
+	public void setAssociatedProfileId(Integer associatedProfileId) {
+		this.associatedProfileId = associatedProfileId;
 	}
 
 	public String getFullName() {
@@ -97,15 +109,6 @@ public class Person implements Serializable {
 	public void setGender(String gender) {
 		this.gender = gender;
 	}
-/*
-	public Person getPerson() {
-		return person;
-	}
-
-	public void setPerson(Person person) {
-		this.person = person;
-	}
-*/
 
 	public Profile getProfile() {
 		return profile;
@@ -114,4 +117,6 @@ public class Person implements Serializable {
 	public void setProfile(Profile profile) {
 		this.profile = profile;
 	}
+
+
 }

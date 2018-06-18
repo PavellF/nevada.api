@@ -25,7 +25,7 @@ public class Token {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
-	private int id;
+	private Integer id;
 	
 	@Column(name="token")
 	@Size(min = 1, max = 1024)
@@ -116,12 +116,12 @@ public class Token {
 	public boolean equals(Object obj) {
 		throw new UnsupportedOperationException();
 	}
-	
-	public int getId() {
+
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
@@ -173,6 +173,14 @@ public class Token {
 		this.accountAccess = accountAccess;
 	}
 
+	public Access getApplicationAccess() {
+		return applicationAccess;
+	}
+
+	public void setApplicationAccess(Access applicationAccess) {
+		this.applicationAccess = applicationAccess;
+	}
+
 	public Access getNotificationsAccess() {
 		return notificationsAccess;
 	}
@@ -181,20 +189,12 @@ public class Token {
 		this.notificationsAccess = notificationsAccess;
 	}
 
-	public Profile getProfile() {
-		return profile;
+	public boolean isSuperToken() {
+		return superToken;
 	}
 
-	public void setProfile(Profile profile) {
-		this.profile = profile;
-	}
-
-	public Application getUssuedBy() {
-		return issuedByApp;
-	}
-
-	public void setUssuedBy(Application ussuedBy) {
-		this.issuedByApp = ussuedBy;
+	public void setSuperToken(boolean superToken) {
+		this.superToken = superToken;
 	}
 
 	public Access getStreamAccess() {
@@ -205,12 +205,20 @@ public class Token {
 		this.streamAccess = streamAccess;
 	}
 
-	public boolean isSuperToken() {
-		return superToken;
+	public Access getPersonInfoAccess() {
+		return personInfoAccess;
 	}
 
-	public void setSuperToken(boolean superToken) {
-		this.superToken = superToken;
+	public void setPersonInfoAccess(Access personInfoAccess) {
+		this.personInfoAccess = personInfoAccess;
+	}
+
+	public Profile getProfile() {
+		return profile;
+	}
+
+	public void setProfile(Profile profile) {
+		this.profile = profile;
 	}
 
 	public int getBelongsToProfile() {
@@ -236,25 +244,6 @@ public class Token {
 	public void setIssuedBy(int issuedBy) {
 		this.issuedBy = issuedBy;
 	}
-
-	public Access getApplicationAccess() {
-		return applicationAccess;
-	}
-
-	public void setApplicationAccess(Access applicationAccess) {
-		this.applicationAccess = applicationAccess;
-	}
-
-	public Access getPersonInfoAccess() {
-		return personInfoAccess;
-	}
-
-	public void setPersonInfoAccess(Access personInfoAccess) {
-		this.personInfoAccess = personInfoAccess;
-	}
-
-	
-	
 	
 	
 }

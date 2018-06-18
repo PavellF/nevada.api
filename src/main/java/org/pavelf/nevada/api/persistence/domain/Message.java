@@ -1,12 +1,6 @@
 package org.pavelf.nevada.api.persistence.domain;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-
-import javax.persistence.AccessType;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -14,15 +8,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.SecondaryTable;
-import javax.persistence.SecondaryTables;
 import javax.persistence.Table;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Size;
@@ -34,29 +21,14 @@ public class Message {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
-	private int id;
+	private Integer id;
 	
 	@ManyToOne(fetch=FetchType.LAZY, cascade = { }, optional=false)
 	@JoinColumn(name ="author", insertable = false, updatable = false)
-	@NotNull
 	private Profile author;
 	
 	@Column(name ="author")
 	private int authorId;
-	
-	@JoinTable(name = "liked_messages", joinColumns = { @JoinColumn(name = "liked_message_id") }, 
-		    inverseJoinColumns = { @JoinColumn(name = "like_id")} )
-	@OneToMany(fetch=FetchType.LAZY, 
-	cascade = {CascadeType.ALL},
-	 orphanRemoval = true	)
-	private Set<Like> likes;
-
-	@JoinTable(name = "message_has_photo", joinColumns = { @JoinColumn(name = "message_id") }, 
-		    inverseJoinColumns = { @JoinColumn(name = "photo_id")} )
-	@OneToMany(fetch=FetchType.LAZY, 
-	cascade = { },
-	 orphanRemoval = false	)
-	private Set<Photo> photos;
 	
 	@Column(name="date")
 	@NotNull
@@ -74,10 +46,6 @@ public class Message {
 	@Column(name="content")
 	private String content;
 	
-	@OneToMany(fetch=FetchType.LAZY, cascade = { })
-	@JoinColumn(name = "reply_to")
-	private List<Message> replies;
-	
 	@Column(name="rating")
 	private int rating;
 	
@@ -86,6 +54,9 @@ public class Message {
 	
 	@Column(name="archived")
 	private boolean archived;
+	
+	@Column(name="stream_post_message")
+	private Integer associatedStreamPost;
 	
 	public Message() { }
 	
@@ -114,11 +85,11 @@ public class Message {
 		throw new UnsupportedOperationException();
 	}
 
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
@@ -130,12 +101,12 @@ public class Message {
 		this.author = author;
 	}
 
-	public Set<Like> getLikes() {
-		return likes;
+	public int getAuthorId() {
+		return authorId;
 	}
 
-	public void setLikes(Set<Like> likes) {
-		this.likes = likes;
+	public void setAuthorId(int authorId) {
+		this.authorId = authorId;
 	}
 
 	public Instant getDate() {
@@ -144,6 +115,14 @@ public class Message {
 
 	public void setDate(Instant date) {
 		this.date = date;
+	}
+
+	public Integer getReplyTo() {
+		return replyTo;
+	}
+
+	public void setReplyTo(Integer replyTo) {
+		this.replyTo = replyTo;
 	}
 
 	public Instant getLastChange() {
@@ -162,28 +141,12 @@ public class Message {
 		this.content = content;
 	}
 
-	public List<Message> getReplies() {
-		return replies;
-	}
-
-	public void setReplies(List<Message> replies) {
-		this.replies = replies;
-	}
-
 	public int getRating() {
 		return rating;
 	}
 
 	public void setRating(int rating) {
 		this.rating = rating;
-	}
-
-	public boolean isArchived() {
-		return archived;
-	}
-
-	public void setArchived(boolean archived) {
-		this.archived = archived;
 	}
 
 	public short getPriority() {
@@ -194,28 +157,20 @@ public class Message {
 		this.priority = priority;
 	}
 
-	public Set<Photo> getPhotos() {
-		return photos;
+	public boolean isArchived() {
+		return archived;
 	}
 
-	public void setPhotos(Set<Photo> photos) {
-		this.photos = photos;
+	public void setArchived(boolean archived) {
+		this.archived = archived;
 	}
 
-	public Integer getReplyTo() {
-		return replyTo;
+	public Integer getAssociatedStreamPost() {
+		return associatedStreamPost;
 	}
 
-	public void setReplyTo(Integer replyTo) {
-		this.replyTo = replyTo;
-	}
-
-	public int getAuthorId() {
-		return authorId;
-	}
-
-	public void setAuthorId(int authorId) {
-		this.authorId = authorId;
+	public void setAssociatedStreamPost(Integer associatedStreamPost) {
+		this.associatedStreamPost = associatedStreamPost;
 	}
 
 	

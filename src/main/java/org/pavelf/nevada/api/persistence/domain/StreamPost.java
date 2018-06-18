@@ -1,10 +1,6 @@
 package org.pavelf.nevada.api.persistence.domain;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
@@ -17,59 +13,19 @@ import javax.validation.constraints.Size;
  * */
 @Entity
 @Table(name="stream_post")
-/*@SqlResultSetMapping(name="streamPostwCurrentUserLike",
-entities=@EntityResult(entityClass=StreamPost.class,
-    fields = {
-            @FieldResult(name="id", column = "sp.id"),
-            @FieldResult(name="authorId", column = "sp.author"),
-            @FieldResult(name="date", column = "sp.date"),
-            @FieldResult(name="content", column = "sp.content"), 
-            @FieldResult(name="rating", column = "sp.rating"),
-            @FieldResult(name="popularity", column = "sp.popularity"),
-            @FieldResult(name="priority", column = "sp.priority")
-            }))
-
-@NamedNativeQuery(name="selectStreamPostWithCurrentUserLike",
-query="SELECT sp.id, sp.author, sp.date, sp.content, sp.rating, " + 
-		"sp.popularity, sp.priority, sp.visibility, sp.commentable, " + 
-		"sp.last_change, l.rating, l.id, l.by_user, l.date " + 
-		"FROM stream_post AS sp " + 
-		"INNER JOIN profile_has_stream_post AS phsp " + 
-		"ON phsp.stream_post_id = sp.id " + 
-		"INNER JOIN like_stream_post AS lsp ON lsp.stream_post_id = sp.id " + 
-		"LEFT OUTER JOIN _likes AS l ON l.id = lsp.like_id " + 
-		"AND l.by_user = :currentUserId " + 
-		"WHERE phsp.profile_id = :profileID AND sp.visibility IN (:levels) "
-		+ "GROUP BY ?#{#pageable}", 
-resultSetMapping="streamPostwCurrentUserLike")*/
 public class StreamPost {
 
-	/*@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
-	@JoinTable(name = "like_stream_post", 
-		joinColumns = @JoinColumn(name = "stream_post_id"), 
-		inverseJoinColumns = @JoinColumn(name = "like_id"))*/
-	private transient Like currentUserLike;
-	
 	@Id	
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
-	private int id;
+	private Integer id;
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
 	@JoinColumn(name = "author", insertable = false, updatable = false)
 	private Profile author;
 	
-	@ManyToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
-	@JoinTable(name = "profile_has_stream_post", 
-		joinColumns = @JoinColumn(name = "stream_post_id"), 
-		inverseJoinColumns = @JoinColumn(name = "profile_id"))
-	private transient Profile associatedProfile;
-	
-	@ManyToOne(fetch=FetchType.LAZY, cascade = { }, optional = true)
-	@JoinTable(name = "stream_post_has_tag", 
-			joinColumns = @JoinColumn(name = "stream_post_id"), 
-			inverseJoinColumns = @JoinColumn(name = "tag"))
-	private transient Tag associatedTag;
+	@Column(name = "on_profile")
+	private Integer associatedProfile;
 	
 	@Column(name = "author")
 	private int authorId;
@@ -131,11 +87,11 @@ public class StreamPost {
 		throw new UnsupportedOperationException();
 	}
 
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
@@ -145,6 +101,14 @@ public class StreamPost {
 
 	public void setAuthor(Profile author) {
 		this.author = author;
+	}
+
+	public Integer getAssociatedProfile() {
+		return associatedProfile;
+	}
+
+	public void setAssociatedProfile(Integer associatedProfile) {
+		this.associatedProfile = associatedProfile;
 	}
 
 	public int getAuthorId() {
@@ -203,22 +167,6 @@ public class StreamPost {
 		this.visibility = visibility;
 	}
 
-	public Instant getLastChange() {
-		return lastChange;
-	}
-
-	public void setLastChange(Instant lastChange) {
-		this.lastChange = lastChange;
-	}
-
-	public Tag getAssociatedTag() {
-		return associatedTag;
-	}
-
-	public void setAssociatedTag(Tag associatedTag) {
-		this.associatedTag = associatedTag;
-	}
-
 	public Visibility getCommentable() {
 		return commentable;
 	}
@@ -227,20 +175,13 @@ public class StreamPost {
 		this.commentable = commentable;
 	}
 
-	public Profile getAssociatedProfile() {
-		return associatedProfile;
+	public Instant getLastChange() {
+		return lastChange;
 	}
 
-	public void setAssociatedProfile(Profile associatedProfile) {
-		this.associatedProfile = associatedProfile;
+	public void setLastChange(Instant lastChange) {
+		this.lastChange = lastChange;
 	}
 
-	public Like getCurrentUserLike() {
-		return currentUserLike;
-	}
-
-	public void setCurrentUserLike(Like currentUserLike) {
-		this.currentUserLike = currentUserLike;
-	}
 
 }
