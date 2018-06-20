@@ -1,28 +1,23 @@
 package org.pavelf.nevada.api.service.impl;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-
-
 import org.pavelf.nevada.api.persistence.repository.TokenRepository;
 import org.pavelf.nevada.api.domain.Scope;
 import org.pavelf.nevada.api.persistence.domain.Profile;
 import org.pavelf.nevada.api.persistence.domain.Token;
-import org.pavelf.nevada.api.security.TokenContext;
 import org.pavelf.nevada.api.security.TokenOwnerSupplier;
 import org.pavelf.nevada.api.security.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Implements {@code TokenOwnerSupplier} - methods to 
+ * obtain authorization token.
+ * @author Pavel F.
+ * @since 1.0
+ * */
 @Service
 public class TokenOwnerSupplierImpl implements TokenOwnerSupplier {
 
@@ -45,11 +40,14 @@ public class TokenOwnerSupplierImpl implements TokenOwnerSupplier {
 					} 
 					
 					Profile profile = t.getProfile();
-					User user = new User(profile.getUsername(), String.valueOf(profile.getId()), 
+					User user = new User(profile.getUsername(), 
+							String.valueOf(profile.getId()), 
 							profile.getEmail());
 					
 					return new org.pavelf.nevada.api.security.Token(
-									t.getToken().toCharArray() ,mapTokenScopes(t), t.isSuperToken(), user);
+									t.getToken().toCharArray(), 
+									mapTokenScopes(t), 
+									t.isSuperToken(), user);
 				}).orElse(null);
 	}
 		
@@ -59,14 +57,12 @@ public class TokenOwnerSupplierImpl implements TokenOwnerSupplier {
 		map.put(Scope.ACCOUNT , token.getAccountAccess().getLevel());
 		map.put(Scope.FRIENDS , token.getFriendsAccess().getLevel());
 		map.put(Scope.MESSAGE, token.getMessagesAccess().getLevel());
-		map.put(Scope.NOTIFICATION , token.getNotificationsAccess().getLevel());
+		map.put(Scope.NOTIFICATION ,token.getNotificationsAccess().getLevel());
 		map.put(Scope.STREAM, token.getStreamAccess().getLevel());
 		map.put(Scope.ACCOUNT, token.getAccountAccess().getLevel());
 		map.put(Scope.PERSON_INFO, token.getPersonInfoAccess().getLevel());
 		
 		return map;
 	}
-		
 	
-
 }

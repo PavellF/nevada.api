@@ -13,11 +13,11 @@ import org.pavelf.nevada.api.domain.Scope;
 import org.pavelf.nevada.api.domain.Version;
 import org.pavelf.nevada.api.exception.UnrecognizedUserException;
 import org.pavelf.nevada.api.exception.WebApplicationException;
-import org.pavelf.nevada.api.persistence.domain.Sorting;
 import org.pavelf.nevada.api.security.Secured;
 import org.pavelf.nevada.api.security.TokenContext;
 import org.pavelf.nevada.api.security.User;
 import org.pavelf.nevada.api.service.FollowersService;
+import org.pavelf.nevada.api.service.PageAndSortExtended;
 import org.pavelf.nevada.api.service.ProfilePreferencesService;
 import org.pavelf.nevada.api.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +33,11 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Defines service endpoints for {@code Follower} resource.
+ * @author Pavel F.
+ * @since 1.0
+ * */
 @RestController
 public class FollowerController {
 
@@ -56,17 +61,10 @@ public class FollowerController {
 			APPLICATION_ACCEPT_PREFIX+".follower+json", 
 			APPLICATION_ACCEPT_PREFIX+".follower+xml"},
 			path = "/profiles/{owner_id}/followed")
-	public ResponseEntity<List<FollowerDTO>>getFollowedProfiles(
+	public ResponseEntity<List<FollowerDTO>> getFollowedProfiles(
 			@PathVariable("owner_id") int id,
-			@RequestParam(name = "start", defaultValue= "0") int start,
-			@RequestParam(name = "count", defaultValue= "5") int count,
-			@RequestHeader(HttpHeaders.ACCEPT) Version version,
-			@RequestParam(name = "order", defaultValue= "TIME_ASC") Sorting order,
-			@RequestParam(name = "mutual", defaultValue= "true") boolean mutual) {
-		
-		if (count > 100) {
-			new WebApplicationException(INVALID_REQUEST_PARAM);
-		}
+			@RequestParam(name="mutual", defaultValue="true") boolean mutual,
+			PageAndSortExtended pageParams) {
 		
 		if (principal.isAuthorized()) {
 			
@@ -74,9 +72,8 @@ public class FollowerController {
 					.orElseThrow(UnrecognizedUserException::new);
 			
 			if (!mutual && issuer.getIdAsInt() == id) {
-				return ResponseEntity.
-						ok(followersService.getAllFollowed(
-								id, version, start, count, order, false));
+				return ResponseEntity.ok(followersService
+						.getAllFollowed(id, pageParams, false));
 			}
 		} 
 		//have not accepted friends only followed user allowed to request 
@@ -85,25 +82,17 @@ public class FollowerController {
 		}
 		
 		return ResponseEntity.ok(followersService
-						.getAllFollowed(
-								id, version, start, count, order, true));
+						.getAllFollowed(id, pageParams, true));
 	}
 	
 	@GetMapping(produces = { 
 			APPLICATION_ACCEPT_PREFIX+".follower+json", 
 			APPLICATION_ACCEPT_PREFIX+".follower+xml"},
 			path = "/profiles/{owner_id}/followers")
-	public ResponseEntity<List<FollowerDTO>>getFollowersForProfile(
+	public ResponseEntity<List<FollowerDTO>> getFollowersForProfile(
 			@PathVariable("owner_id") int id,
-			@RequestParam(name = "start", defaultValue= "0") int start,
-			@RequestParam(name = "count", defaultValue= "5") int count,
-			@RequestHeader(HttpHeaders.ACCEPT) Version version,
-			@RequestParam(name = "order", defaultValue= "TIME_ASC") Sorting order,
-			@RequestParam(name = "mutual", defaultValue= "true") boolean mutual) {
-		
-		if (count > 100) {
-			new WebApplicationException(INVALID_REQUEST_PARAM);
-		}
+			@RequestParam(name ="mutual", defaultValue="true") boolean mutual,
+			PageAndSortExtended pageParams) {
 		
 		if (principal.isAuthorized()) {
 			
@@ -111,9 +100,8 @@ public class FollowerController {
 					.orElseThrow(UnrecognizedUserException::new);
 			
 			if (!mutual && issuer.getIdAsInt() == id) {
-				return ResponseEntity.
-						ok(followersService.getAllFollowers(
-								id, version, start, count, order, false));
+				return ResponseEntity.ok(followersService.getAllFollowers(
+								id, pageParams, false));
 			}
 		} 
 		//have not accepted friends only followed user allowed to request 
@@ -122,8 +110,7 @@ public class FollowerController {
 		}
 		
 		return ResponseEntity.ok(followersService
-						.getAllFollowers(
-								id, version, start, count, order, true));
+						.getAllFollowers(id, pageParams, true));
 	}
 	
 	@PostMapping(consumes = {
@@ -159,11 +146,11 @@ public class FollowerController {
 				profilePreferencesService
 				.getForProfile(posted.getFollowedId(), version);
 		
-		followersService
-		.follow(posted, version, !prefs.isPremoderateFollowers());
+		followersService.follow(posted, version, 
+				!prefs.getPremoderateFollowers());
 		
-		return ResponseEntity.created(
-				URI.create("/profiles/"+posted.getFollowedId() + "/followers"))
+		return ResponseEntity.created(URI
+				.create("/profiles/"+posted.getFollowedId()+"/followers"))
 				.build();
 	}
 	
@@ -211,6 +198,5 @@ public class FollowerController {
 		
 		throw new WebApplicationException(ACCESS_DENIED);
 	}
-	
 	
 }

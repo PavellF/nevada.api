@@ -1,10 +1,7 @@
 package org.pavelf.nevada.api.service;
 
-import java.util.List;
-
 import org.pavelf.nevada.api.domain.PersonDTO;
 import org.pavelf.nevada.api.domain.Version;
-import org.pavelf.nevada.api.persistence.domain.Sorting;
 
 /**
  * General interface for interactions with application person object.
@@ -27,7 +24,7 @@ public interface PeopleService {
 	 * @param profileId profile id.
 	 * @param personId person id.
 	 * */
-	//public boolean belongsToProfile(int profileId, int personId);
+	public boolean belongsToProfile(int profileId, int personId);
 	
 	/**
 	 * Finds person associated with given profile.

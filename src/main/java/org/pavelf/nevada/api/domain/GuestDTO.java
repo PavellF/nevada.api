@@ -16,31 +16,40 @@ public class GuestDTO {
 
 	private Integer id;
 	private Integer whoId;
+	private Integer toProfile;
 	private Boolean hidden;
 	private Instant when;
 
-	private GuestDTO() { }
-	
 	private GuestDTO(Builder builder) {
 		this.id = builder.id;
 		this.whoId = builder.whoId;
+		this.toProfile = builder.toProfile;
 		this.hidden = builder.hidden;
 		this.when = builder.when;
 	}
-	
+
+	private GuestDTO() { }
+
 	public Integer getId() {
 		return id;
 	}
+
 	public Integer getWhoId() {
 		return whoId;
 	}
+
+	public Integer getToProfile() {
+		return toProfile;
+	}
+
 	public Boolean getHidden() {
 		return hidden;
 	}
+
 	public Instant getWhen() {
 		return when;
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -48,6 +57,8 @@ public class GuestDTO {
 		builder.append(id);
 		builder.append(", whoId=");
 		builder.append(whoId);
+		builder.append(", toProfile=");
+		builder.append(toProfile);
 		builder.append(", hidden=");
 		builder.append(hidden);
 		builder.append(", when=");
@@ -55,6 +66,7 @@ public class GuestDTO {
 		builder.append("]");
 		return builder.toString();
 	}
+
 	/**
 	 * Creates builder to build {@link GuestDTO}.
 	 * @return created builder
@@ -69,6 +81,7 @@ public class GuestDTO {
 	public static final class Builder {
 		private Integer id;
 		private Integer whoId;
+		private Integer toProfile;
 		private Boolean hidden;
 		private Instant when;
 
@@ -82,6 +95,11 @@ public class GuestDTO {
 
 		public Builder withWhoId(Integer whoId) {
 			this.whoId = whoId;
+			return this;
+		}
+
+		public Builder withToProfile(Integer toProfile) {
+			this.toProfile = toProfile;
 			return this;
 		}
 
@@ -99,7 +117,6 @@ public class GuestDTO {
 			return new GuestDTO(this);
 		}
 	}
-	
 	
 	
 }

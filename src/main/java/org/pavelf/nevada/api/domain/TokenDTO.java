@@ -3,20 +3,9 @@ package org.pavelf.nevada.api.domain;
 import java.io.Serializable;
 import java.time.Instant;
 
-import javax.persistence.Column;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.validation.constraints.NotNull;
-
 import org.pavelf.nevada.api.persistence.domain.Access;
-import org.pavelf.nevada.api.persistence.domain.Application;
-import org.pavelf.nevada.api.persistence.domain.Profile;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import javax.annotation.Generated;
 
 /**
  * Represents application security token.

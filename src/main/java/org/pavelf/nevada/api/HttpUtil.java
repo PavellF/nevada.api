@@ -25,31 +25,41 @@ public class HttpUtil {
 	}
 	
 	/**
-	 * Returns string digest representation of Serializable or null if exception occurs. 
-	 * May return an empty string.
+	 * Returns string digest representation of {@code Serializable} 
+	 * or {@code null} if exception occurs. May return an empty string.
 	 * Ensure all underlying objects also implement java.io.Serializable.
 	 * @param alg algorithm to use.
 	 * @param object to hash.
 	 * */
-	public static String hash(Algorithm alg, Serializable object) {
+	public static char[] hash(Algorithm alg, Serializable object) {
+		if (alg == null || object == null) {
+			return null;
+		}
+		
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+			
 			MessageDigest md = MessageDigest.getInstance(alg.name);
 			oos.writeObject(object);
-			byte[] hash = md.digest(baos.toByteArray());
-			String digest = "";
+			
+			final byte[] hash = md.digest(baos.toByteArray());
+			final StringBuilder digest = new StringBuilder();
+			
 			for (int i = 0; i < hash.length; i++) {
 				int v = hash[i] & 0xFF;
 				if (v < 16) {
-					digest += '0';
+					digest.append('0');
 				}
-				digest += Integer.toString(v, 16).toUpperCase();
+				digest.append(Integer.toString(v, 16).toUpperCase());
 			}
-			return digest;
-			} catch (Exception e) {
-					e.printStackTrace();
-					return null;
-			}
+			
+			char[] destination = new char[digest.length()];
+			digest.getChars(0, digest.length(), destination, 0);
+			return destination;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 }

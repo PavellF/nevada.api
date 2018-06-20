@@ -32,7 +32,7 @@ public interface MessageService {
 	 * @throws IllegalArgumentException if null passed.
 	 * */
 	public List<MessageDTO> getAllForProfile(int profileId, 
-			PageAndSort params, boolean archivedIncluded);
+			PageAndSortExtended params, boolean archivedIncluded);
 	
 	/**
 	 * Gets list of messages with given id.
@@ -42,7 +42,7 @@ public interface MessageService {
 	 * @throws IllegalArgumentException if null passed.
 	 * */
 	public List<MessageDTO> getListForStreamPost(int postId,
-			PageAndSort params, boolean archivedIncluded);
+			PageAndSortExtended params, boolean archivedIncluded);
 	
 	/**
 	 * @param profileId owner id.

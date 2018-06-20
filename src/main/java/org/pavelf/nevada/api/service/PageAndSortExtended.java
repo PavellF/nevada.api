@@ -10,7 +10,7 @@ import org.pavelf.nevada.api.domain.Version;
 public interface PageAndSortExtended extends PageAndSort {
 
 	/**
-	 * Version of object
+	 * Version of object, never {@code null}.
 	 * */
 	public Version getObjectVersion();
 }

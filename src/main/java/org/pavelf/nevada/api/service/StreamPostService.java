@@ -1,10 +1,10 @@
 package org.pavelf.nevada.api.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.pavelf.nevada.api.domain.StreamPostDTO;
 import org.pavelf.nevada.api.domain.Version;
-import org.pavelf.nevada.api.persistence.domain.Sorting;
 import org.pavelf.nevada.api.persistence.domain.Visibility;
 
 /**
@@ -19,15 +19,28 @@ public interface StreamPostService {
 	 * returns additional field with rating caller rated some messages.
 	 * @param profileId that represents profile.
 	 * @param pageAndSort parameters of list to fetch.
-	 * @param requestingId requestingId represents caller.
+	 * @param requestingId represents caller who (potentially) liked the post.
 	 * @param levels posts with given visibility levels to return. 
 	 * 		  If none specified all levels will be returned. 
+	 * @return collection of retrieved posts. May be empty, never {@code null}.
+	 * @throws IllegalArgumentException if {@code null} passed.
+	 * */
+	public List<StreamPostDTO> getAllForProfile(int profileId,  
+			PageAndSortExtended pageAndSort, int requestingId, 
+			Version version, Visibility... levels);	
+	
+	/**
+	 * Finds all posts associated with given profile.
+	 * @param profileId that represents profile.
+	 * @param pageAndSort parameters of list to fetch.
+	 * @param levels posts with given visibility levels to return. 
 	 * @return collection of retrieved posts. May be empty, never {@code null}.
 	 * @throws IllegalArgumentException if 
 	 *         {@code null} passed except {@code requestingId}.
 	 * */
 	public List<StreamPostDTO> getAllForProfile(int profileId,  
-			PageAndSort pageAndSort,Integer requestingId, Visibility... levels);
+			PageAndSortExtended pageAndSort,Version version, 
+			Visibility... levels);
 	
 	/**
 	 * Finds all posts associated with given tag and 
@@ -36,11 +49,19 @@ public interface StreamPostService {
 	 * @param pageAndSort parameters of list to fetch.
 	 * @param requestingId requestingId represents caller.
 	 * @return collection of retrieved posts. May be empty, never {@code null}.
-	 * @throws IllegalArgumentException if 
-	 *         {@code null} passed except {@code requestingId}.
+	 * @throws IllegalArgumentException if {@code null} passed.
 	 * */
-	public List<StreamPostDTO> getAllForTag(String tag, PageAndSort pageAndSort,
-			Integer requestingId);
+	public List<StreamPostDTO> getAllForTag(String tag, Version version,
+			PageAndSortExtended pageAndSort, int requestingId);
+	/**
+	 * Finds all posts associated with given tag.
+	 * @param tag tagname.
+	 * @param pageAndSort parameters of list to fetch.
+	 * @return collection of retrieved posts. May be empty, never {@code null}.
+	 * @throws IllegalArgumentException if {@code null} passed.
+	 * */
+	public List<StreamPostDTO> getAllForTag(String tag, 
+			PageAndSortExtended pageAndSort, Version version);
 	
 	/**
 	 * Finds all posts associated with given author and 
@@ -49,14 +70,24 @@ public interface StreamPostService {
 	 * @param pageAndSort parameters of list to fetch.
 	 * @param requestingId requestingId represents caller.
 	 * @param levels posts with given visibility levels to return. 
-	 * If none specified all levels will be returned. 
 	 * @return collection of retrieved posts. May be empty, never {@code null}.
 	 * @throws IllegalArgumentException if 
 	 *         {@code null} passed except {@code requestingId}.
 	 * */
 	public List<StreamPostDTO> getAllForAuthor(int authorId, 
-			Integer requestingId, PageAndSort pageAndSort, 
+			int requestingId, PageAndSortExtended pageAndSort, Version version,
 			Visibility... levels);
+	
+	/**
+	 * Finds all posts associated with given author.
+	 * @param authorId that represents author.
+	 * @param pageAndSort parameters of list to fetch.
+	 * @param levels posts with given visibility levels to return. 
+	 * @return collection of retrieved posts. May be empty, never {@code null}.
+	 * @throws IllegalArgumentException if {@code null} passed.
+	 * */
+	public List<StreamPostDTO> getAllForAuthor(int authorId, Version version,
+			PageAndSortExtended pageAndSort, Visibility... levels);
 	
 	/**
 	 * Creates new post on some profile stream.
@@ -103,8 +134,24 @@ public interface StreamPostService {
 	 * Obtains stream post by its identifier.
 	 * @param postId post identifier.
 	 * @param version of object.
+	 * @param levels only post with one of these levels 
+	 * of visibility will be returned.
+	 * @param requestingId represents caller who (potentially) liked the post.
 	 * @return post if found or {@code null}.
 	 * @throws IllegalArgumentException if {@code null} passed.
 	 * */
-	public StreamPostDTO getById(int postId, Version version);
+	public Optional<StreamPostDTO> getById(int postId, Version version,
+			int requestingId, Visibility... levels);
+	
+	/**
+	 * Obtains stream post by its identifier.
+	 * @param postId post identifier.
+	 * @param version of object.
+	 * @param levels only post with one of these levels 
+	 * of visibility will be returned.
+	 * @return post if found or {@code null}.
+	 * @throws IllegalArgumentException if {@code null} passed.
+	 * */
+	public Optional<StreamPostDTO> getById(int postId, Version version,
+			Visibility... levels);
 }

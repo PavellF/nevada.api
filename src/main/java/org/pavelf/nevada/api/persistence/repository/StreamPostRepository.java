@@ -1,13 +1,12 @@
 package org.pavelf.nevada.api.persistence.repository;
 
 import java.util.List;
+import java.util.Optional;
 
-import javax.persistence.SecondaryTable;
 import javax.persistence.Tuple;
 
 import org.pavelf.nevada.api.persistence.domain.StreamPost;
 import org.pavelf.nevada.api.persistence.domain.Visibility;
-import org.pavelf.nevada.api.service.PageAndSort;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,10 +20,24 @@ import org.springframework.data.repository.query.Param;
 public interface StreamPostRepository 
 	extends JpaRepository<StreamPost, Integer> {
 
+	@Query(value = "SELECT COUNT(*) FROM StreamPost AS sp"
+			+ " WHERE sp.id = ?1 AND sp.associatedProfile = ?2")
+	public int countProfileHasPost(int id, int profileId);
 	
 	@Query(value = "SELECT COUNT(*) FROM StreamPost AS sp"
 			+ " WHERE sp.id = ?1 AND sp.authorId = ?2")
 	public int countPostBelongAuthor(int id, int authorId);
+	
+	@Query("SELECT sp, l FROM StreamPost AS sp "
+			+ "LEFT OUTER JOIN Like AS l ON l.likedById = ?2 "
+			+ "AND l.likedStreamPost = sp.id "
+			+ "WHERE sp.visibility IN (?3)")
+	public Optional<Tuple> findByIdWithLikeInfo(
+			int id, int requestingId, List<Visibility> visibility);
+	
+	@Query("SELECT sp FROM StreamPost AS sp "
+			+ "WHERE sp.visibility IN (?2) AND sp.id = ?1")
+	public Optional<StreamPost> findById(int id, List<Visibility> visibility);
 	
 	/**
 	 * Finds all posts marked with this tag 
@@ -42,18 +55,21 @@ public interface StreamPostRepository
 	public List<Tuple> findAllByTagWithLikeInfo(
 			String tag, int requestingId, Pageable pageable);
 	
+	@Query("SELECT sp FROM StreamPost AS sp "
+			+ "INNER JOIN StreamPostTag AS spt "
+			+ "ON spt.associatedStreamPost = sp.id AND spt.associatedTag = ?1 "
+			+ "WHERE sp.visibility = 'ALL'")
+	public List<StreamPost> findAllByTag(String tag, Pageable pageable);
+	
 	/**
-	 * Finds all posts ever produced by this user profile and 
+	 * Finds all posts posted on this user profile and 
 	 * returns additional field with rating caller rated some posts.
 	 * @param profileId profile identifier.
 	 * @param params fetch options.
 	 * @param requestingId represents caller.
 	 * @param visibility only posts that have these will be returned.
 	 * @return never {@code null}, may be empty {@code List}.
-	 * @throws IllegalArgumentException if {@code params} 
-	 * or {@code visibility} is {@code null}.
 	 * */
-	
 	@Query("SELECT sp, l FROM StreamPost AS sp "
 			+ "LEFT OUTER JOIN Like AS l ON l.likedById = :currentId "
 			+ "AND l.likedStreamPost = sp.id "
@@ -64,14 +80,20 @@ public interface StreamPostRepository
 			@Param("currentId") int requestingId,
 			@Param("levels") List<Visibility> visibility, Pageable pageable);
 	
+	@Query("SELECT sp FROM StreamPost AS sp "
+			+ "WHERE sp.associatedProfile = :profileId "
+			+ "AND sp.visibility IN (:levels)")
+	public List<StreamPost> getAllPostsAssociatedWithProfile(
+			@Param("profileId") int profileId, 
+			@Param("levels") List<Visibility> visibility, Pageable pageable);
+	
 	/**
-	 * Finds all posts ever produced by this user profile and 
+	 * Finds all posts posted on this user profile and 
 	 * returns additional field with rating caller rated some posts.
 	 * @param profileId profile identifier.
 	 * @param params fetch options.
 	 * @param requestingId represents caller.
 	 * @return never {@code null}, may be empty {@code List}.
-	 * @throws IllegalArgumentException if {@code params} is {@code null}.
 	 * */
 	@Query("SELECT sp, l FROM StreamPost AS sp "
 			+ "LEFT OUTER JOIN Like AS l ON l.likedById = :currentId "
@@ -88,8 +110,6 @@ public interface StreamPostRepository
 	 * @param visibility only posts that have these will be returned.
 	 * @param requestingId represents caller user.
 	 * @param params fetch options.
-	 * @throws IllegalArgumentException if {@code params} 
-	 * or {@code visibility} is {@code null}.
 	 * */
 	@Query("SELECT sp, l FROM StreamPost AS sp "
 			+ "LEFT OUTER JOIN Like AS l ON l.likedById = :currentId "
@@ -100,13 +120,18 @@ public interface StreamPostRepository
 			@Param("levels") List<Visibility> visibility, 
 			@Param("currentId") int requestingId, Pageable pageable);
 	
+	@Query("SELECT sp FROM StreamPost AS sp "
+			+ "WHERE sp.authorId = :authorId AND sp.visibility IN (:levels)")
+	public List<StreamPost> findAllByAuthorId(
+			@Param("authorId") int authorId, 
+			@Param("levels") List<Visibility> visibility, Pageable pageable);
+	
 	/**
 	 * Finds all posts where author is given user and 
 	 * returns additional {@code Like} field caller rated some posts.
 	 * @param authorId author identifier.
 	 * @param requestingId represents caller user.
 	 * @param params fetch options.
-	 * @throws IllegalArgumentException if {@code params} is {@code null}.
 	 * */
 	@Query("SELECT sp, l FROM StreamPost AS sp "
 			+ "LEFT OUTER JOIN Like AS l ON l.likedById = :currentId "

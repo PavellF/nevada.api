@@ -1,13 +1,9 @@
 package org.pavelf.nevada.api.domain;
 
-import java.io.Serializable;
 import java.time.Instant;
-
-import org.pavelf.nevada.api.persistence.domain.Profile;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import javax.annotation.Generated;
 
 /**
  * Represents created application from which will be performed calls on endpoints.

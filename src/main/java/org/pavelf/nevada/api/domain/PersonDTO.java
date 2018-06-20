@@ -8,37 +8,48 @@ package org.pavelf.nevada.api.domain;
 public class PersonDTO {
 
 	private Integer id;
+	private Integer associatedProfileId;
 	private String fullName;
 	private String location;
 	private String gender;
 
-	private PersonDTO() { }
-
 	private PersonDTO(Builder builder) {
 		this.id = builder.id;
+		this.associatedProfileId = builder.associatedProfileId;
 		this.fullName = builder.fullName;
 		this.location = builder.location;
 		this.gender = builder.gender;
 	}
-	
+
+	private PersonDTO() { }
+
 	public Integer getId() {
 		return id;
 	}
+
+	public Integer getAssociatedProfileId() {
+		return associatedProfileId;
+	}
+
 	public String getFullName() {
 		return fullName;
 	}
+
 	public String getLocation() {
 		return location;
 	}
+
 	public String getGender() {
 		return gender;
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("PersonDTO [id=");
 		builder.append(id);
+		builder.append(", associatedProfileId=");
+		builder.append(associatedProfileId);
 		builder.append(", fullName=");
 		builder.append(fullName);
 		builder.append(", location=");
@@ -48,7 +59,7 @@ public class PersonDTO {
 		builder.append("]");
 		return builder.toString();
 	}
-	
+
 	/**
 	 * Creates builder to build {@link PersonDTO}.
 	 * @return created builder
@@ -62,6 +73,7 @@ public class PersonDTO {
 	 */
 	public static final class Builder {
 		private Integer id;
+		private Integer associatedProfileId;
 		private String fullName;
 		private String location;
 		private String gender;
@@ -71,6 +83,11 @@ public class PersonDTO {
 
 		public Builder withId(Integer id) {
 			this.id = id;
+			return this;
+		}
+
+		public Builder withAssociatedProfileId(Integer associatedProfileId) {
+			this.associatedProfileId = associatedProfileId;
 			return this;
 		}
 
@@ -93,5 +110,5 @@ public class PersonDTO {
 			return new PersonDTO(this);
 		}
 	}
-	
+
 }

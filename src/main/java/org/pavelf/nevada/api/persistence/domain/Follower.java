@@ -12,6 +12,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+/**
+ * ORM {@code @Entity} that represents follower(friend).
+ * @author Pavel F.
+ * @since 1.0
+ * */
 @Entity
 @Table(name="followers")
 public class Follower {

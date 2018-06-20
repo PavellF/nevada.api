@@ -23,6 +23,7 @@ import org.pavelf.nevada.api.security.User;
 import org.pavelf.nevada.api.service.FollowersService;
 import org.pavelf.nevada.api.service.MessageService;
 import org.pavelf.nevada.api.service.PageAndSort;
+import org.pavelf.nevada.api.service.PageAndSortExtended;
 import org.pavelf.nevada.api.service.ProfileService;
 import org.pavelf.nevada.api.service.StreamPostService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -266,6 +267,11 @@ public class MessageController {
 		throw new WebApplicationException(ACCESS_DENIED);
 	}
 	
+	/**
+	 * Request parameter 'repliesFor=%id%' return all replies for comment with
+	 * given id. If not specified only comments which are not replies 
+	 * to other comments will be returned.
+	 * */
 	@GetMapping(produces = { 
 			APPLICATION_ACCEPT_PREFIX+".message+json", 
 			APPLICATION_ACCEPT_PREFIX+".message+xml"},
@@ -275,7 +281,7 @@ public class MessageController {
 			@PathVariable("owner_id") int ownerId,
 			@PathVariable("destination") Destination destination,
 			@PathVariable("destination_id") int destinationId,
-			PageAndSort pageAndSort) {
+			PageAndSortExtended pageAndSort) {
 		
 		if (owner == Owner.PROFILE) {
 			

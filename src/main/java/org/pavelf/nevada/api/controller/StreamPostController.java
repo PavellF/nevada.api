@@ -21,6 +21,7 @@ import org.pavelf.nevada.api.security.TokenContext;
 import org.pavelf.nevada.api.security.User;
 import org.pavelf.nevada.api.service.FollowersService;
 import org.pavelf.nevada.api.service.PageAndSort;
+import org.pavelf.nevada.api.service.PageAndSortExtended;
 import org.pavelf.nevada.api.service.ProfilePreferencesService;
 import org.pavelf.nevada.api.service.ProfileService;
 import org.pavelf.nevada.api.service.StreamPostService;
@@ -66,7 +67,7 @@ public class StreamPostController {
 	@Secured(access = Access.READ, scope = { Scope.STREAM })
 	public ResponseEntity<List<StreamPostDTO>> getStreamPosts(
 			@PathVariable("id") int id,
-			PageAndSort pageAndSort) { 
+			PageAndSortExtended pageAndSort) { 
 		
 		final User issuer = principal.getToken().getUser()
 				.orElseThrow(UnrecognizedUserException::new);

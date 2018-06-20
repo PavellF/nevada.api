@@ -10,19 +10,25 @@ import org.pavelf.nevada.api.domain.Version;
 import org.pavelf.nevada.api.persistence.domain.Follower;
 import org.pavelf.nevada.api.persistence.domain.Sorting;
 import org.pavelf.nevada.api.persistence.repository.FollowerRepository;
-import org.pavelf.nevada.api.persistence.repository.ProfileRepository;
 import org.pavelf.nevada.api.service.FollowersService;
+import org.pavelf.nevada.api.service.PageAndSortExtended;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Basic implementation for {@code FollowersService}.
+ * @author Pavel F.
+ * @since 1.0
+ * */
 @Service
 public class FollowersServiceImpl implements FollowersService {
 
 	private FollowerRepository followerRepository;
-	private ProfileRepository profileRepository;
 	private final Function<? super Follower, ? extends FollowerDTO> mapper = 
 			(Follower f) -> {
 				FollowerDTO follower = FollowerDTO.builder()
@@ -34,24 +40,35 @@ public class FollowersServiceImpl implements FollowersService {
 						.build();
 				return follower;
 				};
+	private final Function<? super Sorting, ? extends Order> propertyMapper = 
+						(Sorting s) -> {
+							if (Sorting.TIME_ASC == s) {
+								return Order.asc("id");
+							} else if (Sorting.TIME_DESC == s) {
+								return Order.desc("id");
+							} else {
+								return null;
+							}
+						};
 	
 	@Autowired		
-	public FollowersServiceImpl(FollowerRepository followerRepository,
-			ProfileRepository profileRepository) {
+	public FollowersServiceImpl(FollowerRepository followerRepository) {
 		this.followerRepository = followerRepository;
-		this.profileRepository = profileRepository;
 	}
 
 	@Override
-	public List<FollowerDTO> getAllFollowers(int profileId, Version version,
-			int start, int count, Sorting sorting, boolean mutualOnly) {
-		if (sorting == null || version == null) {
+	@Transactional(readOnly = true)
+	public List<FollowerDTO> getAllFollowers(int profileId, 
+			PageAndSortExtended params, boolean mutualOnly) {
+		if (params == null) {
 			throw new IllegalArgumentException("Nulls are disallowed.");
 		}
 		
-		Sort sort = Sort.by(sorting.getDirection(), 
-				sorting.getDomainProperty());
-		Pageable pageRequest = PageRequest.of(start, count, sort);
+		Sort sort = Sort.by(params.getOrderBy().map(propertyMapper)
+				.filter(o -> o != null)
+				.collect(Collectors.toList()));
+		Pageable pageRequest = PageRequest.of(params.getStartIndex(), 
+				params.getCount(), sort);
 		
 		return followerRepository
 				.findAllFollowers(profileId, mutualOnly, pageRequest)
@@ -59,15 +76,18 @@ public class FollowersServiceImpl implements FollowersService {
 	}
 
 	@Override
-	public List<FollowerDTO> getAllFollowed(int profileId, Version version,
-			int start, int count, Sorting sorting, boolean mutualOnly) {
-		if (sorting == null || version == null) {
+	@Transactional(readOnly = true)
+	public List<FollowerDTO> getAllFollowed(int profileId, 
+			PageAndSortExtended params, boolean mutualOnly) {
+		if (params == null) {
 			throw new IllegalArgumentException("Nulls are disallowed.");
 		}
 		
-		Sort sort = Sort.by(sorting.getDirection(), 
-				sorting.getDomainProperty());
-		Pageable pageRequest = PageRequest.of(start, count, sort);
+		Sort sort = Sort.by(params.getOrderBy().map(propertyMapper)
+				.filter(o -> o != null)
+				.collect(Collectors.toList()));
+		Pageable pageRequest = PageRequest.of(params.getStartIndex(), 
+				params.getCount(), sort);
 		
 		return followerRepository
 				.findAllFollowed(profileId, mutualOnly, pageRequest)
@@ -75,6 +95,7 @@ public class FollowersServiceImpl implements FollowersService {
 	}
 
 	@Override
+	@Transactional
 	public Integer follow(FollowerDTO follower, Version version,
 			boolean mutual) {
 		if (follower == null || version == null) {
@@ -82,10 +103,8 @@ public class FollowersServiceImpl implements FollowersService {
 		}
 		
 		Follower newFollower = new Follower();
-		newFollower.setFollowed(
-				profileRepository.getOne(follower.getFollowedId()));
-		newFollower.setFollower(
-				profileRepository.getOne(follower.getFollowerId()));
+		newFollower.setFollowedId(follower.getFollowedId());
+		newFollower.setFollowerId(follower.getFollowerId());
 		
 		if (mutual) {
 			newFollower.setMutual(true);
@@ -98,6 +117,7 @@ public class FollowersServiceImpl implements FollowersService {
 	}
 
 	@Override
+	@Transactional
 	public void acceptFollower(FollowerDTO follower, Version version) {
 		if (follower == null || version == null) {
 			throw new IllegalArgumentException("Nulls are disallowed.");

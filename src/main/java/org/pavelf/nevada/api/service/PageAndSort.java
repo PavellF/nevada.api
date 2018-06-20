@@ -1,6 +1,8 @@
 package org.pavelf.nevada.api.service;
 
-import java.util.Optional;
+import java.util.stream.Stream;
+
+import org.pavelf.nevada.api.persistence.domain.Sorting;
 
 /**
  * Encapsulates fetch options for list of objects.
@@ -22,14 +24,11 @@ public interface PageAndSort {
 	public int getCount();
 	
 	/**
-	 * Sorting type name to use as sorting criteria.
+	 * Returns stream of {@code Sorting} which contain sorting type property 
+	 * names to use as sorting criteria and 
+	 * direction (ascending or descending) pairs. Contains no duplicates.
+	 * May be empty, never {@code null}.
 	 * */
-	public Optional<String> getSortBy();
-	
-	/**
-	 * Ascending or descending.
-	 * */
-	public Optional<String> getSortingDirection();
-	
+	public Stream<Sorting> getOrderBy();
 	
 }

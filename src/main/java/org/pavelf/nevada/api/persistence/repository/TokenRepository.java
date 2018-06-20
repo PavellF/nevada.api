@@ -10,8 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
- * Declares methods used to obtain and modify token related information which is 
- * stored in the database.
+ * Declares methods used to obtain and modify token related information 
+ * which is stored in the database.
  * @since 1.0
  * @author Pavel F.
  */
@@ -22,9 +22,10 @@ public interface TokenRepository extends JpaRepository<Token, Integer> {
 	public List<Token> findAllByIssuedBy(int applicationId);
 	
 	/**
-     * Finds token and its associated profile by using the token string as a search criteria.
-     * @param token string representing token ,
-     * @return  token with owner.
+     * Finds token and its associated profile by using the token string as a 
+     * search criteria.
+     * @param token string representing token.
+     * @return token with owner.
      */
 	@Transactional(readOnly = true)
 	@EntityGraph(value = "graph.tokens.profile", type = EntityGraphType.LOAD)

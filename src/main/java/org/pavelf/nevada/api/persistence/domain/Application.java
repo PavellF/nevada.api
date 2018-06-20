@@ -11,11 +11,15 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Size;
 
+/**
+ * ORM {@code @Entity} to map application.
+ * @author Pavel F.
+ * @since 1.0
+ * */
 @Entity
 @Table(name="applications")
 public class Application {

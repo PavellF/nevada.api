@@ -1,11 +1,5 @@
 package org.pavelf.nevada.api.persistence.repository;
 
-import java.util.List;
-
-import org.pavelf.nevada.api.persistence.domain.StreamPost;
-import org.pavelf.nevada.api.persistence.domain.Visibility;
-import org.pavelf.nevada.api.service.PageAndSort;
-
 /**
  * Defines set of advanced actions with {@code StreamPost}.
  * @author Pavel F.

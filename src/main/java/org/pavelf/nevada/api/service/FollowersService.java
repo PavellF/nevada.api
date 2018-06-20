@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.pavelf.nevada.api.domain.FollowerDTO;
 import org.pavelf.nevada.api.domain.Version;
-import org.pavelf.nevada.api.persistence.domain.Sorting;
 
 /**
  * General interface for interactions with followers.
@@ -16,30 +15,24 @@ public interface FollowersService {
 	/**
 	 * Finds all profile followers.
 	 * @param profileId that represents profile.
-	 * @param version of object to fetch.
-	 * @param start describes relative object number from which list should start.
-	 * @param count number of objects.
-	 * @param sorting filed name and direction of sorting.
 	 * @param mutualOnly will be fetched.
-	 * @return collection of retrieved posts. May be empty, never {@code null}.
+	 * @param params fetch options.
+	 * @return collection of followers. May be empty, never {@code null}.
 	 * @throws IllegalArgumentException if {@code null} passed.
 	 * */
-	public List<FollowerDTO> getAllFollowers(int profileId, Version version, 
-			int start, int count, Sorting sorting, boolean mutualOnly);
+	public List<FollowerDTO> getAllFollowers(int profileId, 
+			PageAndSortExtended params, boolean mutualOnly);
 	
 	/**
 	 * Finds all profiles that given profile follows.
 	 * @param profileId that represents profile.
-	 * @param version of object to fetch.
-	 * @param start describes relative object number from which list should start.
-	 * @param count number of objects.
-	 * @param sorting filed name and direction of sorting.
+	 * @param params fetch options.
 	 * @param mutualOnly will be fetched.
-	 * @return collection of retrieved posts. May be empty, never {@code null}.
+	 * @return collection of followers. May be empty, never {@code null}.
 	 * @throws IllegalArgumentException if {@code null} passed.
 	 * */
-	public List<FollowerDTO> getAllFollowed(int profileId, Version version, 
-			int start, int count, Sorting sorting, boolean mutualOnly);
+	public List<FollowerDTO> getAllFollowed(int profileId, 
+			PageAndSortExtended params, boolean mutualOnly);
 	
 	/**
 	 * Persist new follower.
@@ -49,7 +42,8 @@ public interface FollowersService {
 	 * @return generated identifier. Never {@code null}.
 	 * @throws IllegalArgumentException if {@code null} passed.
 	 * */
-	public Integer follow(FollowerDTO follower, Version version, boolean mutual);
+	public Integer follow(FollowerDTO follower, 
+			Version version, boolean mutual);
 	
 	/**
 	 * Accepts given follower.

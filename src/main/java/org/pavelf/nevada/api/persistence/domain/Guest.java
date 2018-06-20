@@ -9,13 +9,16 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 
+/**
+ * ORM {@code @Entity} that represents guest.
+ * @author Pavel F.
+ * @since 1.0
+ * */
 @Entity
 @Table(name="guests")
 public class Guest {
@@ -68,6 +71,14 @@ public class Guest {
 		throw new UnsupportedOperationException();
 	}
 
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
 	public Profile getWho() {
 		return who;
 	}
@@ -108,9 +119,4 @@ public class Guest {
 		this.toProfile = toProfile;
 	}
 
-	public void setId(Integer id) {
-		this.id = id;
-	}
-	
-	
 }

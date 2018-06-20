@@ -2,6 +2,9 @@ package org.pavelf.nevada.api.resolver;
 
 import static org.pavelf.nevada.api.exception.ExceptionCases.*;
 
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
 import org.pavelf.nevada.api.domain.Version;
 import org.pavelf.nevada.api.domain.VersionImpl;
 import org.pavelf.nevada.api.exception.WebApplicationException;
@@ -47,14 +50,20 @@ public class PageAndSortResolver implements HandlerMethodArgumentResolver {
 			}
 			
 			String orderParam = webRequest.getParameter("order");
-			Sorting order = (orderParam == null) 
-					? Sorting.TIME_ASC : Sorting.valueOf(orderParam);
+			Stream<Sorting> order = null;
+			
+			if (orderParam != null) {
+				order = Pattern.compile("-")
+						.splitAsStream(orderParam)
+						.limit(1)
+						.map(Sorting::valueOf);
+			}
 			
 			String acceptHeader = webRequest.getHeader(HttpHeaders.ACCEPT);
 			Version versionOfObject = VersionImpl.valueOf(acceptHeader);
 			
-			return PageAndSortImpl.valueOf(
-					startValue, countValue, order, versionOfObject);
+			return PageAndSortImpl
+					.valueOf(startValue, countValue, versionOfObject, order);
 		} catch (IllegalArgumentException iae) {
 			WebApplicationException wae = 
 					new WebApplicationException(INVALID_REQUEST_PARAM);

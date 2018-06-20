@@ -1,6 +1,5 @@
 package org.pavelf.nevada.api.persistence.domain;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
@@ -13,6 +12,11 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+/**
+ * ORM {@code @Entity} for user profile preferences.
+ * @author Pavel F.
+ * @since 1.0
+ * */
 @Entity
 @Table(name="profile_preferences")
 public class ProfilePreferences {

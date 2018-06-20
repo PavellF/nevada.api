@@ -23,10 +23,9 @@ public class StreamPostDTO {
 	private Visibility visibility;
 	private Instant lastChange;
 	private Visibility commentable;
-	private Integer userRating;
+	private Short userRating;
+	private Integer associatedProfile;
 
-	private StreamPostDTO() { }
-	
 	private StreamPostDTO(Builder builder) {
 		this.id = builder.id;
 		this.authorId = builder.authorId;
@@ -39,42 +38,59 @@ public class StreamPostDTO {
 		this.lastChange = builder.lastChange;
 		this.commentable = builder.commentable;
 		this.userRating = builder.userRating;
+		this.associatedProfile = builder.associatedProfile;
 	}
-	
+
+	private StreamPostDTO() { }
+
 	public Integer getId() {
 		return id;
 	}
+
 	public Integer getAuthorId() {
 		return authorId;
 	}
+
 	public Instant getDate() {
 		return date;
 	}
+
 	public String getContent() {
 		return content;
 	}
+
 	public Integer getRating() {
 		return rating;
 	}
+
 	public Integer getPopularity() {
 		return popularity;
 	}
+
 	public Short getPriority() {
 		return priority;
 	}
+
 	public Visibility getVisibility() {
 		return visibility;
 	}
+
 	public Instant getLastChange() {
 		return lastChange;
 	}
+
 	public Visibility getCommentable() {
 		return commentable;
 	}
-	public Integer getUserRating() {
+
+	public Short getUserRating() {
 		return userRating;
 	}
-	
+
+	public Integer getAssociatedProfile() {
+		return associatedProfile;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -100,9 +116,12 @@ public class StreamPostDTO {
 		builder.append(commentable);
 		builder.append(", userRating=");
 		builder.append(userRating);
+		builder.append(", associatedProfile=");
+		builder.append(associatedProfile);
 		builder.append("]");
 		return builder.toString();
 	}
+
 	/**
 	 * Creates builder to build {@link StreamPostDTO}.
 	 * @return created builder
@@ -125,7 +144,8 @@ public class StreamPostDTO {
 		private Visibility visibility;
 		private Instant lastChange;
 		private Visibility commentable;
-		private Integer userRating;
+		private Short userRating;
+		private Integer associatedProfile;
 
 		private Builder() {
 		}
@@ -180,8 +200,13 @@ public class StreamPostDTO {
 			return this;
 		}
 
-		public Builder withUserRating(Integer userRating) {
+		public Builder withUserRating(Short userRating) {
 			this.userRating = userRating;
+			return this;
+		}
+
+		public Builder withAssociatedProfile(Integer associatedProfile) {
+			this.associatedProfile = associatedProfile;
 			return this;
 		}
 
@@ -189,6 +214,6 @@ public class StreamPostDTO {
 			return new StreamPostDTO(this);
 		}
 	}
-
+	
 	
 }

@@ -1,8 +1,5 @@
 package org.pavelf.nevada.api.persistence.domain;
 
-import java.io.Serializable;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -14,6 +11,11 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 
+/**
+ * ORM {@code @Entity} that represents person.
+ * @author Pavel F.
+ * @since 1.0
+ * */
 @Entity
 @Table(name="people")
 public class Person {
