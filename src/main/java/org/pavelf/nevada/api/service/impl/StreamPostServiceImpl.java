@@ -108,9 +108,8 @@ public class StreamPostServiceImpl implements StreamPostService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<StreamPostDTO> getAllForProfile(int profileId,
-			PageAndSortExtended params,
-			Version version, Visibility... levels) {
-		if (params == null || levels == null || version == null) {
+			PageAndSortExtended params, Visibility... levels) {
+		if (params == null || levels == null) {
 			throw new IllegalArgumentException("Null is not allowed.");
 		}
 		
@@ -119,10 +118,23 @@ public class StreamPostServiceImpl implements StreamPostService {
 						getPageable(params)).stream().map(mapper)
 				.collect(Collectors.toList());
 	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public List<StreamPostDTO> getAllForProfile(int profileId,  
+			PageAndSortExtended params) {
+		if (params == null) {
+			throw new IllegalArgumentException("Null is not allowed.");
+		}
+		
+		return this.streamPostRepository.getAllPostsAssociatedWithProfile(
+				profileId, getPageable(params)).stream().map(mapper)
+				.collect(Collectors.toList());
+	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<StreamPostDTO> getAllForTag(String tag, Version version,
+	public List<StreamPostDTO> getAllForTag(String tag, 
 			PageAndSortExtended params, int requestingId) {
 		if (tag == null || params == null) {
 			throw new IllegalArgumentException("Null is not allowed.");
@@ -136,7 +148,7 @@ public class StreamPostServiceImpl implements StreamPostService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<StreamPostDTO> getAllForTag(String tag,
-			PageAndSortExtended params, Version version) {
+			PageAndSortExtended params) {
 		if (tag == null || params == null) {
 			throw new IllegalArgumentException("Null is not allowed.");
 		}
@@ -198,7 +210,7 @@ public class StreamPostServiceImpl implements StreamPostService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<StreamPostDTO> getAllForProfile(int profileId,
-			PageAndSortExtended params, int requestingId, Version version,
+			PageAndSortExtended params, int requestingId,
 			Visibility... levels) {
 		if (params == null || levels == null) {
 			throw new IllegalArgumentException("Null is not allowed.");

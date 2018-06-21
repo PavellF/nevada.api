@@ -27,31 +27,41 @@ public interface StreamPostService {
 	 * */
 	public List<StreamPostDTO> getAllForProfile(int profileId,  
 			PageAndSortExtended pageAndSort, int requestingId, 
-			Version version, Visibility... levels);	
+			Visibility... levels);	
 	
 	/**
 	 * Finds all posts associated with given profile.
 	 * @param profileId that represents profile.
-	 * @param pageAndSort parameters of list to fetch.
-	 * @param levels posts with given visibility levels to return. 
+	 * @param params parameters of list to fetch.
 	 * @return collection of retrieved posts. May be empty, never {@code null}.
 	 * @throws IllegalArgumentException if 
 	 *         {@code null} passed except {@code requestingId}.
 	 * */
 	public List<StreamPostDTO> getAllForProfile(int profileId,  
-			PageAndSortExtended pageAndSort,Version version, 
-			Visibility... levels);
+			PageAndSortExtended params);
+	
+	/**
+	 * Finds all posts associated with given profile.
+	 * @param profileId that represents profile.
+	 * @param pageAndSort parameters of list to fetch.
+	 * @param levels posts with given visibility levels to return.
+	 * @return collection of retrieved posts. May be empty, never {@code null}.
+	 * @throws IllegalArgumentException if  {@code null} passed.
+	 * */
+	public List<StreamPostDTO> getAllForProfile(int profileId,  
+			PageAndSortExtended pageAndSort, Visibility... levels);
 	
 	/**
 	 * Finds all posts associated with given tag and 
 	 * returns additional field with rating caller rated some messages.
 	 * @param tag tagname.
+	 * @param version of object.
 	 * @param pageAndSort parameters of list to fetch.
 	 * @param requestingId requestingId represents caller.
 	 * @return collection of retrieved posts. May be empty, never {@code null}.
 	 * @throws IllegalArgumentException if {@code null} passed.
 	 * */
-	public List<StreamPostDTO> getAllForTag(String tag, Version version,
+	public List<StreamPostDTO> getAllForTag(String tag,
 			PageAndSortExtended pageAndSort, int requestingId);
 	/**
 	 * Finds all posts associated with given tag.
@@ -61,7 +71,7 @@ public interface StreamPostService {
 	 * @throws IllegalArgumentException if {@code null} passed.
 	 * */
 	public List<StreamPostDTO> getAllForTag(String tag, 
-			PageAndSortExtended pageAndSort, Version version);
+			PageAndSortExtended pageAndSort);
 	
 	/**
 	 * Finds all posts associated with given author and 

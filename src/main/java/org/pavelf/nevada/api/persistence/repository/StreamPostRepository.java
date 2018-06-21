@@ -61,6 +61,11 @@ public interface StreamPostRepository
 			+ "WHERE sp.visibility = 'ALL'")
 	public List<StreamPost> findAllByTag(String tag, Pageable pageable);
 	
+	@Query("SELECT sp FROM StreamPost AS sp "
+			+ "WHERE sp.associatedProfile = :profileId")
+	public List<StreamPost> getAllPostsAssociatedWithProfile(
+			int profileId, Pageable pageable);
+	
 	/**
 	 * Finds all posts posted on this user profile and 
 	 * returns additional field with rating caller rated some posts.

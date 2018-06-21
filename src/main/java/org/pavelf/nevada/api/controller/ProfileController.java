@@ -41,6 +41,7 @@ import org.pavelf.nevada.api.exception.WebApplicationException;
 import org.pavelf.nevada.api.persistence.domain.Visibility;
 import org.pavelf.nevada.api.security.TokenContext;
 import org.pavelf.nevada.api.security.User;
+import org.pavelf.nevada.api.service.GuestService;
 import org.pavelf.nevada.api.service.MessageService;
 import org.pavelf.nevada.api.service.PeopleService;
 import org.pavelf.nevada.api.service.PhotoService;
@@ -64,18 +65,19 @@ public class ProfileController {
 	private ProfileService profileService;
 	private PhotoService photoService;
 	private MessageService messageService;
-	
+	private GuestService guestService;
 	
 	@Autowired
 	public ProfileController(TokenContext principal,
 			ProfileService profileService, PhotoService photoService,
-			MessageService messageService) {
+			MessageService messageService, GuestService guestService) {
 		this.principal = principal;
 		this.profileService = profileService;
 		this.photoService = photoService;
 		this.messageService = messageService;
+		this.guestService = guestService;
 	}
-	
+
 	/*
 	 * Produces xml or json representation of the user profile.
 	 * Expected headers: 

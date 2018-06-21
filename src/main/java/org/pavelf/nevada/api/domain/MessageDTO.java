@@ -20,12 +20,11 @@ public class MessageDTO {
 	private Short priority;
 	private Boolean archived;
 	private String content;
-	private Boolean isLiked;
 	private Integer replyTo;
-	private Owner ownerType;
-	private Integer ownerId;
 	private Destination destinationType;
 	private Integer destinationId;
+	private Integer countOfReplies;
+	private Short currentUserRating;
 
 	private MessageDTO(Builder builder) {
 		this.id = builder.id;
@@ -36,72 +35,53 @@ public class MessageDTO {
 		this.priority = builder.priority;
 		this.archived = builder.archived;
 		this.content = builder.content;
-		this.isLiked = builder.isLiked;
 		this.replyTo = builder.replyTo;
-		this.ownerType = builder.ownerType;
-		this.ownerId = builder.ownerId;
 		this.destinationType = builder.destinationType;
 		this.destinationId = builder.destinationId;
+		this.countOfReplies = builder.countOfReplies;
+		this.currentUserRating = builder.currentUserRating;
 	}
-
-	private MessageDTO() { }
-
+	
 	public Integer getId() {
 		return id;
 	}
-
 	public Integer getAuthorId() {
 		return authorId;
 	}
-
 	public Instant getDate() {
 		return date;
 	}
-
 	public Instant getLastChange() {
 		return lastChange;
 	}
-
 	public Integer getRating() {
 		return rating;
 	}
-
 	public Short getPriority() {
 		return priority;
 	}
-
 	public Boolean getArchived() {
 		return archived;
 	}
-
 	public String getContent() {
 		return content;
 	}
-
-	public Boolean getIsLiked() {
-		return isLiked;
-	}
-
 	public Integer getReplyTo() {
 		return replyTo;
 	}
-
-	public Owner getOwnerType() {
-		return ownerType;
-	}
-
-	public Integer getOwnerId() {
-		return ownerId;
-	}
-
 	public Destination getDestinationType() {
 		return destinationType;
 	}
-
 	public Integer getDestinationId() {
 		return destinationId;
 	}
-
+	public Integer getCountOfReplies() {
+		return countOfReplies;
+	}
+	public Short getCurrentUserRating() {
+		return currentUserRating;
+	}
+	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -121,22 +101,19 @@ public class MessageDTO {
 		builder.append(archived);
 		builder.append(", content=");
 		builder.append(content);
-		builder.append(", isLiked=");
-		builder.append(isLiked);
 		builder.append(", replyTo=");
 		builder.append(replyTo);
-		builder.append(", ownerType=");
-		builder.append(ownerType);
-		builder.append(", ownerId=");
-		builder.append(ownerId);
 		builder.append(", destinationType=");
 		builder.append(destinationType);
 		builder.append(", destinationId=");
 		builder.append(destinationId);
+		builder.append(", countOfReplies=");
+		builder.append(countOfReplies);
+		builder.append(", currentUserRating=");
+		builder.append(currentUserRating);
 		builder.append("]");
 		return builder.toString();
 	}
-
 	/**
 	 * Creates builder to build {@link MessageDTO}.
 	 * @return created builder
@@ -157,12 +134,11 @@ public class MessageDTO {
 		private Short priority;
 		private Boolean archived;
 		private String content;
-		private Boolean isLiked;
 		private Integer replyTo;
-		private Owner ownerType;
-		private Integer ownerId;
 		private Destination destinationType;
 		private Integer destinationId;
+		private Integer countOfReplies;
+		private Short currentUserRating;
 
 		private Builder() {
 		}
@@ -207,23 +183,8 @@ public class MessageDTO {
 			return this;
 		}
 
-		public Builder withIsLiked(Boolean isLiked) {
-			this.isLiked = isLiked;
-			return this;
-		}
-
 		public Builder withReplyTo(Integer replyTo) {
 			this.replyTo = replyTo;
-			return this;
-		}
-
-		public Builder withOwnerType(Owner ownerType) {
-			this.ownerType = ownerType;
-			return this;
-		}
-
-		public Builder withOwnerId(Integer ownerId) {
-			this.ownerId = ownerId;
 			return this;
 		}
 
@@ -237,10 +198,20 @@ public class MessageDTO {
 			return this;
 		}
 
+		public Builder withCountOfReplies(Integer countOfReplies) {
+			this.countOfReplies = countOfReplies;
+			return this;
+		}
+
+		public Builder withCurrentUserRating(Short currentUserRating) {
+			this.currentUserRating = currentUserRating;
+			return this;
+		}
+
 		public MessageDTO build() {
 			return new MessageDTO(this);
 		}
 	}
-	
+
 	
 }

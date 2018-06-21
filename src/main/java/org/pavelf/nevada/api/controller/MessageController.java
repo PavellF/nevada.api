@@ -5,10 +5,16 @@ import static org.pavelf.nevada.api.exception.ExceptionCases.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.pavelf.nevada.api.domain.Access;
 import org.pavelf.nevada.api.domain.Destination;
+
 import org.pavelf.nevada.api.domain.MessageDTO;
 import org.pavelf.nevada.api.domain.Owner;
+
 import org.pavelf.nevada.api.domain.Scope;
 import org.pavelf.nevada.api.domain.StreamPostDTO;
 import org.pavelf.nevada.api.domain.Version;
@@ -22,7 +28,6 @@ import org.pavelf.nevada.api.security.TokenContext;
 import org.pavelf.nevada.api.security.User;
 import org.pavelf.nevada.api.service.FollowersService;
 import org.pavelf.nevada.api.service.MessageService;
-import org.pavelf.nevada.api.service.PageAndSort;
 import org.pavelf.nevada.api.service.PageAndSortExtended;
 import org.pavelf.nevada.api.service.ProfileService;
 import org.pavelf.nevada.api.service.StreamPostService;
@@ -35,11 +40,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Exposes some endpoints that can accept and emit {@code Message} objects.
  * @author Pavel F.
+ * @param <T>
  * @since 1.0
  * */
 @RestController
@@ -68,7 +75,8 @@ public class MessageController {
 			APPLICATION_ACCEPT_PREFIX+".message+xml"},
 			path = "/profiles/{id}/messages")	
 	public ResponseEntity<List<MessageDTO>> getMessagesForAuthor(
-			@PathVariable("id") int profileId, PageAndSort pageAndSort) {
+			@PathVariable("id") int profileId, 
+			PageAndSortExtended pageAndSort) {
 		
 		if (securityContext.isAuthorized()) {
 			final User issuer = securityContext.getToken().getUser()
@@ -80,7 +88,10 @@ public class MessageController {
 			if (isSuper || isOwnerRequesting) {
 				return ResponseEntity.ok(messageService.getAllForProfile(
 						profileId, pageAndSort, true));
-			}
+			} 
+			
+			return ResponseEntity.ok(messageService.getAllForProfile(
+					profileId, issuer.getIdAsInt(), pageAndSort, false));
 		}
 		
 		return ResponseEntity.ok(messageService
@@ -89,9 +100,9 @@ public class MessageController {
 	}
 	
 	@PostMapping(consumes = {
-			APPLICATION_ACCEPT_PREFIX+".message+json", 
-			APPLICATION_ACCEPT_PREFIX+".message+xml"},
-			path = "/{owner}/{owner_id}/{destination}/{destination_id}/messages")
+		APPLICATION_ACCEPT_PREFIX+".message+json", 
+		APPLICATION_ACCEPT_PREFIX+".message+xml"},
+		path = "/{owner}/{owner_id}/{destination}/{destination_id}/messages")
 	@Secured(access = Access.READ_WRITE, scope = { Scope.MESSAGE })
 	public ResponseEntity<MessageDTO> postMessage(
 			HttpEntity<MessageDTO> entity,
@@ -122,52 +133,21 @@ public class MessageController {
 			
 			final Integer repliedId = posted.getReplyTo();
 			if (repliedId != null) {
-				if (!messageService.isPostedUnderPost(destinationId, repliedId)) {
+				if (!messageService
+						.isPostedUnderPost(destinationId, repliedId)) {
 					throw new WebApplicationException(ACCESS_DENIED);
 				}
 			} 
 			
-			if (owner == Owner.PROFILE && 
-					streamPostService.profileHasPost(ownerId, destinationId)) {
+			if (owner == Owner.PROFILE && streamPostService
+					.profileHasPost(ownerId, destinationId)) {
 
 				final URI created = URI.create(
-						"profile/"+ownerId+"/posts/"+destinationId+"/messages");
-				/*	
-				final StreamPostDTO post = 
-					streamPostService.getById(destinationId, version);
+					"profile/"+ownerId+"/posts/"+destinationId+"/messages");
 				
-				final Visibility whoCanCommentThis = post.getCommentable();
-				final boolean isOwner = ownerId == issuerId;
-				final boolean isRegularUser = posted.getPriority() == null;
-				final Visibility visibilityOfPost = post.getVisibility();
-				boolean allowed = false;
-				
-				if (visibilityOfPost == ALL) {
-					
-					switch (whoCanCommentThis) {
-					case ALL: allowed = isOwner || isRegularUser; break;
-					case FRIENDS: allowed = isOwner || (isRegularUser && 
-						followersService.isFollow(issuerId, ownerId)); break;
-					case ME: allowed = isOwner; break;
-					}
-					
-				} else if (visibilityOfPost == FRIENDS) {
-					
-					if (whoCanCommentThis == ALL || 
-							whoCanCommentThis == FRIENDS) {
-						allowed = isOwner || (isRegularUser && 
-						followersService.isFollow(issuerId, ownerId));
-					} else {
-						allowed = isOwner;
-					}
-					
-				} else if (visibilityOfPost == ME) {
-					allowed = isOwner;
-				}
-				*/
 				boolean canCommentPost = canCommentPost(
 						streamPostService.getById(destinationId, version),
-						ownerId, issuerId, posted.getPriority() == null);
+						ownerId, issuerId, posted);
 				
 				if (canCommentPost || securityContext.getToken().isSuper()) {
 					messageService.saveUnderStreamPost(
@@ -181,43 +161,46 @@ public class MessageController {
 		throw new WebApplicationException(ACCESS_DENIED);
 	}
 	
-	protected boolean canCommentPost(StreamPostDTO post, int ownerId,
-			int issuerId, boolean isRegularUser) {
-			final Visibility whoCanCommentThis = post.getCommentable();
-			final boolean isOwner = ownerId == issuerId;
-			final Visibility visibilityOfPost = post.getVisibility();
-			boolean allowed = false;
+	protected boolean canCommentPost(Optional<StreamPostDTO> maybePost, 
+			int ownerId, int issuerId, MessageDTO posted) {
+		final StreamPostDTO post = maybePost.orElseThrow(() -> 
+					new WebApplicationException(ACCESS_DENIED));
+		
+		final Visibility whoCanCommentThis = post.getCommentable();
+		final boolean isOwner = ownerId == issuerId;
+		final Visibility visibilityOfPost = post.getVisibility();
+		final boolean isRegularUser = posted.getPriority() == null;
+		boolean allowed = false;
 			
-			if (visibilityOfPost == ALL) {
-				
-				switch (whoCanCommentThis) {
-				case ALL: allowed = isOwner || isRegularUser; break;
-				case FRIENDS: allowed = isOwner || (isRegularUser && 
-					followersService.isFollow(issuerId, ownerId)); break;
-				case ME: allowed = isOwner; break;
-				}
-				
-			} else if (visibilityOfPost == FRIENDS) {
-				
-				if (whoCanCommentThis == ALL || 
-						whoCanCommentThis == FRIENDS) {
-					allowed = isOwner || (isRegularUser && 
-					followersService.isFollow(issuerId, ownerId));
-				} else {
-					allowed = isOwner;
-				}
-				
-			} else if (visibilityOfPost == ME) {
-				allowed = isOwner;
+		if (visibilityOfPost == ALL) {
+			
+			switch (whoCanCommentThis) {
+			case ALL: allowed = isOwner || isRegularUser; break;
+			case FRIENDS: allowed = isOwner || (isRegularUser && 
+				followersService.isFollow(issuerId, ownerId)); break;
+			case ME: allowed = isOwner; break;
 			}
 			
-			return allowed;
+		} else if (visibilityOfPost == FRIENDS) {
+			
+			if (whoCanCommentThis == ALL || whoCanCommentThis == FRIENDS) {
+				allowed = isOwner || (isRegularUser && 
+				followersService.isFollow(issuerId, ownerId));
+			} else {
+				allowed = isOwner;
+			}
+				
+		} else if (visibilityOfPost == ME) {
+			allowed = isOwner;
+		}
+			
+		return allowed;
 	}
 	
 	@PutMapping(consumes = {
-			APPLICATION_ACCEPT_PREFIX+".message+json", 
-			APPLICATION_ACCEPT_PREFIX+".message+xml"},
-			path = "/{owner}/{owner_id}/{destination}/{destination_id}/messages")
+		APPLICATION_ACCEPT_PREFIX+".message+json", 
+		APPLICATION_ACCEPT_PREFIX+".message+xml"},
+		path = "/{owner}/{owner_id}/{destination}/{destination_id}/messages")
 	@Secured(access = Access.READ_WRITE, scope = { Scope.MESSAGE })
 	public ResponseEntity<MessageDTO> updateMessage(
 			HttpEntity<MessageDTO> entity,
@@ -242,21 +225,25 @@ public class MessageController {
 		
 		if (destination == Destination.STREAM_POST) {
 			
-			if (owner == Owner.PROFILE 
-					&& streamPostService.profileHasPost(ownerId, destinationId)) {
+			if (owner == Owner.PROFILE && streamPostService
+					.profileHasPost(ownerId, destinationId)) {
 				
-				final boolean isAuthorRequested = 
-						messageService.isBelongsTo(issuerId, posted.getId());
+				final boolean isAuthor = 
+						messageService.isAuthorOf(issuerId, posted.getId());
 				final boolean canCommentPost = canCommentPost(
 						streamPostService.getById(destinationId, version),
-						ownerId, issuerId, posted.getPriority() == null);
+						ownerId, issuerId, posted);
 				final boolean isOwner = ownerId == issuerId;
-				final boolean isAuthorAndOwner = isAuthorRequested && isOwner;
+				final boolean isAuthorAndOwner = isAuthor && isOwner;
+				final boolean isAuthorOfMessageButNotOwnerOfPost = 
+						isAuthor && !isOwner && posted.getPriority() == null;
+				final boolean isNotAuthorOfMessageButOwnerOfPost = 
+						!isAuthor && isOwner && posted.getContent() == null;
 				
 				if (securityContext.getToken().isSuper() || (canCommentPost
 						&& (isAuthorAndOwner || 
-			(!isAuthorRequested && isOwner && posted.getContent() == null) || 
-            (isAuthorRequested && !isOwner && posted.getPriority() == null)))) {
+								isNotAuthorOfMessageButOwnerOfPost || 
+								isAuthorOfMessageButNotOwnerOfPost))) {
 					
 					messageService.update(posted, version);
 					return ResponseEntity.noContent().build();
@@ -270,12 +257,79 @@ public class MessageController {
 	/**
 	 * Request parameter 'repliesFor=%id%' return all replies for comment with
 	 * given id. If not specified only comments which are not replies 
-	 * to other comments will be returned.
+	 * to other comments will be returned. Returned objects has additional
+	 * field describing count of replies.
 	 * */
 	@GetMapping(produces = { 
-			APPLICATION_ACCEPT_PREFIX+".message+json", 
-			APPLICATION_ACCEPT_PREFIX+".message+xml"},
-			path = "/{owner}/{owner_id}/{destination}/{destination_id}/messages")
+		APPLICATION_ACCEPT_PREFIX+".message+json", 
+		APPLICATION_ACCEPT_PREFIX+".message+xml"},
+		path = "/{owner}/{owner_id}/{destination}/{destination_id}/messages")
+	public ResponseEntity<List<MessageDTO>> getMessages(
+			@PathVariable("owner") Owner owner,
+			@PathVariable("owner_id") int ownerId,
+			@PathVariable("destination") Destination destination,
+			@PathVariable("destination_id") int destinationId,
+			@RequestParam(name = "repliesFor",required=false) Integer replyId,
+			PageAndSortExtended pageAndSort) {
+		
+		if (owner == Owner.PROFILE) {
+			
+			if (destination == Destination.STREAM_POST) {
+				
+				final StreamPostDTO post = streamPostService.getById(
+							destinationId, pageAndSort.getObjectVersion())
+						.orElseThrow(() -> 
+						new WebApplicationException(ACCESS_DENIED));
+				
+				if (post.getAssociatedProfile() != ownerId) {
+					throw new WebApplicationException(ACCESS_DENIED);
+				}
+				
+				final Visibility visibilityOfPost = post.getVisibility();
+				boolean isAllowed = visibilityOfPost == ALL;
+				boolean isSuperOrOwnerRequest = false; 
+			
+				if (securityContext.isAuthorized()) {
+					final User issuer = securityContext.getToken().getUser()
+						.orElseThrow(UnrecognizedUserException::new);
+					final Integer issuerId = issuer.getIdAsInt();
+					
+					isSuperOrOwnerRequest = issuerId == ownerId ||
+							securityContext.getToken().isSuper();
+					
+					if (visibilityOfPost == FRIENDS) {
+						isAllowed = isSuperOrOwnerRequest || 
+							followersService.isFollow(issuerId, ownerId);
+					}
+					
+					isAllowed = isSuperOrOwnerRequest || isAllowed;
+					
+					if (isAllowed) {
+						return ResponseEntity.ok(messageService
+								.getListOfRepliesForMessageUnderStreamPost(
+								destinationId, pageAndSort, issuerId,
+								replyId, isSuperOrOwnerRequest));
+					}
+				}
+				
+				if (isAllowed) {
+					return ResponseEntity.ok(messageService
+							.getListOfRepliesForMessageUnderStreamPost(
+							destinationId, pageAndSort, replyId, false));
+				}
+			}
+		}
+		
+		throw new WebApplicationException(ACCESS_DENIED);
+	}
+	
+	/**
+	 * GETs all messages under stream post. 
+	 * Returned message can be reply to other message or not.
+	 * */
+	@GetMapping(produces = { APPLICATION_ACCEPT_PREFIX+".message+json", 
+	APPLICATION_ACCEPT_PREFIX+".message+xml"},
+	path = "/{owner}/{owner_id}/{destination}/{destination_id}/messagesList")
 	public ResponseEntity<List<MessageDTO>> getMessages(
 			@PathVariable("owner") Owner owner,
 			@PathVariable("owner_id") int ownerId,
@@ -285,11 +339,17 @@ public class MessageController {
 		
 		if (owner == Owner.PROFILE) {
 			
-			if (destination == Destination.STREAM_POST && 
-					streamPostService.profileHasPost(ownerId, destinationId)) {
+			if (destination == Destination.STREAM_POST) {
 				
-				final StreamPostDTO post = streamPostService.getById(
-							destinationId, pageAndSort.getObjectVersion());
+				final StreamPostDTO post = streamPostService
+						.getById(destinationId, pageAndSort.getObjectVersion())
+						.orElseThrow(() -> 
+								new WebApplicationException(ACCESS_DENIED));
+				
+				if (post.getAssociatedProfile() != ownerId) {
+					throw new WebApplicationException(ACCESS_DENIED);
+				}
+				
 				final Visibility visibilityOfPost = post.getVisibility();
 				boolean isAllowed = visibilityOfPost == ALL;
 				boolean isSuperOrOwnerRequest = false; 
@@ -298,6 +358,7 @@ public class MessageController {
 					final User issuer = securityContext.getToken().getUser()
 						.orElseThrow(UnrecognizedUserException::new);
 					final Integer issuerId = issuer.getIdAsInt();
+					
 					isSuperOrOwnerRequest = issuerId == ownerId ||
 							securityContext.getToken().isSuper();
 					
@@ -305,12 +366,21 @@ public class MessageController {
 						isAllowed = isSuperOrOwnerRequest || 
 							followersService.isFollow(issuerId, ownerId);
 					}
+					
+					isAllowed = isSuperOrOwnerRequest || isAllowed;
+					
+					if (isAllowed) {
+						return ResponseEntity.ok(messageService
+								.getListOfRepliesForStreamPost(
+								destinationId, issuerId, pageAndSort, 
+								isSuperOrOwnerRequest));
+					}
 				}
 				
-				if (isSuperOrOwnerRequest || isAllowed) {
+				if (isAllowed) {
 					return ResponseEntity.ok(messageService
-						.getListForStreamPost(destinationId, 
-								pageAndSort, isSuperOrOwnerRequest));
+							.getListOfRepliesForStreamPost(
+							destinationId, pageAndSort, false));
 				}
 			}
 		}
@@ -318,5 +388,129 @@ public class MessageController {
 		throw new WebApplicationException(ACCESS_DENIED);
 	}
 	
+	/**
+	 * GETs all messages under stream post only with given ids. 
+	 * Returned message can be reply to other message or not.
+	 * */
+	@GetMapping(produces = { APPLICATION_ACCEPT_PREFIX+".message+json", 
+	APPLICATION_ACCEPT_PREFIX+".message+xml"},
+	path = "/{owner}/{owner_id}/{destination}/{destination_id}/{ids}")
+	public ResponseEntity<List<MessageDTO>> getMessagesByIds(
+			@PathVariable("owner") Owner owner,
+			@PathVariable("owner_id") int ownerId,
+			@PathVariable("destination") Destination destination,
+			@PathVariable("destination_id") int destinationId,
+			@PathVariable("ids") String messageIds,
+			PageAndSortExtended pageAndSort) {
+		
+		List<Integer> ids = Pattern.compile("-").splitAsStream(messageIds)
+				.limit(75).map(Integer::valueOf).collect(Collectors.toList());
+		
+		if (owner == Owner.PROFILE) {
+			
+			if (destination == Destination.STREAM_POST) {
+				
+				final StreamPostDTO post = streamPostService
+						.getById(destinationId, pageAndSort.getObjectVersion())
+							.orElseThrow(() -> 
+								new WebApplicationException(ACCESS_DENIED));
+				
+				if (post.getAssociatedProfile() != ownerId) {
+					throw new WebApplicationException(ACCESS_DENIED);
+				}
+				
+				final Visibility visibilityOfPost = post.getVisibility();
+				boolean isAllowed = visibilityOfPost == ALL;
+				boolean isSuperOrOwnerRequest = false; 
+			
+				if (securityContext.isAuthorized()) {
+					final User issuer = securityContext.getToken().getUser()
+						.orElseThrow(UnrecognizedUserException::new);
+					final Integer issuerId = issuer.getIdAsInt();
+					
+					isSuperOrOwnerRequest = issuerId == ownerId ||
+							securityContext.getToken().isSuper();
+					
+					if (visibilityOfPost == FRIENDS) {
+						isAllowed = followersService
+								.isFollow(issuerId, ownerId);
+					}
+					
+					isAllowed = isSuperOrOwnerRequest || isAllowed;
+					
+					if (isAllowed) {
+						return ResponseEntity.ok(messageService
+								.getListOfMessagesUnderStreamPost(
+										destinationId,pageAndSort, 
+										ids, issuerId));
+					}
+				}
+				
+				if (isAllowed) {
+					return ResponseEntity.ok(messageService
+							.getListOfMessagesUnderStreamPost(destinationId, 
+									pageAndSort, ids));
+				} 
+			}
+		}
+		
+		throw new WebApplicationException(ACCESS_DENIED);
+	}
+	
+	/**
+	 * GETs map consists of message - reply ids pairs.
+	 * */
+	@GetMapping(produces = { 
+	APPLICATION_ACCEPT_PREFIX+".message+json", 
+	APPLICATION_ACCEPT_PREFIX+".message+xml"},
+	path = "/{owner}/{owner_id}/{destination}/{destination_id}/messages/map")
+	public ResponseEntity<Map<Integer, Integer>> getMessagesMap(
+			@PathVariable("owner") Owner owner,
+			@PathVariable("owner_id") int ownerId,
+			@PathVariable("destination") Destination destination,
+			@PathVariable("destination_id") int destinationId,
+			PageAndSortExtended pageAndSort) {
+		
+		if (owner == Owner.PROFILE) {
+			
+			if (destination == Destination.STREAM_POST) {
+				
+				final StreamPostDTO post = streamPostService
+						.getById(destinationId, pageAndSort.getObjectVersion())
+							.orElseThrow(() -> 
+								new WebApplicationException(ACCESS_DENIED));
+				
+				if (post.getAssociatedProfile() != ownerId) {
+					throw new WebApplicationException(ACCESS_DENIED);
+				}
+				
+				final Visibility visibilityOfPost = post.getVisibility();
+				boolean isAllowed = visibilityOfPost == ALL;
+				boolean isSuperOrOwnerRequest = false; 
+			
+				if (securityContext.isAuthorized()) {
+					final User issuer = securityContext.getToken().getUser()
+						.orElseThrow(UnrecognizedUserException::new);
+					final Integer issuerId = issuer.getIdAsInt();
+					
+					isSuperOrOwnerRequest = issuerId == ownerId ||
+							securityContext.getToken().isSuper();
+					
+					if (visibilityOfPost == FRIENDS) {
+						isAllowed = followersService
+								.isFollow(issuerId, ownerId);
+					}
+				}
+				
+				if (isSuperOrOwnerRequest || isAllowed) {
+					return ResponseEntity.ok(messageService
+							.getMessageIdReplyIdForStreamPost(destinationId, 
+									pageAndSort, isSuperOrOwnerRequest));
+				} 
+			}
+		}
+		
+		throw new WebApplicationException(ACCESS_DENIED);
+	}
 	
 }

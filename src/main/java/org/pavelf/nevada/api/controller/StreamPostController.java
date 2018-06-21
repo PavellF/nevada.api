@@ -14,13 +14,11 @@ import org.pavelf.nevada.api.domain.StreamPostDTO;
 import org.pavelf.nevada.api.domain.Version;
 import org.pavelf.nevada.api.exception.UnrecognizedUserException;
 import org.pavelf.nevada.api.exception.WebApplicationException;
-import org.pavelf.nevada.api.persistence.domain.Sorting;
 import org.pavelf.nevada.api.persistence.domain.Visibility;
 import org.pavelf.nevada.api.security.Secured;
 import org.pavelf.nevada.api.security.TokenContext;
 import org.pavelf.nevada.api.security.User;
 import org.pavelf.nevada.api.service.FollowersService;
-import org.pavelf.nevada.api.service.PageAndSort;
 import org.pavelf.nevada.api.service.PageAndSortExtended;
 import org.pavelf.nevada.api.service.ProfilePreferencesService;
 import org.pavelf.nevada.api.service.ProfileService;
@@ -28,7 +26,6 @@ import org.pavelf.nevada.api.service.StreamPostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,9 +33,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Exposes endpoints to access {@code StreamPost} resource.
+ * @author Pavel F.
+ * @since 1.0
+ * */
 @RestController
 public class StreamPostController {
 
@@ -86,41 +87,49 @@ public class StreamPostController {
 			path = "/{destination}/{destination_id}/posts")	
 	public ResponseEntity<List<StreamPostDTO>> getStreamPostsForDestination(
 			@PathVariable("destination") Destination destination,
-			@PathVariable("destination_id") int destinationId,
-			PageAndSort pageAndSort) { 
+			@PathVariable("destination_id") String destinationId,
+			PageAndSortExtended pageAndSort) { 
 		
 		if (destination == Destination.PROFILE) {
+			final Integer destId = Integer.valueOf(destinationId);
 			
 			if (principal.isAuthorized()) {
 				final User issuer = principal.getToken().getUser()
-				.orElseThrow(UnrecognizedUserException::new);
+						.orElseThrow(UnrecognizedUserException::new);
+				final Integer issuerId = issuer.getIdAsInt();
 				
-				if (issuer.getIdAsInt() == destinationId || 
-				principal.getToken().isSuper()) {
+				if (issuerId == destId || principal.getToken().isSuper()) {
 			
-				return ResponseEntity.ok(streamPostService.getAllForProfile(
-						Integer.valueOf(destinationId), pageAndSort, null));
-			
+					return ResponseEntity.ok(streamPostService
+						.getAllForProfile(destId, pageAndSort));
 				}
-			}
-			
-			final Integer destId = Integer.valueOf(destinationId);
-			final Integer issuerId = issuer.getIdAsInt();
-			boolean areFriends = followersService
+				
+				final boolean areFriends = followersService
 						.isFollow(issuerId, destId);
-			if (areFriends) {
-				return ResponseEntity.ok(streamPostService
-						.getAllForProfile(destId, pageAndSort, issuerId,
-								Visibility.ALL, Visibility.FRIENDS));
+				
+				if (areFriends) {
+					return ResponseEntity.ok(streamPostService
+							.getAllForProfile(destId, pageAndSort, issuerId,
+									Visibility.ALL, Visibility.FRIENDS));
+				}
 			} else {
 				return ResponseEntity.ok(streamPostService.getAllForProfile(
-						destId, pageAndSort, issuerId, Visibility.ALL));
+						destId, pageAndSort, Visibility.ALL));
 			}
 				
 		} else if (destination == Destination.TAG) {
 			
-			return ResponseEntity.ok(streamPostService
-					.getAllForTag(destinationId, pageAndSort, ));
+			if (principal.isAuthorized()) {
+				final User issuer = principal.getToken().getUser()
+						.orElseThrow(UnrecognizedUserException::new);
+				final Integer issuerId = issuer.getIdAsInt();
+				
+				return ResponseEntity.ok(streamPostService
+						.getAllForTag(destinationId, pageAndSort, issuerId));
+			} else {
+				return ResponseEntity.ok(streamPostService
+					.getAllForTag(destinationId, pageAndSort));
+			}
 		}
 		
 		return ResponseEntity.badRequest().build();
@@ -159,8 +168,10 @@ public class StreamPostController {
 			boolean isDestinationOwner = destinationId == issuerId;
 			
 			if (isDestinationOwner || principal.getToken().isSuper()) {
-				this.streamPostService.createOnProfile(posted, destinationId, version);
-				return ResponseEntity.created(URI.create("profile/"+destinationId+"/posts")).build();
+				streamPostService.createOnProfile(
+						posted, destinationId, version);
+				return ResponseEntity.created(
+						URI.create("profile/"+destinationId+"/posts")).build();
 				
 			} else {
 				
@@ -196,15 +207,14 @@ public class StreamPostController {
 			}
 		}
 		
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		return ResponseEntity.badRequest().build();
 	}
-	
 	
 	@PutMapping(consumes = {
 			APPLICATION_ACCEPT_PREFIX+".post+json", 
 			APPLICATION_ACCEPT_PREFIX+".post+xml"},
 			path = "/{destination}/{destination_id}/posts")
-	@Secured(access = Access.READ_WRITE, scope = { Scope.STREAM})
+	@Secured(access = Access.READ_WRITE, scope = { Scope.STREAM })
 	public ResponseEntity<StreamPostDTO> updateStreamPost(
 			HttpEntity<StreamPostDTO> entity,
 			@PathVariable("destination") Destination destination,
@@ -221,10 +231,8 @@ public class StreamPostController {
 		}
 		
 		if (principal.getToken().isSuper()) {
-			if(streamPostService.update(posted, version)) {
-				return ResponseEntity.noContent().build();
-			}
-			throw new WebApplicationException(FAILED_UPDATE);
+			streamPostService.update(posted, version);
+			return ResponseEntity.noContent().build();
 		}
 		
 		if (posted.getPopularity() != null) {
@@ -234,19 +242,14 @@ public class StreamPostController {
 		if (Destination.PROFILE == destination) {
 			// stream owner can only change priority and visibility
 			if (issuerId == destinationId && posted.getContent() == null) {
-				if(streamPostService.update(posted, version)) {
-					return ResponseEntity.noContent().build();
-				}
-				throw new WebApplicationException(FAILED_UPDATE);
+				streamPostService.update(posted, version);
+				return ResponseEntity.noContent().build();
 			}
 			//post owner can not change priority
-			
 			if (streamPostService.belongsTo(issuerId, posted.getId()) 
 					&& posted.getPriority() == null) {
-				if(streamPostService.update(posted, version)) {
-					return ResponseEntity.noContent().build();
-				}
-				throw new WebApplicationException(FAILED_UPDATE);
+				streamPostService.update(posted, version);
+				return ResponseEntity.noContent().build();
 			}
 		}
 		
@@ -254,17 +257,18 @@ public class StreamPostController {
 	}
 	
 	@DeleteMapping(path = "/{destination}/{destination_id}/posts/{id}")
-	@Secured(access = Access.READ_WRITE, scope = { Scope.STREAM})
+	@Secured(access = Access.READ_WRITE, scope = { Scope.STREAM })
 	public ResponseEntity<StreamPostDTO> deleteStreamPost(
 			@PathVariable("id") int postId,
 			@PathVariable("destination") Destination destination,
 			@PathVariable("destination_id") int destinationId) {
 		final User issuer = principal.getToken().getUser().orElseThrow(() -> 
-		new WebApplicationException(UNRECOGNIZED_USER));
+			new WebApplicationException(UNRECOGNIZED_USER));
 		final int issuerId = issuer.getIdAsInt();
 		
 		if (Destination.PROFILE == destination) {
-			if (issuerId == destinationId || streamPostService.belongsTo(issuerId, postId)
+			if (issuerId == destinationId 
+					|| streamPostService.belongsTo(issuerId, postId)
 					|| principal.getToken().isSuper()) {
 				streamPostService.deleteStreamPost(postId);
 				return ResponseEntity.noContent().build();
