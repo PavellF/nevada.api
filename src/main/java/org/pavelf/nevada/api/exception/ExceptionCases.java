@@ -2,19 +2,25 @@ package org.pavelf.nevada.api.exception;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * Describes domain-specific exception cases.
+ * @author Pavel F.
+ * @since 1.0
+ * */
 public interface ExceptionCases {
 
 	public static final ExceptionCase MULTIPLE_IP_REQUESTS =
 			ExceptionCase.of(1, "Too many requests that have the same token "
-					+ "from defferent IP addresses has come in short period of time.", 
-					HttpStatus.FORBIDDEN);
+					+ "from defferent IP addresses has come in short "
+					+ "period of time...", HttpStatus.FORBIDDEN);
 	
 	public final ExceptionCase HEADER_SHOULD_BE_SPECIFIED = 
-			ExceptionCase.of(2, "Accept or Content-Type header should be specified.", 
+			ExceptionCase.of(2, "Some of required headers are missing!", 
 					HttpStatus.BAD_REQUEST);
 	
-	public static final ExceptionCase MALFORMED_ACCEPT_HEADER =
-			ExceptionCase.of(3, "Could not recognize incomig request's header version parameter. ", 
+	public static final ExceptionCase UNKNOWN_VERSION =
+			ExceptionCase.of(3, 
+					"Could not recognize incomig request's header version.", 
 					HttpStatus.BAD_REQUEST);
 	
 	public static final ExceptionCase MALFORMED_VERSION =
@@ -22,11 +28,11 @@ public interface ExceptionCases {
 					HttpStatus.BAD_REQUEST);
 	
 	public static final ExceptionCase REQUIRED_BODY_PROPERTY =
-			ExceptionCase.of(5, "One of required properties in the body was not set.", 
-					HttpStatus.BAD_REQUEST);
+			ExceptionCase.of(5, "One of required properties in the "
+					+ "body was not set.", HttpStatus.BAD_REQUEST);
 	
 	public static final ExceptionCase UNRECOGNIZED_USER =
-			ExceptionCase.of(6, "Could not recognize bounded user.", 
+			ExceptionCase.of(6, "Could not recognize user.", 
 					HttpStatus.FORBIDDEN);
 	
 	public static final ExceptionCase UNRECOGNIZED_APPLICATION =
@@ -34,12 +40,12 @@ public interface ExceptionCases {
 					HttpStatus.FORBIDDEN);
 	
 	public static final ExceptionCase BANNED_APPLICATION =
-			ExceptionCase.of(8, "Specified application can not perform requests due suspend.", 
-					HttpStatus.FORBIDDEN);
+			ExceptionCase.of(8, "Specified application can not perform "
+					+ "requests due suspend.", HttpStatus.FORBIDDEN);
 	
 	public static final ExceptionCase INVALID_BODY_PROPERTY =
-			ExceptionCase.of(9, "Some of body property is invalid(e.g. invalid time).", 
-					HttpStatus.BAD_REQUEST);
+			ExceptionCase.of(9, "Some of body property is invalid "
+					+ "(e.g. invalid time).", HttpStatus.BAD_REQUEST);
 	
 	public static final ExceptionCase ACCESS_DENIED =
 			ExceptionCase.of(10, "Have no permission to access this endpoint.", 
@@ -50,28 +56,32 @@ public interface ExceptionCases {
 					HttpStatus.BAD_REQUEST);
 	
 	public static final ExceptionCase BODY_REQUIRED =
-			ExceptionCase.of(12, "Request body is required to perform this action.", 
-					HttpStatus.BAD_REQUEST);
+			ExceptionCase.of(12, "Request body is required to "
+					+ "perform this action.", HttpStatus.BAD_REQUEST);
 	
 	public static final ExceptionCase FAILED_UPDATE =
 			ExceptionCase.of(13, "Could not update entity.", 
 					HttpStatus.INTERNAL_SERVER_ERROR);
 	
 	public static final ExceptionCase NO_PREVIOUS_PASSWORD =
-			ExceptionCase.of(14, "Need current password in order to update existing one.", 
-					HttpStatus.FORBIDDEN);
+			ExceptionCase.of(14, "Need current password in order "
+					+ "to update existing one.", HttpStatus.FORBIDDEN);
 	
 	public static final ExceptionCase BANNED_PROFILE =
 			ExceptionCase.of(15, "This profile cn not perform requests.", 
 					HttpStatus.FORBIDDEN);
 	
 	public static final ExceptionCase FORBIDDEN_BODY_PROPERTY =
-			ExceptionCase.of(16, "Some of body properties set are disallowed for this user.", 
-					HttpStatus.BAD_REQUEST);
+			ExceptionCase.of(16, "Some of body properties set are "
+					+ "disallowed for this user.", HttpStatus.BAD_REQUEST);
 	
 	public static final ExceptionCase INVALID_REQUEST_PARAM =
 			ExceptionCase.of(17, 
-					"Some of request params are invalid, maybe some values out of bound.", 
-					HttpStatus.BAD_REQUEST);
+					"Some of request params are invalid, maybe some "
+					+ "values out of bound.", HttpStatus.BAD_REQUEST);
+	
+	public static final ExceptionCase INTERNAL_SERVER_ERROR =
+			ExceptionCase.of(18, "Something went wrong on server side.", 
+					HttpStatus.INTERNAL_SERVER_ERROR);
 	
 }

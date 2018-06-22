@@ -1,5 +1,10 @@
 package org.pavelf.nevada.api.logging;
 
+/**
+ * Defines general purpose application logger.
+ * @author Pavel F.
+ * @since 1.0
+ * */
 public interface Logger {
 
 	public void info(String message);

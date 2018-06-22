@@ -11,15 +11,15 @@ public class WebApplicationException extends RuntimeException {
 	private final ExceptionCase exceptionCase;
 	
 	public WebApplicationException(ExceptionCase exceptionCase) {
-		super(exceptionCase.toString());
+		super(exceptionCase.getMessage());
 		this.exceptionCase = exceptionCase;
 	}
 
+	/**
+	 * Gets associated {@code ExceptionCase}. Never {@code null}.
+	 * */
 	public ExceptionCase getExceptionCase() {
 		return exceptionCase;
 	}
 
-	
-
-	
 }

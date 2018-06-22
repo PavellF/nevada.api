@@ -1,30 +1,8 @@
 package org.pavelf.nevada.api.domain;
 
 import java.time.Instant;
-import java.util.Arrays;
-
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Past;
-import javax.validation.constraints.Size;
-
-import org.pavelf.nevada.api.persistence.domain.Message;
-import org.pavelf.nevada.api.domain.PersonDTO;
-import org.pavelf.nevada.api.persistence.domain.Photo;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import javax.annotation.Generated;
 
 /**
  * Represents application profile.

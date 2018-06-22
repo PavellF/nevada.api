@@ -6,7 +6,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
- * Represents created application from which will be performed calls on endpoints.
+ * Represents created application from which will 
+ * be performed calls on endpoints.
  * @since 1.0
  * @author Pavel F.
  * */

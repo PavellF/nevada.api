@@ -16,7 +16,10 @@ import org.pavelf.nevada.api.resolver.PageAndSortResolver;
 import org.pavelf.nevada.api.resolver.VersionConverter;
 import org.pavelf.nevada.api.security.IpTokenInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.env.Environment;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -37,16 +40,27 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 	    registry.addInterceptor(
-	    		new IpTokenInterceptor(Duration.of(5, ChronoUnit.SECONDS), logger, 
-	    				(String token) -> {
-	    					throw new WebApplicationException(ExceptionCases.MULTIPLE_IP_REQUESTS);
-	    				})).order(1);
+	    		new IpTokenInterceptor(Duration.of(5, ChronoUnit.SECONDS),
+	    				logger, (String token) -> {
+	    					throw new WebApplicationException(
+	    							ExceptionCases.MULTIPLE_IP_REQUESTS);
+	    			})).order(1);
 	 }
 	
 	@Override
     public void addFormatters(FormatterRegistry registry) {
         registry.addConverter(new VersionConverter());
     }
+	
+	@Bean
+	public MessageSource messageSource() {
+		ReloadableResourceBundleMessageSource messageSource = 
+				new ReloadableResourceBundleMessageSource();
+		messageSource.setBasenames(
+				"classpath:locale/WebAppExceptionMessages");
+		messageSource.setDefaultEncoding("UTF-8");
+		return messageSource;
+	}
 	
 	@Override
     public void addArgumentResolvers(

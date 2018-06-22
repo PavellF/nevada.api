@@ -94,20 +94,19 @@ public interface MessageService {
 	/**
 	 * Obtains message id and replied message id pairs, if any. 
 	 * @param postId of post.
-	 * @param params parameters of returned list.
 	 * @param archivedIncluded whether to include already archived messages.
 	 * @return never {@link null} may be empty map.
 	 * @throws IllegalArgumentException if null passed.
 	 * */
 	public Map<Integer, Integer> getMessageIdReplyIdForStreamPost(int postId, 
-			PageAndSortExtended params, boolean archivedIncluded);
+			boolean archivedIncluded);
 	
 	/**
 	 * Finds all messages ever posted by this user.
 	 * @param profileId profile identifier.
 	 * @param params fetch options.
-	 * @param issuerId will be returned additional field with information 
-	 * whether this user liked message or {@code null} if not.
+	 * @param issuerId will be returned additional field with rating this 
+	 * user liked message.
 	 * @param archivedIncluded whether to include already archived messages.
 	 * @return never {@code null}, may be empty {@code List}.
 	 * @throws IllegalArgumentException if null passed.

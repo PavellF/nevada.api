@@ -2,20 +2,14 @@ package org.pavelf.nevada.api.controller;
 
 import static org.pavelf.nevada.api.Application.APPLICATION_ACCEPT_PREFIX;
 import static org.pavelf.nevada.api.exception.ExceptionCases.*;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
-import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
-
 import java.net.URI;
-import java.time.Instant;
 import java.util.List;
 
 import org.pavelf.nevada.api.domain.Access;
-import org.pavelf.nevada.api.domain.ApplicationDTO;
 import org.pavelf.nevada.api.domain.Owner;
 import org.pavelf.nevada.api.domain.Scope;
 import org.pavelf.nevada.api.domain.TokenDTO;
 import org.pavelf.nevada.api.domain.Version;
-import org.pavelf.nevada.api.domain.VersionImpl;
 import org.pavelf.nevada.api.exception.WebApplicationException;
 import org.pavelf.nevada.api.security.Secured;
 import org.pavelf.nevada.api.security.TokenContext;
@@ -26,17 +20,19 @@ import org.pavelf.nevada.api.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Exposes endpoints that can accept and emit {@code Token} objects.
+ * @author Pavel F.
+ * @since 1.0
+ * */
 @RestController
 public class TokenController {
 

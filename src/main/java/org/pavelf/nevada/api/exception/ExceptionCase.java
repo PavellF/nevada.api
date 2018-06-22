@@ -3,8 +3,8 @@ package org.pavelf.nevada.api.exception;
 import org.springframework.http.HttpStatus;
 
 /**
- * Defines application specific exception information. Immutable. Usually serialized and send to client
- * over the wire in form of json or xml.
+ * Defines application specific exception information. Immutable. 
+ * Usually serialized and send to client over the wire in form of json or xml.
  * @since 1.0
  * @author Pavel F.
  * */
@@ -26,7 +26,8 @@ public class ExceptionCase {
 	 * @param httpStatus HTTP code associated with this exception case.
 	 * @throws IllegalArgumentException if null or empty string passed.
 	 * */
-	public static ExceptionCase of (int code, String message, HttpStatus httpStatus) {
+	public static ExceptionCase of(int code, String message, 
+			HttpStatus httpStatus) {
 		if (message == null || httpStatus == null || message.isEmpty()) {
 			throw new IllegalArgumentException("Null or empty string passed.");
 		}
@@ -61,6 +62,38 @@ public class ExceptionCase {
 
 	public HttpStatus getHttpStatus() {
 		return httpStatus;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + code;
+		result = prime * result
+				+ ((httpStatus == null) ? 0 : httpStatus.hashCode());
+		result = prime * result + ((message == null) ? 0 : message.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ExceptionCase other = (ExceptionCase) obj;
+		if (code != other.code)
+			return false;
+		if (httpStatus != other.httpStatus)
+			return false;
+		if (message == null) {
+			if (other.message != null)
+				return false;
+		} else if (!message.equals(other.message))
+			return false;
+		return true;
 	}
 
 

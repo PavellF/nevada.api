@@ -76,11 +76,11 @@ public final class VersionImpl implements Version {
 				}
 			}
 			
-			throw new WebApplicationException(HEADER_SHOULD_BE_SPECIFIED);
+			throw new WebApplicationException(UNKNOWN_VERSION);
 			
 		} catch (InvalidMediaTypeException imte) {
 			WebApplicationException e  
-			= new WebApplicationException(MALFORMED_ACCEPT_HEADER);
+			= new WebApplicationException(MALFORMED_VERSION);
 			e.initCause(imte);
 			throw e;
 		}

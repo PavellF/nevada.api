@@ -4,15 +4,12 @@ import static org.pavelf.nevada.api.Application.APPLICATION_ACCEPT_PREFIX;
 import static org.pavelf.nevada.api.exception.ExceptionCases.*;
 
 import java.net.URI;
-import java.util.List;
-
 import org.pavelf.nevada.api.domain.Access;
 import org.pavelf.nevada.api.domain.PersonDTO;
 import org.pavelf.nevada.api.domain.Scope;
 import org.pavelf.nevada.api.domain.Version;
 import org.pavelf.nevada.api.exception.UnrecognizedUserException;
 import org.pavelf.nevada.api.exception.WebApplicationException;
-import org.pavelf.nevada.api.persistence.domain.Sorting;
 import org.pavelf.nevada.api.security.Secured;
 import org.pavelf.nevada.api.security.TokenContext;
 import org.pavelf.nevada.api.security.User;
@@ -26,9 +23,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Exposes endpoints that can accept and emit {@code Person} objects.
+ * @author Pavel F.
+ * @since 1.0
+ * */
 @RestController
 public class PersonController {
 

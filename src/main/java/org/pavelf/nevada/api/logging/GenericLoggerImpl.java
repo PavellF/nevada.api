@@ -1,5 +1,11 @@
 package org.pavelf.nevada.api.logging;
 
+/**
+ * Basic slf4j backed implementation for {@code Logger} that writes logs into 
+ * file.
+ * @author Pavel F.
+ * @since 1.0
+ * */
 public class GenericLoggerImpl implements Logger {
 
 	private org.slf4j.Logger logger;

@@ -46,7 +46,6 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Exposes some endpoints that can accept and emit {@code Message} objects.
  * @author Pavel F.
- * @param <T>
  * @since 1.0
  * */
 @RestController
@@ -461,24 +460,23 @@ public class MessageController {
 	 * GETs map consists of message - reply ids pairs.
 	 * */
 	@GetMapping(produces = { 
-	APPLICATION_ACCEPT_PREFIX+".message+json", 
-	APPLICATION_ACCEPT_PREFIX+".message+xml"},
+	APPLICATION_ACCEPT_PREFIX+".messageMap+json", 
+	APPLICATION_ACCEPT_PREFIX+".messageMap+xml"},
 	path = "/{owner}/{owner_id}/{destination}/{destination_id}/messages/map")
 	public ResponseEntity<Map<Integer, Integer>> getMessagesMap(
 			@PathVariable("owner") Owner owner,
 			@PathVariable("owner_id") int ownerId,
 			@PathVariable("destination") Destination destination,
 			@PathVariable("destination_id") int destinationId,
-			PageAndSortExtended pageAndSort) {
+			@RequestHeader(HttpHeaders.ACCEPT) Version version) {
 		
 		if (owner == Owner.PROFILE) {
 			
 			if (destination == Destination.STREAM_POST) {
 				
 				final StreamPostDTO post = streamPostService
-						.getById(destinationId, pageAndSort.getObjectVersion())
-							.orElseThrow(() -> 
-								new WebApplicationException(ACCESS_DENIED));
+						.getById(destinationId, version).orElseThrow(() -> 
+							new WebApplicationException(ACCESS_DENIED));
 				
 				if (post.getAssociatedProfile() != ownerId) {
 					throw new WebApplicationException(ACCESS_DENIED);
@@ -504,8 +502,8 @@ public class MessageController {
 				
 				if (isSuperOrOwnerRequest || isAllowed) {
 					return ResponseEntity.ok(messageService
-							.getMessageIdReplyIdForStreamPost(destinationId, 
-									pageAndSort, isSuperOrOwnerRequest));
+							.getMessageIdReplyIdForStreamPost(
+									destinationId, isSuperOrOwnerRequest));
 				} 
 			}
 		}

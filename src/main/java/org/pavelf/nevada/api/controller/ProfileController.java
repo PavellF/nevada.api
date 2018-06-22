@@ -6,58 +6,39 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import ch.qos.logback.classic.Logger;
-
 import static org.pavelf.nevada.api.Application.APPLICATION_ACCEPT_PREFIX;
-import static  org.springframework.http.MediaType.*;
-
 import java.net.URI;
-import java.security.Principal;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.validation.constraints.Null;
-import javax.websocket.server.PathParam;
-
 import org.pavelf.nevada.api.domain.Access;
-import org.pavelf.nevada.api.domain.MessageDTO;
-import org.pavelf.nevada.api.domain.PersonDTO;
 import org.pavelf.nevada.api.domain.ProfileDTO;
-import org.pavelf.nevada.api.domain.ProfilePreferencesDTO;
-import org.pavelf.nevada.api.domain.ProfilePreferencesDTO.Builder;
 import org.pavelf.nevada.api.domain.Scope;
-import org.pavelf.nevada.api.domain.TokenDTO;
 import org.pavelf.nevada.api.domain.Version;
-import org.pavelf.nevada.api.domain.VersionImpl;
 import static org.pavelf.nevada.api.exception.ExceptionCases.*;
 
 import org.pavelf.nevada.api.exception.UnrecognizedUserException;
 import org.pavelf.nevada.api.exception.WebApplicationException;
-import org.pavelf.nevada.api.persistence.domain.Visibility;
 import org.pavelf.nevada.api.security.TokenContext;
 import org.pavelf.nevada.api.security.User;
 import org.pavelf.nevada.api.service.GuestService;
 import org.pavelf.nevada.api.service.MessageService;
-import org.pavelf.nevada.api.service.PeopleService;
 import org.pavelf.nevada.api.service.PhotoService;
-import org.pavelf.nevada.api.service.ProfilePreferencesService;
 import org.pavelf.nevada.api.service.ProfileService;
 import org.pavelf.nevada.api.security.Secured;
-import org.pavelf.nevada.api.security.TokenContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 
-@RestController()
+/**
+ * Exposes endpoints to access {@code Profile} from outside world.
+ * @author Pavel F.
+ * @since 1.0
+ * */
+@RestController
 @RequestMapping("/profiles")
 public class ProfileController {
 
@@ -207,7 +188,7 @@ public class ProfileController {
 		}
 		
 		if (toUpdate.getAboutId() != null) {
-			if (!messageService.isBelongsTo(toUpdate.getId(), 
+			if (!messageService.isAuthorOf(toUpdate.getId(), 
 					toUpdate.getAboutId())) {
 				throw new WebApplicationException(ACCESS_DENIED);
 			}

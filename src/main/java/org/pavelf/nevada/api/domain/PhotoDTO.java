@@ -1,23 +1,14 @@
 package org.pavelf.nevada.api.domain;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Set;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Past;
-
-import org.pavelf.nevada.api.persistence.domain.Profile;
-import org.pavelf.nevada.api.persistence.domain.Visibility;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import javax.annotation.Generated;
-import java.util.Collections;
-import java.util.Iterator;
-
+/**
+ * Describes application specific photo meta data, not image itself.
+ * @author Pavel F.
+ * @since 1.0
+ * */
 @JsonInclude(Include.NON_NULL)
 public class PhotoDTO {
 
