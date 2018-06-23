@@ -1,10 +1,13 @@
 package org.pavelf.nevada.api.domain;
 
 import java.time.Instant;
+import java.util.Set;
+
 import org.pavelf.nevada.api.persistence.domain.Visibility;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.Collections;
 /**
  * Represents stream post that users usually create.
  * @author Pavel F.
@@ -25,6 +28,8 @@ public class StreamPostDTO {
 	private Visibility commentable;
 	private Short userRating;
 	private Integer associatedProfile;
+	private Set<String> tags;
+	private Set<Integer> images;
 
 	private StreamPostDTO(Builder builder) {
 		this.id = builder.id;
@@ -39,58 +44,53 @@ public class StreamPostDTO {
 		this.commentable = builder.commentable;
 		this.userRating = builder.userRating;
 		this.associatedProfile = builder.associatedProfile;
+		this.tags = builder.tags;
+		this.images = builder.images;
 	}
-
-	private StreamPostDTO() { }
-
+	
 	public Integer getId() {
 		return id;
 	}
-
 	public Integer getAuthorId() {
 		return authorId;
 	}
-
 	public Instant getDate() {
 		return date;
 	}
-
 	public String getContent() {
 		return content;
 	}
-
 	public Integer getRating() {
 		return rating;
 	}
-
 	public Integer getPopularity() {
 		return popularity;
 	}
-
 	public Short getPriority() {
 		return priority;
 	}
-
 	public Visibility getVisibility() {
 		return visibility;
 	}
-
 	public Instant getLastChange() {
 		return lastChange;
 	}
-
 	public Visibility getCommentable() {
 		return commentable;
 	}
-
 	public Short getUserRating() {
 		return userRating;
 	}
-
 	public Integer getAssociatedProfile() {
 		return associatedProfile;
 	}
-
+	public Set<String> getTags() {
+		return tags;
+	}
+	public Set<Integer> getImages() {
+		return images;
+	}
+	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -118,10 +118,13 @@ public class StreamPostDTO {
 		builder.append(userRating);
 		builder.append(", associatedProfile=");
 		builder.append(associatedProfile);
+		builder.append(", tags=");
+		builder.append(tags);
+		builder.append(", images=");
+		builder.append(images);
 		builder.append("]");
 		return builder.toString();
 	}
-
 	/**
 	 * Creates builder to build {@link StreamPostDTO}.
 	 * @return created builder
@@ -146,6 +149,8 @@ public class StreamPostDTO {
 		private Visibility commentable;
 		private Short userRating;
 		private Integer associatedProfile;
+		private Set<String> tags = Collections.emptySet();
+		private Set<Integer> images = Collections.emptySet();
 
 		private Builder() {
 		}
@@ -210,10 +215,20 @@ public class StreamPostDTO {
 			return this;
 		}
 
+		public Builder withTags(Set<String> tags) {
+			this.tags = tags;
+			return this;
+		}
+
+		public Builder withImages(Set<Integer> images) {
+			this.images = images;
+			return this;
+		}
+
 		public StreamPostDTO build() {
 			return new StreamPostDTO(this);
 		}
 	}
-	
-	
+
+
 }

@@ -4,22 +4,27 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import javax.persistence.Tuple;
 
-import org.pavelf.nevada.api.domain.ParsedMessage;
 import org.pavelf.nevada.api.domain.StreamPostDTO;
 import org.pavelf.nevada.api.domain.Version;
+import org.pavelf.nevada.api.persistence.domain.Attachment;
 import org.pavelf.nevada.api.persistence.domain.Like;
 import org.pavelf.nevada.api.persistence.domain.Sorting;
 import org.pavelf.nevada.api.persistence.domain.StreamPost;
 import org.pavelf.nevada.api.persistence.domain.Visibility;
+import org.pavelf.nevada.api.persistence.repository.AttachmentRepository;
 import org.pavelf.nevada.api.persistence.repository.StreamPostRepository;
-import org.pavelf.nevada.api.service.MessageParser;
 import org.pavelf.nevada.api.service.PageAndSortExtended;
+import org.pavelf.nevada.api.service.PhotoService;
 import org.pavelf.nevada.api.service.StreamPostService;
 import org.pavelf.nevada.api.service.TagsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -36,11 +41,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class StreamPostServiceImpl implements StreamPostService {
 
 	private StreamPostRepository streamPostRepository;
-	private MessageParser messageParser;
+	private PhotoService photoService;
 	private TagsService tagsService;
+	private AttachmentRepository attachmentRepository;
+	
 	private final Function<? super StreamPost,? extends StreamPostDTO> 
 	mapper = (StreamPost s) -> {
-		StreamPostDTO toMap = StreamPostDTO.builder()
+		StreamPostDTO.Builder toMap = StreamPostDTO.builder()
 				.withAuthorId(s.getAuthorId())
 				.withContent(s.getContent())
 				.withAssociatedProfile(s.getAssociatedProfile())
@@ -52,8 +59,21 @@ public class StreamPostServiceImpl implements StreamPostService {
 				.withVisibility(s.getVisibility())
 				.withUserRating(null)
 				.withCommentable(s.getCommentable())
-				.withPriority(s.getPriority()).build();
-		return toMap;
+				.withPriority(s.getPriority());
+		
+		Stream<Attachment> attachments = attachmentRepository
+				.findAllPostAttachments(s.getId()).stream();
+		
+		Set<Integer> photos = attachments.map(Attachment::getPhotoId)
+				.collect(Collectors.toSet());
+		Set<String> tags = attachments.map(Attachment::getTagName)
+				.collect(Collectors.toSet());
+		
+		toMap
+		.withImages(photos)
+		.withTags(tags);
+		
+		return toMap.build();
 	};
 	
 	private final Function<? super Sorting, ? extends Order> propertyMapper = 
@@ -85,6 +105,18 @@ public class StreamPostServiceImpl implements StreamPostService {
 				.withCommentable(s.getCommentable())
 				.withPriority(s.getPriority());
 		
+		Stream<Attachment> attachments = attachmentRepository
+				.findAllPostAttachments(s.getId()).stream();
+		
+		Set<Integer> photos = attachments.map(Attachment::getPhotoId)
+				.collect(Collectors.toSet());
+		Set<String> tags = attachments.map(Attachment::getTagName)
+				.collect(Collectors.toSet());
+		
+		toMap
+		.withImages(photos)
+		.withTags(tags);
+		
 		Like like = t.get(1, Like.class);
 		
 		if (like != null) {
@@ -93,18 +125,26 @@ public class StreamPostServiceImpl implements StreamPostService {
 		
 		return toMap.build();
 	};
-		
+	
+	@Autowired
+	public StreamPostServiceImpl(StreamPostRepository streamPostRepository,
+			PhotoService photoService, TagsService tagsService,
+			AttachmentRepository attachmentRepository) {
+		this.streamPostRepository = streamPostRepository;
+		this.photoService = photoService;
+		this.tagsService = tagsService;
+		this.attachmentRepository = attachmentRepository;
+	}
+
 	private Pageable getPageable(PageAndSortExtended params) {
 		
 		Sort sort = Sort.by(params.getOrderBy().map(propertyMapper)
 				.filter(o -> o != null)
 				.collect(Collectors.toList()));
 		
-		return PageRequest.of(params.getStartIndex(),
-					params.getCount(), sort);
+		return PageRequest.of(params.getStartIndex(),params.getCount(), sort);
 	}
 	
-
 	@Override
 	@Transactional(readOnly = true)
 	public List<StreamPostDTO> getAllForProfile(int profileId,
@@ -113,9 +153,9 @@ public class StreamPostServiceImpl implements StreamPostService {
 			throw new IllegalArgumentException("Null is not allowed.");
 		}
 		
-		return this.streamPostRepository.getAllPostsAssociatedWithProfile(
-						profileId, Arrays.asList(levels),
-						getPageable(params)).stream().map(mapper)
+		return streamPostRepository.getAllPostsAssociatedWithProfile(
+				profileId, Arrays.asList(levels), getPageable(params))
+				.stream().map(mapper)
 				.collect(Collectors.toList());
 	}
 	
@@ -158,6 +198,7 @@ public class StreamPostServiceImpl implements StreamPostService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<StreamPostDTO> getAllForAuthor(int authorId, int requestingId,
 			PageAndSortExtended params,
 			Version version, Visibility... levels) {
@@ -172,6 +213,7 @@ public class StreamPostServiceImpl implements StreamPostService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<StreamPostDTO> getAllForAuthor(int authorId, Version version,
 			PageAndSortExtended params, Visibility... levels) {
 		if (levels == null || params == null) {
@@ -242,15 +284,19 @@ public class StreamPostServiceImpl implements StreamPostService {
 		streamPost.setRating(0);
 		streamPost.setVisibility(post.getVisibility());
 		streamPost.setCommentable(post.getCommentable());
-		
-		ParsedMessage pm = this.messageParser.parse(post.getContent());
-		
-		streamPost.setContent(pm.getParsed());
+		streamPost.setContent(post.getContent());
 		
 		Integer id = streamPostRepository.save(streamPost).getId();
 		
-		tagsService.assosiateWithStreamPostAndAddAllTags(
-				pm.getMessageTags(), id);
+		Iterable<String> tags = post.getTags();
+		if (tags != null) {
+			tagsService.assosiateWithStreamPostAndAddTags(tags, id);
+		}
+		
+		Iterable<Integer> photos = post.getImages();
+		if (photos != null) {
+			photoService.associateAllWithStreamPost(id, photos);
+		}
 		
 		return id;
 	}
@@ -272,21 +318,27 @@ public class StreamPostServiceImpl implements StreamPostService {
 		streamPost.setPriority(post.getPriority());
 		streamPost.setVisibility(post.getVisibility());
 		streamPost.setCommentable(post.getCommentable());
-		
-		ParsedMessage pm = this.messageParser.parse(post.getContent());
-		
-		streamPost.setContent(pm.getParsed());
+		streamPost.setContent(post.getContent());
 		streamPostRepository.save(streamPost);
 		
-		tagsService.clearAllStreamPostTags(id);
+		Iterable<String> tags = post.getTags();
+		if (tags != null) {
+			tagsService.updateStreamPostTags(id, tags);
+		}
 		
-		tagsService.assosiateWithStreamPostAndAddAllTags(
-				pm.getMessageTags(),id);
+		Iterable<Integer> photos = post.getImages();
+		if (photos != null) {
+			photoService.updateStreamPostPhotos(id, photos);
+		}
+		
 		return true;
 	}
 
 	@Override
+	@Transactional
 	public void deleteStreamPost(int postId) {
+		tagsService.clearAllStreamPostTags(postId);
+		photoService.clearAllStreamPostPhotos(postId);
 		streamPostRepository.deleteById(postId);
 	}
 

@@ -3,10 +3,11 @@ package org.pavelf.nevada.api;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pavelf.nevada.api.domain.ProfileDTO;
+import org.pavelf.nevada.api.exception.ExceptionCase;
 import org.pavelf.nevada.api.persistence.domain.Like;
 import org.pavelf.nevada.api.persistence.domain.Profile;
 import org.pavelf.nevada.api.persistence.domain.StreamPost;
-import org.pavelf.nevada.api.persistence.domain.StreamPostTag;
+import org.pavelf.nevada.api.persistence.domain.Attachment;
 import org.pavelf.nevada.api.persistence.domain.Tag;
 import org.pavelf.nevada.api.persistence.domain.Token;
 import org.pavelf.nevada.api.persistence.domain.Visibility;
@@ -15,7 +16,7 @@ import org.pavelf.nevada.api.persistence.repository.ApplicationRepository;
 import org.pavelf.nevada.api.persistence.repository.LikeRepository;
 import org.pavelf.nevada.api.persistence.repository.ProfileRepository;
 import org.pavelf.nevada.api.persistence.repository.StreamPostRepository;
-import org.pavelf.nevada.api.persistence.repository.StreamPostTagRepository;
+import org.pavelf.nevada.api.persistence.repository.AttachmentRepository;
 import org.pavelf.nevada.api.persistence.repository.TagRepository;
 import org.pavelf.nevada.api.persistence.repository.TokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,8 +59,10 @@ public class ProfileControllerTest {
     
     @Autowired 
     private StreamPostRepository spr;
+    
     @Autowired 
-    private LikeRepository lr;
+     private LikeRepository lr;
+    
     @Autowired 
     private ProfileRepository pr;
     
@@ -67,13 +70,10 @@ public class ProfileControllerTest {
     private ApplicationRepository applicationRepository;
     	
     @Autowired
-    private AdvancedStreamPostRepository aspr;
-    
-    @Autowired
     private TagRepository tr;
     
     @Autowired
-    private StreamPostTagRepository sptr;
+    private AttachmentRepository sptr;
     
     @Autowired
     private TokenRepository tokenRepository;
@@ -146,7 +146,7 @@ public class ProfileControllerTest {
 		
 		tr.save(tag);
 		
-		StreamPostTag spTag = new StreamPostTag();
+		Attachment spTag = new Attachment();
 		spTag.setAssociatedStreamPost(1);
 		spTag.setAssociatedTag("wow");
 		sptr.save(spTag);
@@ -191,11 +191,12 @@ public class ProfileControllerTest {
 				APPLICATION_ACCEPT_PREFIX+".profile+json;version=1.0");	
 		headers.set(HttpHeaders.AUTHORIZATION, "testMD5");
 		
-		ResponseEntity<ProfileDTO> response = restTemplate.exchange(
-				endpoint, HttpMethod.POST, new HttpEntity<>(profile, headers), ProfileDTO.class);
+		ResponseEntity<ExceptionCase> response = restTemplate.exchange(
+				endpoint, HttpMethod.POST, new HttpEntity<>(profile, headers), 
+				ExceptionCase.class);
 		
 		HttpHeaders returnedHeaders = response.getHeaders();
-		ProfileDTO returnedBody = response.getBody();
+		ExceptionCase returnedBody = response.getBody();
 		HttpStatus returnedStatus = response.getStatusCode();
 		
 		Assertions.assertThat(returnedBody).isNull();

@@ -1,8 +1,5 @@
 package org.pavelf.nevada.api.service;
 
-import java.util.Set;
-
-import org.pavelf.nevada.api.domain.TagDTO;
 
 /**
  * Service for interactions with user defined tags.
@@ -15,15 +12,20 @@ public interface TagsService {
 	 * Adds(if not exist) and associates all given tags with stream post.
 	 * @param tags tags to add.
 	 * @param postId to associate.
-	 * @return added tags never {@code null}. May be empty set.
 	 * @throws IllegalArgumentException if {@code null} passed.
 	 * */
-	public void assosiateWithStreamPostAndAddAllTags(Set<TagDTO> tags, 
+	public void assosiateWithStreamPostAndAddTags(Iterable<String> tags, 
 			int postId);
+	
+	/**
+	 * Compares {@code tags} with existing associations and deletes stale 
+	 * or saves new ones.
+	 * @throws IllegalArgumentException if {@code null} passed.
+	 * */
+	public void updateStreamPostTags(int postId, Iterable<String> tags);
 	
 	/**
 	 * Clears all associations between this post and tags.
 	 * */
 	public void clearAllStreamPostTags(int postId);
-	
 }

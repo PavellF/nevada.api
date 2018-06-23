@@ -1,8 +1,6 @@
 package org.pavelf.nevada.api.persistence.domain;
 
 import java.time.Instant;
-import java.util.Set;
-
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,15 +10,16 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 
+/**
+ * Represents ORM {@code @Entity} for mapping images.
+ * @author Pavel F.
+ * @since 1.0
+ * */
 @Entity
 @Table(name="photos")
 public class Photo {
@@ -61,11 +60,15 @@ public class Photo {
 	@Basic(fetch=FetchType.LAZY)
 	private byte[] original;
 	
-	@Column(name="message_photo")
-	private Integer associatedMessageId;
+	@Column(name="filename")
+	@NotNull
+	@javax.validation.constraints.Size(min = 1, max = 64)
+	private String fileName;
 	
-	@Column(name="stream_post_photo")
-	private Integer associatedStreamPostId;
+	@Column(name="visibility")
+	@NotNull
+	@Enumerated(javax.persistence.EnumType.STRING)
+	private Visibility visibility;
 	
 	/**
 	 * Does NOT trigger lazy loading. Always returns empty string.
@@ -156,22 +159,21 @@ public class Photo {
 		this.original = original;
 	}
 
-	public Integer getAssociatedMessageId() {
-		return associatedMessageId;
+	public String getFileName() {
+		return fileName;
 	}
 
-	public void setAssociatedMessageId(Integer associatedMessageId) {
-		this.associatedMessageId = associatedMessageId;
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
 	}
 
-	public Integer getAssociatedStreamPostId() {
-		return associatedStreamPostId;
+	public Visibility getVisibility() {
+		return visibility;
 	}
 
-	public void setAssociatedStreamPostId(Integer associatedStreamPostId) {
-		this.associatedStreamPostId = associatedStreamPostId;
+	public void setVisibility(Visibility visibility) {
+		this.visibility = visibility;
 	}
 
-	
 
 }

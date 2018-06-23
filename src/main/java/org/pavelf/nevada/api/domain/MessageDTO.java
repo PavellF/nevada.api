@@ -1,6 +1,8 @@
 package org.pavelf.nevada.api.domain;
 
 import java.time.Instant;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -25,6 +27,8 @@ public class MessageDTO {
 	private Integer destinationId;
 	private Integer countOfReplies;
 	private Short currentUserRating;
+	private Set<String> tags;
+	private Set<Integer> images;
 
 	private MessageDTO(Builder builder) {
 		this.id = builder.id;
@@ -211,6 +215,14 @@ public class MessageDTO {
 		public MessageDTO build() {
 			return new MessageDTO(this);
 		}
+	}
+
+	public Set<String> getTags() {
+		return tags;
+	}
+
+	public Set<Integer> getImages() {
+		return images;
 	}
 
 	

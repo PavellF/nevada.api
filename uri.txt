@@ -26,12 +26,17 @@
 /profilePreferences - PUT
 /profiles/{owner_id}/profilePreferences - GET
 
-/profiles/{id}/likes - GET //should return liked objects
+/profiles/{id}/likes - GET //should return like attached to
 /{owner}/{owner_id}/{destination}/{destination_id}/likes - POST, PUT, GET
 /{owner}/{owner_id}/{destination}/{destination_id}/likes/{id} - DELETE
 
 /profiles/{id}/messages - GET //should return objects message linked to
 /{owner}/{owner_id}/{destination}/{destination_id}/messages - POST, PUT, GET
+/{owner}/{owner_id}/{destination}/{destination_id}/messages/map - GET
+/{owner}/{owner_id}/{destination}/{destination_id}/messagesList - GET
+/{owner}/{owner_id}/{destination}/{destination_id}/messages/{ids} - GET
 
 /profiles/{id}/photos - GET, POST //should return photo objects
 /{owner}/{owner_id}/{destination}/{destination_id}/photos - POST, PUT, GET
+
+/{destination}/{destination_id}/tags - GET

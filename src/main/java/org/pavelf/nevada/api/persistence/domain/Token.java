@@ -16,6 +16,12 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+
+/**
+ * Represents ORM mapping for security token.
+ * @author Pavel F.
+ * @since 1.0
+ * */
 @Entity
 @Table(name="tokens")
 @NamedEntityGraph(name = "graph.tokens.profile", 

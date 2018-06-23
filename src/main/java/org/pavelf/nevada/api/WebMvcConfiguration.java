@@ -1,16 +1,12 @@
 package org.pavelf.nevada.api;
 
-import org.pavelf.nevada.api.security.TokenValidatorAspect;
-
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.List;
 
 import org.pavelf.nevada.api.exception.ExceptionCases;
 import org.pavelf.nevada.api.exception.WebApplicationException;
 
-import org.pavelf.nevada.api.logging.Logger;
 import org.pavelf.nevada.api.logging.LoggerFactory;
 import org.pavelf.nevada.api.resolver.PageAndSortResolver;
 import org.pavelf.nevada.api.resolver.VersionConverter;
@@ -20,12 +16,10 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
-import org.springframework.core.env.Environment;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {
@@ -56,8 +50,8 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 	public MessageSource messageSource() {
 		ReloadableResourceBundleMessageSource messageSource = 
 				new ReloadableResourceBundleMessageSource();
-		messageSource.setBasenames(
-				"classpath:locale/WebAppExceptionMessages");
+		messageSource.setConcurrentRefresh(false);
+		messageSource.setBasenames("classpath:locale/ExceptionCases");
 		messageSource.setDefaultEncoding("UTF-8");
 		return messageSource;
 	}

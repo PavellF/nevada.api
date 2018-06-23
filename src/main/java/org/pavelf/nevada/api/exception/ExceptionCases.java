@@ -11,7 +11,7 @@ public interface ExceptionCases {
 
 	public static final ExceptionCase MULTIPLE_IP_REQUESTS =
 			ExceptionCase.of(1, "Too many requests that have the same token "
-					+ "from defferent IP addresses has come in short "
+					+ "from different IP addresses has come in short "
 					+ "period of time...", HttpStatus.FORBIDDEN);
 	
 	public final ExceptionCase HEADER_SHOULD_BE_SPECIFIED = 
@@ -20,7 +20,7 @@ public interface ExceptionCases {
 	
 	public static final ExceptionCase UNKNOWN_VERSION =
 			ExceptionCase.of(3, 
-					"Could not recognize incomig request's header version.", 
+					"Could not recognize incoming request's header version.", 
 					HttpStatus.BAD_REQUEST);
 	
 	public static final ExceptionCase MALFORMED_VERSION =
@@ -36,7 +36,7 @@ public interface ExceptionCases {
 					HttpStatus.FORBIDDEN);
 	
 	public static final ExceptionCase UNRECOGNIZED_APPLICATION =
-			ExceptionCase.of(7, "Could not recognize applicaion.", 
+			ExceptionCase.of(7, "Could not recognize application.", 
 					HttpStatus.FORBIDDEN);
 	
 	public static final ExceptionCase BANNED_APPLICATION =
@@ -68,7 +68,7 @@ public interface ExceptionCases {
 					+ "to update existing one.", HttpStatus.FORBIDDEN);
 	
 	public static final ExceptionCase BANNED_PROFILE =
-			ExceptionCase.of(15, "This profile cn not perform requests.", 
+			ExceptionCase.of(15, "This profile can not perform requests.", 
 					HttpStatus.FORBIDDEN);
 	
 	public static final ExceptionCase FORBIDDEN_BODY_PROPERTY =

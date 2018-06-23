@@ -2,21 +2,14 @@ package org.pavelf.nevada.api.exception;
 
 import java.util.Locale;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.pavelf.nevada.api.security.TokenContext;
 import org.pavelf.nevada.api.logging.Logger;
 import org.pavelf.nevada.api.logging.LoggerFactory;
-import org.pavelf.nevada.api.security.Token;
-import org.pavelf.nevada.api.security.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.annotation.RequestScope;
 
 /**
  * All exceptions ever thrown in time of processing request will be intercepted 
@@ -43,14 +36,22 @@ public class GeneralExceptionAdvice  {
 			WebApplicationException execption, Locale locale) {
 		ExceptionCase info = execption.getExceptionCase();
 		
-		log.error("THROWN " + info.toString());
+		log.error("THROWN: " + info.toString());
 		
 		if (locale == null) {
 			locale = Locale.ENGLISH;
 		}
 		
-		messageSource.getMessage(String.valueOf(info.getCode()), null, locale);
-			//info = info.setMessage("");
+		log.error("Incoming request locale was set: " + locale.toString());
+			
+		String message = messageSource.getMessage(
+				String.valueOf(info.getCode()), null, locale);
+			
+		log.error("Appropriate message was just found: " + message);
+			
+		info = info.setMessage(message);
+		
+		log.error("Sending exception object to the caller...");
 		
 		return ResponseEntity.status(info.getHttpStatus()).body(info);
 	}

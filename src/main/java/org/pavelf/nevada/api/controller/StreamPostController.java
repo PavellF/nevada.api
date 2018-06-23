@@ -4,6 +4,7 @@ import static org.pavelf.nevada.api.Application.APPLICATION_ACCEPT_PREFIX;
 import static org.pavelf.nevada.api.exception.ExceptionCases.*;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.List;
 
 import org.pavelf.nevada.api.domain.Access;
@@ -20,6 +21,7 @@ import org.pavelf.nevada.api.security.TokenContext;
 import org.pavelf.nevada.api.security.User;
 import org.pavelf.nevada.api.service.FollowersService;
 import org.pavelf.nevada.api.service.PageAndSortExtended;
+import org.pavelf.nevada.api.service.PhotoService;
 import org.pavelf.nevada.api.service.ProfilePreferencesService;
 import org.pavelf.nevada.api.service.ProfileService;
 import org.pavelf.nevada.api.service.StreamPostService;
@@ -48,17 +50,20 @@ public class StreamPostController {
 	private ProfilePreferencesService profilePreferencesService;
 	private ProfileService profileService;
 	private FollowersService followersService;
+	private PhotoService photoService;
 	
 	@Autowired
 	public StreamPostController(TokenContext principal,
 			StreamPostService streamPostService,
 			ProfilePreferencesService profilePreferencesService,
-			ProfileService profileService, FollowersService followersService) {
+			ProfileService profileService, FollowersService followersService,
+			PhotoService photoService) {
 		this.principal = principal;
 		this.streamPostService = streamPostService;
 		this.profilePreferencesService = profilePreferencesService;
 		this.profileService = profileService;
 		this.followersService = followersService;
+		this.photoService = photoService;
 	}
 
 	@GetMapping(produces = { 
@@ -135,11 +140,47 @@ public class StreamPostController {
 		return ResponseEntity.badRequest().build();
 	}
 	
+	protected void validateAttachments(Collection<Integer> images, 
+			Collection<String> tags, int authorId) {
+		
+		if (images != null) {
+			if (images.size() > 16) {
+				throw new WebApplicationException(OUT_OF_BOUND_VALUE);
+			}
+			
+			if (!photoService.areBelongsTo(authorId, images)) {
+				throw new WebApplicationException(ACCESS_DENIED);
+			}
+		}
+		
+		if (tags != null && tags.size() > 24) {
+			throw new WebApplicationException(OUT_OF_BOUND_VALUE);
+		} 
+		
+	}
+	
+	protected ResponseEntity<StreamPostDTO> createPost(StreamPostDTO posted, 
+			int destinationId, Version version, int authorId) {
+		
+		validateAttachments(posted.getImages(), posted.getTags(), authorId);
+		streamPostService.createOnProfile(posted, destinationId, version);
+		return ResponseEntity.created(URI
+				.create("profile/"+destinationId+"/posts")).build();
+	}
+	
+	protected ResponseEntity<StreamPostDTO> updatePost(StreamPostDTO posted, 
+			int destinationId, Version version, int authorId) {
+		
+		validateAttachments(posted.getImages(), posted.getTags(), authorId);
+		streamPostService.update(posted, version);
+		return ResponseEntity.noContent().build();
+	}
+	
 	@PostMapping(consumes = {
 			APPLICATION_ACCEPT_PREFIX+".post+json", 
 			APPLICATION_ACCEPT_PREFIX+".post+xml"},
 			path = "/{destination}/{destination_id}/posts")
-	@Secured(access = Access.READ_WRITE, scope = { Scope.STREAM})
+	@Secured(access = Access.READ_WRITE, scope = { Scope.STREAM })
 	public ResponseEntity<StreamPostDTO> postStreamPost(
 			HttpEntity<StreamPostDTO> entity,
 			@PathVariable("destination") Destination destination,
@@ -168,43 +209,31 @@ public class StreamPostController {
 			boolean isDestinationOwner = destinationId == issuerId;
 			
 			if (isDestinationOwner || principal.getToken().isSuper()) {
-				streamPostService.createOnProfile(
-						posted, destinationId, version);
-				return ResponseEntity.created(
-						URI.create("profile/"+destinationId+"/posts")).build();
-				
-			} else {
-				
-				if (posted.getPriority() != null) {
-					throw new WebApplicationException(FORBIDDEN_BODY_PROPERTY);
-				}
-				//check if user allow other users post on his stream
-				ProfilePreferencesDTO prefs = profilePreferencesService
-						.getForProfile(destinationId, version);
-				
-				switch (prefs.getCanPostOnMyStream()) {
-				case ALL: {
-					//check if owner blocked this user
-					this.streamPostService
-					.createOnProfile(posted, destinationId, version);
-					return ResponseEntity.created(
-							URI.create("profile/"+destinationId+"/posts"))
-							.build();
-					}
-				case FRIENDS: {
-					if (followersService.isFollow(issuerId, destinationId)) {
-						this.streamPostService.createOnProfile(
-								posted, destinationId, version);
-						return ResponseEntity.created(
-								URI.create("profile/"+destinationId+"/posts"))
-								.build();
-					}
-					} 
-				case ME: {
-						throw new WebApplicationException(ACCESS_DENIED);
-					} 
-				}
+				return createPost(posted, destinationId, version, issuerId);
 			}
+				
+			if (posted.getPriority() != null) {
+				throw new WebApplicationException(FORBIDDEN_BODY_PROPERTY);
+			}
+			//check if user allow other users post on his stream
+			ProfilePreferencesDTO prefs = profilePreferencesService
+					.getForProfile(destinationId, version);
+			
+			switch (prefs.getCanPostOnMyStream()) {
+			case ALL: {
+				//check if owner blocked this user
+				return createPost(posted, destinationId, version, issuerId);
+				}
+			case FRIENDS: {
+				if (followersService.isFollow(issuerId, destinationId)) {
+					return createPost(posted,destinationId,version,issuerId);
+				}
+				} 
+			case ME: {
+				throw new WebApplicationException(ACCESS_DENIED);
+				} 
+			}
+			
 		}
 		
 		return ResponseEntity.badRequest().build();
@@ -231,8 +260,7 @@ public class StreamPostController {
 		}
 		
 		if (principal.getToken().isSuper()) {
-			streamPostService.update(posted, version);
-			return ResponseEntity.noContent().build();
+			return updatePost(posted, destinationId, version, issuerId);
 		}
 		
 		if (posted.getPopularity() != null) {
@@ -242,14 +270,12 @@ public class StreamPostController {
 		if (Destination.PROFILE == destination) {
 			// stream owner can only change priority and visibility
 			if (issuerId == destinationId && posted.getContent() == null) {
-				streamPostService.update(posted, version);
-				return ResponseEntity.noContent().build();
+				return updatePost(posted, destinationId, version, issuerId);
 			}
 			//post owner can not change priority
 			if (streamPostService.belongsTo(issuerId, posted.getId()) 
 					&& posted.getPriority() == null) {
-				streamPostService.update(posted, version);
-				return ResponseEntity.noContent().build();
+				return updatePost(posted, destinationId, version, issuerId);
 			}
 		}
 		

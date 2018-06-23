@@ -9,27 +9,35 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 /**
- * {@code @Entity} that links <b>many</b> {@code StreamPost} 
- * <b>to many</b> {@code Tag}s.
+ * {@code @Entity} that links <b>many</b> {@code StreamPost}s or 
+ * {@code Message}s <b>to many</b> {@code Tag}s or {@code Photo}s.
  * @author Pavel F.
  * @since 1.0
  * */
 @Entity
-@Table(name="stream_post_has_tag")
-public class StreamPostTag {
+@Table(name="attachment")
+public class Attachment {
 
 	@Id	
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private int id;
 	
-	@Column(name = "stream_post_id")
+	@Column(name = "to_stream_post")
 	@NotNull
-	private Integer associatedStreamPost;
+	private Integer toStreamPost;
+	
+	@Column(name = "to_message")
+	@NotNull
+	private Integer toMessage;
+	
+	@Column(name = "photo")
+	@NotNull
+	private Integer photoId;
 	
 	@Column(name = "tag")
 	@NotNull
-	private String associatedTag;
+	private String tagName;
 	
 	/**
 	 * Does NOT trigger lazy loading. Always returns empty string.
@@ -64,21 +72,36 @@ public class StreamPostTag {
 		this.id = id;
 	}
 
-	public Integer getAssociatedStreamPost() {
-		return associatedStreamPost;
+	public Integer getToStreamPost() {
+		return toStreamPost;
 	}
 
-	public void setAssociatedStreamPost(Integer associatedStreamPost) {
-		this.associatedStreamPost = associatedStreamPost;
+	public void setToStreamPost(Integer toStreamPost) {
+		this.toStreamPost = toStreamPost;
 	}
 
-	public String getAssociatedTag() {
-		return associatedTag;
+	public Integer getToMessage() {
+		return toMessage;
 	}
 
-	public void setAssociatedTag(String associatedTag) {
-		this.associatedTag = associatedTag;
+	public void setToMessage(Integer toMessage) {
+		this.toMessage = toMessage;
 	}
 
-	
+	public Integer getPhotoId() {
+		return photoId;
+	}
+
+	public void setPhotoId(Integer photoId) {
+		this.photoId = photoId;
+	}
+
+	public String getTagName() {
+		return tagName;
+	}
+
+	public void setTagName(String tagName) {
+		this.tagName = tagName;
+	}
+
 }

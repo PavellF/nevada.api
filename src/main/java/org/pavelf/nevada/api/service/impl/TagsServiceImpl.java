@@ -5,9 +5,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.pavelf.nevada.api.domain.TagDTO;
-import org.pavelf.nevada.api.persistence.domain.StreamPostTag;
+import org.pavelf.nevada.api.persistence.domain.Attachment;
 import org.pavelf.nevada.api.persistence.domain.Tag;
-import org.pavelf.nevada.api.persistence.repository.StreamPostTagRepository;
+import org.pavelf.nevada.api.persistence.repository.AttachmentRepository;
 import org.pavelf.nevada.api.persistence.repository.TagRepository;
 import org.pavelf.nevada.api.service.TagsService;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class TagsServiceImpl implements TagsService {
 
 	private TagRepository tagRepository;
-	private StreamPostTagRepository postTagRepository;
+	private AttachmentRepository postTagRepository;
 	
 	
 	@Override
@@ -41,8 +41,8 @@ public class TagsServiceImpl implements TagsService {
 		
 		newTags = tagRepository.saveAll(newTags);
 		
-		List<StreamPostTag> postTags = newTags.stream().map((Tag tag) -> {
-			StreamPostTag spt = new StreamPostTag();
+		List<Attachment> postTags = newTags.stream().map((Tag tag) -> {
+			Attachment spt = new Attachment();
 			spt.setAssociatedTag(tag.getName());
 			spt.setAssociatedStreamPost(postId);
 			return spt;

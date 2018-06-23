@@ -98,12 +98,6 @@ CREATE TABLE IF NOT EXISTS stream_post (
         PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS stream_post_has_tag (
-        id SERIAL NOT NULL PRIMARY KEY,
-        stream_post_id INTEGER NOT NULL REFERENCES stream_post (id),
-        tag VARCHAR NOT NULL REFERENCES tags (name),
-);
-
 CREATE TABLE IF NOT EXISTS messages (
         id SERIAL NOT NULL,
         archived BOOLEAN DEFAULT FALSE,
@@ -126,8 +120,8 @@ CREATE TABLE IF NOT EXISTS photos (
         small BYTEA NOT NULL,
         medium BYTEA NOT NULL,
         original BYTEA NOT NULL,
-        message_photo INTEGER DEFAULT NULL REFERENCES messages(id),
-        stream_post_photo INTEGER DEFAULT NULL REFERENCES stream_post(id),
+        filename VARCHAR(64) NOT NULL,
+        visibility VARCHAR(36) NOT NULL,
         PRIMARY KEY(id)
 );
 
@@ -139,6 +133,14 @@ CREATE TABLE IF NOT EXISTS _likes (
         liked_message INTEGER DEFAULT NULL REFERENCES messages(id),
         liked_stream_post INTEGER DEFAULT NULL REFERENCES stream_post(id),
         PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS attachment (
+        id SERIAL NOT NULL PRIMARY KEY,
+        to_message INTEGER DEFAULT NULL REFERENCES messages(id),
+        to_stream_post INTEGER DEFAULT NULL REFERENCES stream_post(id),
+        photo INTEGER DEFAULT NULL REFERENCES photos(id),
+        tag VARCHAR(64) DEFAULT NULL REFERENCES tags (name)
 );
 
 ALTER TABLE IF EXISTS stream_post_has_tag
