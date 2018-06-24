@@ -122,6 +122,7 @@ CREATE TABLE IF NOT EXISTS photos (
         original BYTEA NOT NULL,
         filename VARCHAR(64) NOT NULL,
         visibility VARCHAR(36) NOT NULL,
+        archived BOOLEAN DEFAULT FALSE,
         PRIMARY KEY(id)
 );
 

@@ -1,27 +1,30 @@
 package org.pavelf.nevada.api.service.impl;
 
 import java.time.Instant;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import javax.persistence.Tuple;
 
 import org.assertj.core.util.Lists;
-import org.pavelf.nevada.api.domain.Destination;
 import org.pavelf.nevada.api.domain.MessageDTO;
-import org.pavelf.nevada.api.domain.ParsedMessage;
 import org.pavelf.nevada.api.domain.Version;
-import org.pavelf.nevada.api.domain.VersionImpl;
+import org.pavelf.nevada.api.persistence.domain.Attachment;
 import org.pavelf.nevada.api.persistence.domain.Like;
 import org.pavelf.nevada.api.persistence.domain.Message;
 import org.pavelf.nevada.api.persistence.domain.Sorting;
+import org.pavelf.nevada.api.persistence.repository.AttachmentRepository;
 import org.pavelf.nevada.api.persistence.repository.MessageRepository;
-import org.pavelf.nevada.api.service.MessageParser;
 import org.pavelf.nevada.api.service.MessageService;
 import org.pavelf.nevada.api.service.PageAndSort;
 import org.pavelf.nevada.api.service.PageAndSortExtended;
+import org.pavelf.nevada.api.service.PhotoService;
+import org.pavelf.nevada.api.service.TagsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -40,17 +43,6 @@ public class MessageServiceImpl implements MessageService {
 
 	private MessageRepository messageRepository;
 	
-	private MessageParser messageParser;
-	
-	private Map<Version, 
-		Function<? super Tuple, ? extends MessageDTO>> tupleMappers;
-	
-	private Map<Version, 
-		Function<? super Tuple, ? extends MessageDTO>> replyCountMappers;
-	
-	private Map<Version, 
-		Function<? super Message, ? extends MessageDTO>> mappers;
-	
 	private final Function<? super Sorting, ? extends Order> propertyMapper = 
 			(Sorting s) -> {
 				switch (s) {
@@ -62,103 +54,99 @@ public class MessageServiceImpl implements MessageService {
 				}
 	};
 	
+	private final Function<Tuple, MessageDTO> wLikeMapper = (Tuple t) -> {
+		Message m = t.get(0, Message.class);
+		
+		MessageDTO.Builder message = MessageDTO.builder()
+				.withArchived(m.isArchived())
+				.withAuthorId(m.getAuthorId())
+				.withContent(m.getContent())
+				.withDate(m.getDate())
+				.withStreamPostId(m.getAssociatedStreamPost())
+				.withId(m.getId())
+				.withLastChange(m.getLastChange())
+				.withPriority(m.getPriority())
+				.withRating(m.getRating())
+				.withReplyTo(m.getReplyTo());
+		
+		Like l = t.get(1, Like.class);
+		
+		if (l != null) {
+			message.withCurrentUserRating(l.getRating());
+		} 
+		
+		addAttachmentsIfAny(message, m.getId());
+		
+		return message.build();
+	};
+	
+	private final Function<Tuple, MessageDTO> wLikeAndReplies = (Tuple t) -> {
+		Message m = t.get(0, Message.class);
+		
+		MessageDTO.Builder message = MessageDTO.builder()
+				.withArchived(m.isArchived())
+				.withAuthorId(m.getAuthorId())
+				.withContent(m.getContent())
+				.withDate(m.getDate())
+				.withStreamPostId(m.getAssociatedStreamPost())
+				.withId(m.getId())
+				.withLastChange(m.getLastChange())
+				.withPriority(m.getPriority())
+				.withRating(m.getRating())
+				.withReplyTo(m.getReplyTo())
+				.withCountOfReplies(t.get(1, Integer.class));
+		
+		Like l = t.get(2, Like.class);
+		
+		if (l != null) {
+			message.withCurrentUserRating(l.getRating());
+		} 
+		
+		addAttachmentsIfAny(message, m.getId());
+		
+		return message.build();
+	};
+	
+	private final Function<Message, MessageDTO> mapper = (Message m) -> {
+		MessageDTO.Builder message = MessageDTO.builder()
+				.withArchived(m.isArchived())
+				.withAuthorId(m.getAuthorId())
+				.withContent(m.getContent())
+				.withDate(m.getDate())
+				.withStreamPostId(m.getAssociatedStreamPost())
+				.withId(m.getId())
+				.withLastChange(m.getLastChange())
+				.withPriority(m.getPriority())
+				.withRating(m.getRating())
+				.withReplyTo(m.getReplyTo());
+		
+		addAttachmentsIfAny(message, m.getId());
+		
+		return message.build();
+	};
+	
 	@Autowired
 	public MessageServiceImpl(MessageRepository messageRepository,
-			MessageParser messageParser) {
+			PhotoService photoService, TagsService tagsService,
+			AttachmentRepository attachmentRepository) {
 		this.messageRepository = messageRepository;
-		this.messageParser = messageParser;
-		
-		this.tupleMappers = new HashMap<>();
-		tupleMappers.put(VersionImpl.getBy("1.0"), (Tuple t) -> {
-			Message m = t.get(0, Message.class);
-			
-			MessageDTO.Builder message = MessageDTO.builder()
-					.withArchived(m.isArchived())
-					.withAuthorId(m.getAuthorId())
-					.withContent(m.getContent())
-					.withDate(m.getDate());
-			
-			Integer underStreamPost = m.getAssociatedStreamPost();
-			if (underStreamPost != null) {
-				message
-				.withDestinationId(underStreamPost)
-				.withDestinationType(Destination.STREAM_POST);
-			}
-			
-			message.withId(m.getId())
-			.withLastChange(m.getLastChange())
-			.withPriority(m.getPriority())
-			.withRating(m.getRating())
-			.withReplyTo(m.getReplyTo());
-			
-			Like l = t.get(1, Like.class);
-			
-			if (l != null) {
-				message.withCurrentUserRating(l.getRating());
-			} 
-			
-			return message.build();
-		});
-		
-		replyCountMappers = new HashMap<>();
-		replyCountMappers.put(VersionImpl.getBy("1.0"), (Tuple t) -> {
-			Message m = t.get(0, Message.class);
-			
-			MessageDTO.Builder message = MessageDTO.builder()
-					.withArchived(m.isArchived())
-					.withAuthorId(m.getAuthorId())
-					.withContent(m.getContent())
-					.withDate(m.getDate());
-			
-			Integer underStreamPost = m.getAssociatedStreamPost();
-			if (underStreamPost != null) {
-				message
-				.withDestinationId(underStreamPost)
-				.withDestinationType(Destination.STREAM_POST);
-			}
-			
-			message.withId(m.getId())
-			.withLastChange(m.getLastChange())
-			.withPriority(m.getPriority())
-			.withRating(m.getRating())
-			.withReplyTo(m.getReplyTo())
-			.withCountOfReplies(t.get(1, Integer.class));
-			
-			Like l = t.get(2, Like.class);
-			
-			if (l != null) {
-				message.withCurrentUserRating(l.getRating());
-			} 
-			
-			return message.build();
-		});
-		
-		this.mappers = new HashMap<>();
-		mappers.put(VersionImpl.getBy("1.0"), (Message m) -> {
-			MessageDTO.Builder message = MessageDTO.builder()
-					.withArchived(m.isArchived())
-					.withAuthorId(m.getAuthorId())
-					.withContent(m.getContent())
-					.withDate(m.getDate());
-			
-			Integer underStreamPost = m.getAssociatedStreamPost();
-			if (underStreamPost != null) {
-				message
-				.withDestinationId(underStreamPost)
-				.withDestinationType(Destination.STREAM_POST);
-			}
-			
-			message.withId(m.getId())
-			.withLastChange(m.getLastChange())
-			.withPriority(m.getPriority())
-			.withRating(m.getRating())
-			.withReplyTo(m.getReplyTo())
-			.withCurrentUserRating(null);
-			
-			return message.build();
-		});
+		this.photoService = photoService;
+		this.tagsService = tagsService;
+		this.attachmentRepository = attachmentRepository;
 	}
 
+	protected void addAttachmentsIfAny(MessageDTO.Builder to, int id) {
+		Stream<Attachment> attachments = attachmentRepository
+				.findAllMessageAttachments(id).stream();
+		
+		Set<Integer> photos = attachments.map(Attachment::getPhotoId)
+				.collect(Collectors.toSet());
+		Set<String> tags = attachments.map(Attachment::getTagName)
+				.collect(Collectors.toSet());
+		
+		to.withImages(photos).withTags(tags);
+	}
+	
 	protected Pageable getPageable(PageAndSort params) {
 		
 		Sort sort = Sort.by(params.getOrderBy().map(propertyMapper)
@@ -170,7 +158,7 @@ public class MessageServiceImpl implements MessageService {
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
+	@Transactional
 	public Integer saveUnderStreamPost(int streamPostId, MessageDTO message,
 			Version version) {
 		if (version == null || message == null) {
@@ -185,11 +173,21 @@ public class MessageServiceImpl implements MessageService {
 		msg.setPriority(message.getPriority());
 		msg.setRating(0);
 		msg.setReplyTo(message.getReplyTo());
+		msg.setContent(message.getContent());
 		
-		ParsedMessage pm = messageParser.parse(message.getContent());
-		msg.setContent(pm.getParsed());
+		int id = messageRepository.save(msg).getId();
 		
-		return messageRepository.save(msg).getId();
+		Collection<String> tags = message.getTags();
+		if (tags != null) {
+			tagsService.assosiateWithMessageAndAddTags(tags, id);
+		}
+		
+		Iterable<Integer> photos = message.getImages();
+		if (photos != null) {
+			photoService.associateAllWithMessage(id, photos);
+		}
+		
+		return id;
 	}
 	
 	@Override
@@ -205,8 +203,7 @@ public class MessageServiceImpl implements MessageService {
 			? messageRepository.findAllForProfile(profileId, pageable) 
 			: messageRepository.findAllActiveForProfile(profileId, pageable);
 		
-		return messages.stream().map(mappers.get(params.getObjectVersion()))
-				.collect(Collectors.toList());
+		return messages.stream().map(mapper).collect(Collectors.toList());
 	}
 
 	@Override
@@ -222,8 +219,7 @@ public class MessageServiceImpl implements MessageService {
 			? messageRepository.findAllUnderPost(postId, pageable)
 			: messageRepository.findAllActiveUnderPost(postId, pageable);
 		
-		return messages.stream().map(mappers.get(params.getObjectVersion()))
-				.collect(Collectors.toList());
+		return messages.stream().map(mapper).collect(Collectors.toList());
 	}
 
 	@Override
@@ -256,8 +252,7 @@ public class MessageServiceImpl implements MessageService {
 			messages = Lists.emptyList();
 		}
 		
-		return messages.stream()
-				.map(replyCountMappers.get(params.getObjectVersion()))
+		return messages.stream().map(wLikeAndReplies)
 				.collect(Collectors.toList());
 	}
 
@@ -269,12 +264,9 @@ public class MessageServiceImpl implements MessageService {
 			throw new IllegalArgumentException("Null is disallowed.");
 		}
 		
-		Pageable pageable = this.getPageable(params);
-		
 		return messageRepository.findAllSelectedUnderPost(
-				postId, messageIds, pageable).stream()
-				.map(mappers.get(params.getObjectVersion()))
-				.collect(Collectors.toList());
+				postId, messageIds, getPageable(params)).stream()
+				.map(mapper).collect(Collectors.toList());
 	}
 
 	@Override
@@ -295,14 +287,24 @@ public class MessageServiceImpl implements MessageService {
 			throw new IllegalArgumentException("Null is disallowed.");
 		}
 		
+		Integer id = message.getId();
+		
 		Message toUpdate = new Message();
-		toUpdate.setId(message.getId());
+		toUpdate.setId(id);
 		toUpdate.setArchived(message.getArchived());
 		toUpdate.setLastChange(Instant.now());
 		toUpdate.setPriority(message.getPriority());
+		toUpdate.setContent(message.getContent());
 		
-		ParsedMessage pm = messageParser.parse(message.getContent());
-		toUpdate.setContent(pm.getParsed());
+		Collection<String> tags = message.getTags();
+		if (tags != null) {
+			tagsService.updateMessageTags(id, tags);
+		}
+		
+		Iterable<Integer> photos = message.getImages();
+		if (photos != null) {
+			photoService.updateMessagePhotos(id, photos);
+		}
 		
 		messageRepository.save(toUpdate);
 	}
@@ -335,8 +337,7 @@ public class MessageServiceImpl implements MessageService {
 				: messageRepository.findAllActiveForProfileWLike(
 						profileId, issuerId, pageable);
 		
-		return messsagesWLike.stream()
-				.map(tupleMappers.get(params.getObjectVersion()))
+		return messsagesWLike.stream().map(wLikeMapper)
 				.collect(Collectors.toList());
 	}
 
@@ -356,8 +357,7 @@ public class MessageServiceImpl implements MessageService {
 				: messageRepository	.findAllActiveUnderPostWLike(
 						postId, issuerId, pageable);
 		
-		return messsagesWLike.stream()
-				.map(tupleMappers.get(params.getObjectVersion()))
+		return messsagesWLike.stream().map(wLikeMapper)
 				.collect(Collectors.toList());
 	}
 
@@ -392,8 +392,7 @@ public class MessageServiceImpl implements MessageService {
 			messages = Lists.emptyList();
 		}
 		
-		return messages.stream()
-				.map(replyCountMappers.get(params.getObjectVersion()))
+		return messages.stream().map(wLikeAndReplies)
 				.collect(Collectors.toList());
 	}
 
@@ -407,14 +406,9 @@ public class MessageServiceImpl implements MessageService {
 			throw new IllegalArgumentException("Null is disallowed.");
 		}
 		
-		Pageable pageable = this.getPageable(params);
-		
 		return messageRepository.findAllSelectedUnderPostWLike(
-				postId, messageIds, issuerId, pageable).stream()
-				.map(tupleMappers.get(params.getObjectVersion()))
-				.collect(Collectors.toList());
+				postId, messageIds, issuerId, getPageable(params)).stream()
+				.map(wLikeMapper).collect(Collectors.toList());
 	}
 
-	
-	
 }

@@ -9,6 +9,7 @@ public enum Destination {
 
 	PROFILE,
 	TAG,
-	STREAM_POST
+	STREAM_POST,
+	MESSAGE
 	
 }

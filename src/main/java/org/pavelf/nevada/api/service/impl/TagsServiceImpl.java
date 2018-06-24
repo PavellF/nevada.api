@@ -1,15 +1,13 @@
 package org.pavelf.nevada.api.service.impl;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.pavelf.nevada.api.domain.TagDTO;
-import org.pavelf.nevada.api.persistence.domain.Attachment;
+import org.pavelf.nevada.api.domain.Version;
 import org.pavelf.nevada.api.persistence.domain.Tag;
-import org.pavelf.nevada.api.persistence.repository.AttachmentRepository;
 import org.pavelf.nevada.api.persistence.repository.TagRepository;
 import org.pavelf.nevada.api.service.TagsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,40 +20,38 @@ import org.springframework.transaction.annotation.Transactional;
 public class TagsServiceImpl implements TagsService {
 
 	private TagRepository tagRepository;
-	private AttachmentRepository postTagRepository;
 	
-	
-	@Override
-	@Transactional
-	public void assosiateWithStreamPostAndAddAllTags(Set<TagDTO> tags,
-			int postId) {
-		if (tags == null) {
-			throw new IllegalArgumentException("Null is not allowed.");
-		}
-		
-		List<Tag> newTags = tags.stream().map((TagDTO t) -> {
-			Tag tag = new Tag();
-			tag.setName(t.getTagName());
-			return tag;
-		}).collect(Collectors.toList());
-		
-		newTags = tagRepository.saveAll(newTags);
-		
-		List<Attachment> postTags = newTags.stream().map((Tag tag) -> {
-			Attachment spt = new Attachment();
-			spt.setAssociatedTag(tag.getName());
-			spt.setAssociatedStreamPost(postId);
-			return spt;
-		}).collect(Collectors.toList());
-		
-		postTagRepository.saveAll(postTags);
+	@Autowired
+	public TagsServiceImpl(TagRepository tagRepository) {
+		this.tagRepository = tagRepository;
 	}
 
 	@Override
-	@Transactional
-	public void clearAllStreamPostTags(int postId) {
-		postTagRepository.deleteAllTagsAssociatedWithPost(postId);
-		
+	@Transactional(readOnly = true)
+	public List<TagDTO> getAllForStreamPost(int postId, Version version) {
+		if (version == null) {
+			throw new IllegalArgumentException("Null is not allowed.");
+		}
+		return tagRepository.findAllForStreamPost(postId).stream()
+				.map((Tag t) -> {
+					TagDTO tag = new TagDTO();
+					tag.setTagName(t.getName());
+					return tag;
+				}).collect(Collectors.toList());
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public List<TagDTO> getAllForMessage(int messageId, Version version) {
+		if (version == null) {
+			throw new IllegalArgumentException("Null is not allowed.");
+		}
+		return tagRepository.findAllForMessage(messageId).stream()
+				.map((Tag t) -> {
+					TagDTO tag = new TagDTO();
+					tag.setTagName(t.getName());
+					return tag;
+				}).collect(Collectors.toList());
 	}
 	
 }

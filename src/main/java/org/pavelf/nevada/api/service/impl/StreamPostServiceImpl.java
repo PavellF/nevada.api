@@ -2,6 +2,7 @@ package org.pavelf.nevada.api.service.impl;
 
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -41,9 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class StreamPostServiceImpl implements StreamPostService {
 
 	private StreamPostRepository streamPostRepository;
-	private PhotoService photoService;
-	private TagsService tagsService;
-	private AttachmentRepository attachmentRepository;
 	
 	private final Function<? super StreamPost,? extends StreamPostDTO> 
 	mapper = (StreamPost s) -> {
@@ -288,7 +286,7 @@ public class StreamPostServiceImpl implements StreamPostService {
 		
 		Integer id = streamPostRepository.save(streamPost).getId();
 		
-		Iterable<String> tags = post.getTags();
+		Collection<String> tags = post.getTags();
 		if (tags != null) {
 			tagsService.assosiateWithStreamPostAndAddTags(tags, id);
 		}
@@ -321,7 +319,7 @@ public class StreamPostServiceImpl implements StreamPostService {
 		streamPost.setContent(post.getContent());
 		streamPostRepository.save(streamPost);
 		
-		Iterable<String> tags = post.getTags();
+		Collection<String> tags = post.getTags();
 		if (tags != null) {
 			tagsService.updateStreamPostTags(id, tags);
 		}
@@ -337,8 +335,7 @@ public class StreamPostServiceImpl implements StreamPostService {
 	@Override
 	@Transactional
 	public void deleteStreamPost(int postId) {
-		tagsService.clearAllStreamPostTags(postId);
-		photoService.clearAllStreamPostPhotos(postId);
+		attachmentRepository.deleteAllPostAttachments(postId);
 		streamPostRepository.deleteById(postId);
 	}
 

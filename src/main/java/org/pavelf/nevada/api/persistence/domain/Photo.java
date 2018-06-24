@@ -70,6 +70,9 @@ public class Photo {
 	@Enumerated(javax.persistence.EnumType.STRING)
 	private Visibility visibility;
 	
+	@Column(name="archived")
+	private boolean archived;
+	
 	/**
 	 * Does NOT trigger lazy loading. Always returns empty string.
 	 * */
@@ -173,6 +176,14 @@ public class Photo {
 
 	public void setVisibility(Visibility visibility) {
 		this.visibility = visibility;
+	}
+
+	public boolean isArchived() {
+		return archived;
+	}
+
+	public void setArchived(boolean archived) {
+		this.archived = archived;
 	}
 
 

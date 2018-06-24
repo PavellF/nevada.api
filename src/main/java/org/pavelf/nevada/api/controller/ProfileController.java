@@ -59,6 +59,11 @@ public class ProfileController {
 		this.guestService = guestService;
 	}
 
+	protected User getCurrentUser() {
+		return principal.getToken().getUser()
+				.orElseThrow(UnrecognizedUserException::new);
+	}
+	
 	/*
 	 * Produces xml or json representation of the user profile.
 	 * Expected headers: 
@@ -73,17 +78,17 @@ public class ProfileController {
 	public ResponseEntity<ProfileDTO> getProfile(@PathVariable("id") int id, 
 			HttpEntity<ProfileDTO> entity, 
 			@RequestHeader(HttpHeaders.ACCEPT) Version version) { 
+		
 		if(!principal.isAuthorized()) {
 			return ResponseEntity.ok(profileService.read(id, true, version));
 		} 
 		
-		User issuer = principal.getToken().getUser().orElseThrow(() -> {
-			return new WebApplicationException(UNRECOGNIZED_USER);
-		});
+		User issuer = getCurrentUser();
 		
 		if (issuer.getIdAsInt() == id) {
 			return ResponseEntity.ok(profileService.read(id, false, version));
 		} else {
+			guestService.visitUserProfile(id, issuer.getIdAsInt(), false);
 			return ResponseEntity.ok(profileService.read(id, true, version));
 		}
 	}
@@ -108,8 +113,9 @@ public class ProfileController {
 	@GetMapping(produces = { 
 			APPLICATION_ACCEPT_PREFIX+".profile+json", 
 			APPLICATION_ACCEPT_PREFIX+".profile+xml"},
-			path = "/{ids}-**")	
-	public ResponseEntity<Set<ProfileDTO>> getProfiles(@PathVariable("ids") String ids, 
+			path = "/{ids}")	
+	public ResponseEntity<Set<ProfileDTO>> getProfiles(
+			@PathVariable("ids") String ids, 
 			@RequestHeader(HttpHeaders.ACCEPT) Version version) { 
 		
 		Set<Integer> profileIds = Pattern.compile("-")
@@ -132,11 +138,11 @@ public class ProfileController {
 			APPLICATION_ACCEPT_PREFIX+".profile+xml"})
 	@Secured(access = Access.READ_WRITE, 
 	scope = { Scope.ACCOUNT, Scope.PERSON_INFO })
-	public ResponseEntity<ProfileDTO> updateProfile(HttpEntity<ProfileDTO> entity, 
+	public ResponseEntity<ProfileDTO> updateProfile(
+			HttpEntity<ProfileDTO> entity, 
 			@RequestHeader(HttpHeaders.CONTENT_TYPE) Version version) {
-		final User issuer = principal.getToken().getUser()
-				.orElseThrow(UnrecognizedUserException::new);
 		
+		final User issuer = getCurrentUser();
 		final ProfileDTO toUpdate = entity.getBody();
 		
 		if (toUpdate == null) {

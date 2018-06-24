@@ -22,4 +22,13 @@ public interface AttachmentRepository
 	@Query("SELECT a FROM Attachment a WHERE a.toStreamPost = ?1")
 	public List<Attachment> findAllPostAttachments(int streamPostId);
 	
+	@Query("SELECT a FROM Attachment a WHERE a.toMessage = ?1")
+	public List<Attachment> findAllMessageAttachments(int messageId);
+	/*
+	@Modifying
+	@Query("DELETE FROM Attachment a WHERE a.toStreamPost = ?2 "
+			+ "AND a.tagName IN (?1)")
+	public void deleteAllPostTagAttachments(int postId, 
+			Iterable<String> tags);*/
+	
 }

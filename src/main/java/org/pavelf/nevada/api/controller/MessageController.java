@@ -2,8 +2,9 @@ package org.pavelf.nevada.api.controller;
 
 import static org.pavelf.nevada.api.Application.APPLICATION_ACCEPT_PREFIX;
 import static org.pavelf.nevada.api.exception.ExceptionCases.*;
-
+	
 import java.net.URI;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,6 +30,7 @@ import org.pavelf.nevada.api.security.User;
 import org.pavelf.nevada.api.service.FollowersService;
 import org.pavelf.nevada.api.service.MessageService;
 import org.pavelf.nevada.api.service.PageAndSortExtended;
+import org.pavelf.nevada.api.service.PhotoService;
 import org.pavelf.nevada.api.service.ProfileService;
 import org.pavelf.nevada.api.service.StreamPostService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,19 +58,26 @@ public class MessageController {
 	private ProfileService profileService;
 	private FollowersService followersService;
 	private StreamPostService streamPostService;
+	private PhotoService photoService;
 	
 	@Autowired
 	public MessageController(MessageService messageService,
 			TokenContext securityContext, ProfileService profileService,
 			FollowersService followersService,
-			StreamPostService streamPostService) {
+			StreamPostService streamPostService, PhotoService photoService) {
 		this.messageService = messageService;
 		this.securityContext = securityContext;
 		this.profileService = profileService;
 		this.followersService = followersService;
 		this.streamPostService = streamPostService;
+		this.photoService = photoService;
 	}
 
+	protected User getCurrentUser() {
+		return securityContext.getToken().getUser()
+				.orElseThrow(UnrecognizedUserException::new);
+	}
+	
 	@GetMapping(produces = { 
 			APPLICATION_ACCEPT_PREFIX+".message+json", 
 			APPLICATION_ACCEPT_PREFIX+".message+xml"},
@@ -78,8 +87,7 @@ public class MessageController {
 			PageAndSortExtended pageAndSort) {
 		
 		if (securityContext.isAuthorized()) {
-			final User issuer = securityContext.getToken().getUser()
-					.orElseThrow(UnrecognizedUserException::new);
+			final User issuer = getCurrentUser();	
 			
 			boolean isSuper = securityContext.getToken().isSuper();
 			boolean isOwnerRequesting = issuer.getIdAsInt() == profileId;
@@ -112,8 +120,7 @@ public class MessageController {
 			@RequestHeader(HttpHeaders.CONTENT_TYPE) Version version) {
 		
 		final MessageDTO posted = entity.getBody();
-		final User issuer = securityContext.getToken().getUser()
-				.orElseThrow(UnrecognizedUserException::new);
+		final User issuer = getCurrentUser();	
 		final int issuerId = issuer.getIdAsInt();
 		
 		if (posted == null) {
@@ -131,15 +138,17 @@ public class MessageController {
 		if (destination == Destination.STREAM_POST) {
 			
 			final Integer repliedId = posted.getReplyTo();
-			if (repliedId != null) {
-				if (!messageService
+			if (repliedId != null && !messageService
 						.isPostedUnderPost(destinationId, repliedId)) {
-					throw new WebApplicationException(ACCESS_DENIED);
-				}
+				throw new WebApplicationException(ACCESS_DENIED);
 			} 
 			
-			if (owner == Owner.PROFILE && streamPostService
-					.profileHasPost(ownerId, destinationId)) {
+			final StreamPostDTO post = streamPostService.getById(
+					destinationId, version).orElseThrow(() -> 
+					new WebApplicationException(ACCESS_DENIED));
+			
+			if (owner == Owner.PROFILE && 
+					post.getAssociatedProfile() == ownerId) {
 
 				final URI created = URI.create(
 					"profile/"+ownerId+"/posts/"+destinationId+"/messages");
@@ -149,6 +158,8 @@ public class MessageController {
 						ownerId, issuerId, posted);
 				
 				if (canCommentPost || securityContext.getToken().isSuper()) {
+					validateAttachments(posted.getImages(), 
+							posted.getTags(), issuerId);
 					messageService.saveUnderStreamPost(
 							destinationId, posted, version);
 					return ResponseEntity.created(created).build();
@@ -158,6 +169,24 @@ public class MessageController {
 		}
 		
 		throw new WebApplicationException(ACCESS_DENIED);
+	}
+	
+	protected void validateAttachments(Collection<Integer> images, 
+			Collection<String> tags, int authorId) {
+		
+		if (images != null) {
+			if (images.size() > 3) {
+				throw new WebApplicationException(OUT_OF_BOUND_VALUE);
+			}
+			
+			if (!photoService.areBelongsTo(authorId, images)) {
+				throw new WebApplicationException(ACCESS_DENIED);
+			}
+		}
+		
+		if (tags != null && tags.size() > 12) {
+			throw new WebApplicationException(OUT_OF_BOUND_VALUE);
+		} 
 	}
 	
 	protected boolean canCommentPost(Optional<StreamPostDTO> maybePost, 
@@ -210,8 +239,7 @@ public class MessageController {
 			@RequestHeader(HttpHeaders.CONTENT_TYPE) Version version) {
 		
 		final MessageDTO posted = entity.getBody();
-		final User issuer = securityContext.getToken().getUser()
-				.orElseThrow(UnrecognizedUserException::new);
+		final User issuer = getCurrentUser();
 		final int issuerId = issuer.getIdAsInt();
 		
 		if (posted == null) {
@@ -224,14 +252,19 @@ public class MessageController {
 		
 		if (destination == Destination.STREAM_POST) {
 			
-			if (owner == Owner.PROFILE && streamPostService
-					.profileHasPost(ownerId, destinationId)) {
+			final StreamPostDTO post = streamPostService.getById(
+					destinationId, version).orElseThrow(() -> 
+				new WebApplicationException(ACCESS_DENIED));
+			
+			if (owner == Owner.PROFILE && 
+					post.getAssociatedProfile() == destinationId) {
 				
 				final boolean isAuthor = 
 						messageService.isAuthorOf(issuerId, posted.getId());
 				final boolean canCommentPost = canCommentPost(
 						streamPostService.getById(destinationId, version),
 						ownerId, issuerId, posted);
+				
 				final boolean isOwner = ownerId == issuerId;
 				final boolean isAuthorAndOwner = isAuthor && isOwner;
 				final boolean isAuthorOfMessageButNotOwnerOfPost = 
@@ -241,9 +274,10 @@ public class MessageController {
 				
 				if (securityContext.getToken().isSuper() || (canCommentPost
 						&& (isAuthorAndOwner || 
-								isNotAuthorOfMessageButOwnerOfPost || 
-								isAuthorOfMessageButNotOwnerOfPost))) {
-					
+							isNotAuthorOfMessageButOwnerOfPost || 
+							isAuthorOfMessageButNotOwnerOfPost))) {
+					validateAttachments(posted.getImages(), 
+							posted.getTags(), issuerId);
 					messageService.update(posted, version);
 					return ResponseEntity.noContent().build();
 				}
@@ -289,11 +323,10 @@ public class MessageController {
 				boolean isSuperOrOwnerRequest = false; 
 			
 				if (securityContext.isAuthorized()) {
-					final User issuer = securityContext.getToken().getUser()
-						.orElseThrow(UnrecognizedUserException::new);
+					final User issuer = getCurrentUser();
 					final Integer issuerId = issuer.getIdAsInt();
 					
-					isSuperOrOwnerRequest = issuerId == ownerId ||
+					isSuperOrOwnerRequest = (issuerId == ownerId) ||
 							securityContext.getToken().isSuper();
 					
 					if (visibilityOfPost == FRIENDS) {

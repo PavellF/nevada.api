@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.Collections;
 
 /**
  * Represents text message with attachments.
@@ -23,8 +24,7 @@ public class MessageDTO {
 	private Boolean archived;
 	private String content;
 	private Integer replyTo;
-	private Destination destinationType;
-	private Integer destinationId;
+	private Integer streamPostId;
 	private Integer countOfReplies;
 	private Short currentUserRating;
 	private Set<String> tags;
@@ -40,52 +40,71 @@ public class MessageDTO {
 		this.archived = builder.archived;
 		this.content = builder.content;
 		this.replyTo = builder.replyTo;
-		this.destinationType = builder.destinationType;
-		this.destinationId = builder.destinationId;
+		this.streamPostId = builder.streamPostId;
 		this.countOfReplies = builder.countOfReplies;
 		this.currentUserRating = builder.currentUserRating;
+		this.tags = builder.tags;
+		this.images = builder.images;
 	}
-	
+
+	private MessageDTO() { }
+
 	public Integer getId() {
 		return id;
 	}
+
 	public Integer getAuthorId() {
 		return authorId;
 	}
+
 	public Instant getDate() {
 		return date;
 	}
+
 	public Instant getLastChange() {
 		return lastChange;
 	}
+
 	public Integer getRating() {
 		return rating;
 	}
+
 	public Short getPriority() {
 		return priority;
 	}
+
 	public Boolean getArchived() {
 		return archived;
 	}
+
 	public String getContent() {
 		return content;
 	}
+
 	public Integer getReplyTo() {
 		return replyTo;
 	}
-	public Destination getDestinationType() {
-		return destinationType;
+
+	public Integer getStreamPostId() {
+		return streamPostId;
 	}
-	public Integer getDestinationId() {
-		return destinationId;
-	}
+
 	public Integer getCountOfReplies() {
 		return countOfReplies;
 	}
+
 	public Short getCurrentUserRating() {
 		return currentUserRating;
 	}
-	
+
+	public Set<String> getTags() {
+		return tags;
+	}
+
+	public Set<Integer> getImages() {
+		return images;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -107,17 +126,20 @@ public class MessageDTO {
 		builder.append(content);
 		builder.append(", replyTo=");
 		builder.append(replyTo);
-		builder.append(", destinationType=");
-		builder.append(destinationType);
-		builder.append(", destinationId=");
-		builder.append(destinationId);
+		builder.append(", streamPostId=");
+		builder.append(streamPostId);
 		builder.append(", countOfReplies=");
 		builder.append(countOfReplies);
 		builder.append(", currentUserRating=");
 		builder.append(currentUserRating);
+		builder.append(", tags=");
+		builder.append(tags);
+		builder.append(", images=");
+		builder.append(images);
 		builder.append("]");
 		return builder.toString();
 	}
+
 	/**
 	 * Creates builder to build {@link MessageDTO}.
 	 * @return created builder
@@ -139,10 +161,11 @@ public class MessageDTO {
 		private Boolean archived;
 		private String content;
 		private Integer replyTo;
-		private Destination destinationType;
-		private Integer destinationId;
+		private Integer streamPostId;
 		private Integer countOfReplies;
 		private Short currentUserRating;
+		private Set<String> tags = Collections.emptySet();
+		private Set<Integer> images = Collections.emptySet();
 
 		private Builder() {
 		}
@@ -192,13 +215,8 @@ public class MessageDTO {
 			return this;
 		}
 
-		public Builder withDestinationType(Destination destinationType) {
-			this.destinationType = destinationType;
-			return this;
-		}
-
-		public Builder withDestinationId(Integer destinationId) {
-			this.destinationId = destinationId;
+		public Builder withStreamPostId(Integer streamPostId) {
+			this.streamPostId = streamPostId;
 			return this;
 		}
 
@@ -212,18 +230,19 @@ public class MessageDTO {
 			return this;
 		}
 
+		public Builder withTags(Set<String> tags) {
+			this.tags = tags;
+			return this;
+		}
+
+		public Builder withImages(Set<Integer> images) {
+			this.images = images;
+			return this;
+		}
+
 		public MessageDTO build() {
 			return new MessageDTO(this);
 		}
 	}
 
-	public Set<String> getTags() {
-		return tags;
-	}
-
-	public Set<Integer> getImages() {
-		return images;
-	}
-
-	
 }
