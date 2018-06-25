@@ -6,7 +6,6 @@ import static org.pavelf.nevada.api.exception.ExceptionCases.BANNED_PROFILE;
 import static org.pavelf.nevada.api.exception.ExceptionCases.BODY_REQUIRED;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.List;
 import org.mockito.internal.util.collections.Sets;
 import org.pavelf.nevada.api.domain.Access;

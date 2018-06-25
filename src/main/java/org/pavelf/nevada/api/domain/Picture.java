@@ -2,8 +2,6 @@ package org.pavelf.nevada.api.domain;
 
 import java.util.List;
 import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Describes processed picture. Mutable.
@@ -13,7 +11,6 @@ import java.util.function.Supplier;
 public class Picture {
 
 	private byte[] data;
-	private final String outputFilename;
 	private final int outputWidth;
 	private final int outputLength;
 	private final boolean metadataPreserved;
@@ -23,33 +20,21 @@ public class Picture {
 	/**
 	 * @throws IllegalArgumentException if {@link data} is null.
 	 * */
-	public Picture(byte[] data, int outputWidth, int outputLength,
-			boolean metadataPreserved, float outputQuality, String outputFilename) {
+	private Picture(byte[] data, int outputWidth, int outputLength,
+			boolean metadataPreserved, float outputQuality) {
 		setData(data);
-		
-		if (outputFilename == null) {
-			StringBuilder sb = new StringBuilder();
-			
-			for (int i = 0; i < data.length && i < 16; i++) {
-				sb.append(data[i]);
-			}
-			
-			this.outputFilename = sb.toString();
-		} else {
-			this.outputFilename = outputFilename ;
-		}
-		
 		this.outputWidth = outputWidth;
 		this.outputLength = outputLength;
 		this.metadataPreserved = metadataPreserved;
 		this.outputQuality = outputQuality;
 	}
 	
-	public Picture(byte[] data, int outputWidth, int outputLength,
-			boolean metadataPreserved, float outputQuality) {
-		this(data, outputWidth, outputLength, metadataPreserved, outputQuality, null);
+	public static Picture newPicture(byte[] data, int outputWidth, 
+			int outputLength, boolean metadataPreserved, float outputQuality) {
+		return new Picture(data, outputWidth, outputLength, 
+				metadataPreserved, outputQuality);
 	}
-
+	
 	/**
 	 * @return never {@code null}.
 	 * */
@@ -57,17 +42,12 @@ public class Picture {
 		return data;
 	}
 	
-	public String getFilename() {
-		return this.outputFilename;
-	}
-	
 	/**
-	 * @param filename if not set first n bytes will be used as a name.
 	 * @throws IllegalArgumentException if data passed is null.
 	 * */ 
 	public void setData(byte[] data) {
 		if (data == null) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Null passed.");
 		}
 		this.data = data;
 	}
@@ -93,7 +73,8 @@ public class Picture {
 		this.metadataSupplier = metadataSupplier;
 	}
 	
-	public List<String> getMetadataByTag(String tagname, String attributeName) {
+	public List<String> getMetadataByTag(String tagname, 
+			String attributeName) {
 		if (metadataSupplier != null) {
 			return metadataSupplier.apply(tagname, attributeName);
 		}
@@ -103,9 +84,7 @@ public class Picture {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Picture [filename=");
-		builder.append(outputFilename);
-		builder.append(", outputWidth=");
+		builder.append("Picture outputWidth=");
 		builder.append(outputWidth);
 		builder.append(", outputLength=");
 		builder.append(outputLength);

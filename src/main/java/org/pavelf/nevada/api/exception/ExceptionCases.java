@@ -84,4 +84,9 @@ public interface ExceptionCases {
 			ExceptionCase.of(18, "Something went wrong on server side.", 
 					HttpStatus.INTERNAL_SERVER_ERROR);
 	
+	public static final ExceptionCase CAN_NOT_LIKE = ExceptionCase.of(
+			19, 
+			"Can not like object twice or like own content.", 
+			HttpStatus.BAD_REQUEST);
+	
 }

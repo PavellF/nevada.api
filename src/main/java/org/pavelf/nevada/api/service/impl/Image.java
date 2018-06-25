@@ -34,11 +34,12 @@ import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
  *   Used to open, resize, rotate, crop and save images.
  *
  ******************************************************************************/
-
+@SuppressWarnings("rawtypes")
 public class Image {
     
     private BufferedImage bufferedImage = null; 
-    private java.util.ArrayList corners = null;
+    
+	private java.util.ArrayList corners = null;
     
     private float outputQuality = 1f; //0.9f; //0.5f;
 

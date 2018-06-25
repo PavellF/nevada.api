@@ -1,6 +1,9 @@
 package org.pavelf.nevada.api.service;
 
 import java.util.Collection;
+import java.util.List;
+
+import org.pavelf.nevada.api.persistence.domain.Attachment;
 
 /**
  * Service for linking entities to each other.
@@ -9,6 +12,22 @@ import java.util.Collection;
  */
 public interface AttachmentService {
 
+	/**
+	 * Deletes all associations given post has.
+	 * */
+	public void deleteAllAttachmentsOnStreamPost(int postId);
+	
+	/**
+	 * @see #getAllStreamPostAttachments
+	 * */
+	public List<Attachment> getAllMessageAttachments(int messageId);
+	
+	/**
+	 * Finds all {@code Attachment}s associated with given stream post.
+	 * @return Never {@code null}, may be empty list.
+	 * */
+	public List<Attachment> getAllStreamPostAttachments(int postId);
+	
 	/**
 	 * Adds(if not exist) and associates all given tags and photos with 
 	 * stream post. If some of parameters is {@code null} it will be ignored.

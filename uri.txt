@@ -1,7 +1,7 @@
  
 /profiles - POST, PUT
-/profiles/{id} - GET
-/profiles/{ids}-** - GET
+/profile/{id} - GET
+/profiles/{ids} - GET
 
 /applications - POST, PUT
 /profiles/{owner_id}/applications/ - GET
@@ -12,6 +12,8 @@
 /profile/{id}/posts - GET
 /{destination}/{destination_id}/posts - POST, GET, PUT
 /{destination}/{destination_id}/posts/{id} - DELETE
+/posts/{ids} - GET  
+/posts/ - GET //featured 
 
 /profiles/{owner_id}/followers - GET
 /followers - POST, PUT
@@ -27,16 +29,17 @@
 /profiles/{owner_id}/profilePreferences - GET
 
 /profiles/{id}/likes - GET //should return like attached to
-/{owner}/{owner_id}/{destination}/{destination_id}/likes - POST, PUT, GET
-/{owner}/{owner_id}/{destination}/{destination_id}/likes/{id} - DELETE
+/{destination}/{destination_id}/likes - POST, PUT, GET
+/likes/{id} - DELETE
 
 /profiles/{id}/messages - GET //should return objects message linked to
-/{owner}/{owner_id}/{destination}/{destination_id}/messages - POST, PUT, GET
-/{owner}/{owner_id}/{destination}/{destination_id}/messages/map - GET
-/{owner}/{owner_id}/{destination}/{destination_id}/messagesList - GET
-/{owner}/{owner_id}/{destination}/{destination_id}/messages/{ids} - GET
+/{owner}/{owner_id}/{destination}/{destination_id}/messages - POST, PUT, GET *
+/{owner}/{owner_id}/{destination}/{destination_id}/messages/map - GET *
+/{owner}/{owner_id}/{destination}/{destination_id}/messagesList - GET *
+/{owner}/{owner_id}/{destination}/{destination_id}/messages/{ids} - GET *
 
-/profiles/{id}/photos - GET, POST //should return photo objects
-/{owner}/{owner_id}/{destination}/{destination_id}/photos - POST, PUT, GET
+/{destination}/{destination_id}/photos - GET
+/{destination}/{destination_id}/photos/{id} - GET
+/photos - POST, PUT
 
 /{destination}/{destination_id}/tags - GET

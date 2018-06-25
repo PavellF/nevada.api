@@ -18,13 +18,11 @@ import org.pavelf.nevada.api.persistence.domain.Attachment;
 import org.pavelf.nevada.api.persistence.domain.Like;
 import org.pavelf.nevada.api.persistence.domain.Message;
 import org.pavelf.nevada.api.persistence.domain.Sorting;
-import org.pavelf.nevada.api.persistence.repository.AttachmentRepository;
 import org.pavelf.nevada.api.persistence.repository.MessageRepository;
+import org.pavelf.nevada.api.service.AttachmentService;
 import org.pavelf.nevada.api.service.MessageService;
 import org.pavelf.nevada.api.service.PageAndSort;
 import org.pavelf.nevada.api.service.PageAndSortExtended;
-import org.pavelf.nevada.api.service.PhotoService;
-import org.pavelf.nevada.api.service.TagsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -42,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MessageServiceImpl implements MessageService {
 
 	private MessageRepository messageRepository;
+	private AttachmentService attachmentService;
 	
 	private final Function<? super Sorting, ? extends Order> propertyMapper = 
 			(Sorting s) -> {
@@ -127,17 +126,14 @@ public class MessageServiceImpl implements MessageService {
 	
 	@Autowired
 	public MessageServiceImpl(MessageRepository messageRepository,
-			PhotoService photoService, TagsService tagsService,
-			AttachmentRepository attachmentRepository) {
+			AttachmentService attachmentService) {
 		this.messageRepository = messageRepository;
-		this.photoService = photoService;
-		this.tagsService = tagsService;
-		this.attachmentRepository = attachmentRepository;
+		this.attachmentService = attachmentService;
 	}
-
+	
 	protected void addAttachmentsIfAny(MessageDTO.Builder to, int id) {
-		Stream<Attachment> attachments = attachmentRepository
-				.findAllMessageAttachments(id).stream();
+		Stream<Attachment> attachments = attachmentService
+				.getAllMessageAttachments(id).stream();
 		
 		Set<Integer> photos = attachments.map(Attachment::getPhotoId)
 				.collect(Collectors.toSet());
@@ -176,16 +172,10 @@ public class MessageServiceImpl implements MessageService {
 		msg.setContent(message.getContent());
 		
 		int id = messageRepository.save(msg).getId();
-		
 		Collection<String> tags = message.getTags();
-		if (tags != null) {
-			tagsService.assosiateWithMessageAndAddTags(tags, id);
-		}
+		Collection<Integer> photos = message.getImages();
 		
-		Iterable<Integer> photos = message.getImages();
-		if (photos != null) {
-			photoService.associateAllWithMessage(id, photos);
-		}
+		attachmentService.assosiateWithMessage(tags, photos, id);
 		
 		return id;
 	}
@@ -297,14 +287,8 @@ public class MessageServiceImpl implements MessageService {
 		toUpdate.setContent(message.getContent());
 		
 		Collection<String> tags = message.getTags();
-		if (tags != null) {
-			tagsService.updateMessageTags(id, tags);
-		}
-		
-		Iterable<Integer> photos = message.getImages();
-		if (photos != null) {
-			photoService.updateMessagePhotos(id, photos);
-		}
+		Collection<Integer> photos = message.getImages();
+		attachmentService.updateMessageAttachments(id, tags, photos);
 		
 		messageRepository.save(toUpdate);
 	}

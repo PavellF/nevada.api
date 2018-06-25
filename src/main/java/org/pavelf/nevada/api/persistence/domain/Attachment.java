@@ -6,7 +6,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 
 /**
  * {@code @Entity} that links <b>many</b> {@code StreamPost}s or 
@@ -24,19 +23,15 @@ public class Attachment {
 	private int id;
 	
 	@Column(name = "to_stream_post")
-	@NotNull
 	private Integer toStreamPost;
 	
 	@Column(name = "to_message")
-	@NotNull
 	private Integer toMessage;
 	
 	@Column(name = "photo")
-	@NotNull
 	private Integer photoId;
 	
 	@Column(name = "tag")
-	@NotNull
 	private String tagName;
 	
 	/**
@@ -75,7 +70,7 @@ public class Attachment {
 	public Integer getToStreamPost() {
 		return toStreamPost;
 	}
-
+ 
 	public void setToStreamPost(Integer toStreamPost) {
 		this.toStreamPost = toStreamPost;
 	}

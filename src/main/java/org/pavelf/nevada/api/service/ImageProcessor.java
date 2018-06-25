@@ -1,7 +1,6 @@
 package org.pavelf.nevada.api.service;
 
 import org.pavelf.nevada.api.domain.Picture;
-import org.pavelf.nevada.api.service.impl.Image;
 
 /**
  * General purpose image processor.
@@ -14,6 +13,7 @@ public interface ImageProcessor {
 	 * Processes given image.
 	 * @param toProcess image data.
 	 * @throws IllegalArgumentException if null passed.
+	 * @return mutated {@code Picture}, never {@code null}.
 	 * */
 	public Picture process(Picture toProcess);
 	

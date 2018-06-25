@@ -246,6 +246,10 @@ public class MessageController {
 			throw new WebApplicationException(BODY_REQUIRED);
 		}
 		
+		if (posted.getId() == null) {
+			throw new WebApplicationException(REQUIRED_BODY_PROPERTY);
+		}
+		
 		if (profileService.isSuspended(issuerId)) {
 			throw new WebApplicationException(BANNED_PROFILE); 
 		}

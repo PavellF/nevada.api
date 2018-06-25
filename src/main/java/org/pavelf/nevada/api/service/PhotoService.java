@@ -1,5 +1,6 @@
 package org.pavelf.nevada.api.service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -75,7 +76,7 @@ public interface PhotoService {
 	 * @param photoIds photo identifiers, may be {@code null}.
 	 * @return Whether all these photos belong profile with given id.
 	 * */
-	public boolean areBelongsTo(int profileId, Iterable<Integer> photoIds);
+	public boolean areBelongsTo(int profileId, Collection<Integer> photoIds);
 	
 	/**
 	 * @param profileId owner id.

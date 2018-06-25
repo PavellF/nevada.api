@@ -2,10 +2,12 @@ package org.pavelf.nevada.api.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.pavelf.nevada.api.domain.StreamPostDTO;
 import org.pavelf.nevada.api.domain.Version;
 import org.pavelf.nevada.api.persistence.domain.Visibility;
+import org.pavelf.nevada.api.persistence.repository.Temporal;
 
 /**
  * Defines set of actions for {@code StreamPost}.
@@ -15,8 +17,37 @@ import org.pavelf.nevada.api.persistence.domain.Visibility;
 public interface StreamPostService {
 
 	/**
+	 * Finds all posts, returns only those this user has access. Also return 
+	 * additional field representing value this user rated post.
+	 * @param profileId that represents user. If {@code null} passed only posts
+	 * which visible by everyone will be returned.
+	 * @param forInterval objects will be fetched from specified relative 
+	 * interval until now.
+	 * @param params of fetched list.
+	 * @return collection of retrieved posts, never {@code null}. Returned 
+	 * list may also be empty or less than expected due access restrictions.
+	 * @throws IllegalArgumentException if {@code null} passed.
+	 * */
+	public List<StreamPostDTO> getAllVisibleByProfile(Integer profileId, 
+			PageAndSortExtended params, Temporal forInterval);
+	
+	/**
+	 * Finds selected posts, returns only those this user has access. Also 
+	 * return additional field representing value this user rated post.
+	 * @param profileId that represents user. If {@code null} passed only posts
+	 * which visible by everyone will be returned.
+	 * @param postIds set of posts ids.
+	 * @param version of objects.
+	 * @return collection of retrieved posts, never {@code null}. Returned 
+	 * list may also be empty or less than expected due access restrictions.
+	 * @throws IllegalArgumentException if {@code null} passed.
+	 * */
+	public List<StreamPostDTO> getSelectedVisibleByProfile(Integer profileId, 
+			Set<Integer> postIds, Version version);
+	
+	/**
 	 * Finds all posts associated with given profile and 
-	 * returns additional field with rating caller rated some messages.
+	 * returns additional field with rating caller rated some posts.
 	 * @param profileId that represents profile.
 	 * @param pageAndSort parameters of list to fetch.
 	 * @param requestingId represents caller who (potentially) liked the post.

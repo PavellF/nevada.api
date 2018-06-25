@@ -2,7 +2,6 @@ package org.pavelf.nevada.api.service;
 
 import java.util.List;
 
-import org.pavelf.nevada.api.domain.ProfileDTO;
 import org.pavelf.nevada.api.domain.TokenDTO;
 import org.pavelf.nevada.api.domain.Version;
 

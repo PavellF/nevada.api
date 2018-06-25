@@ -11,7 +11,6 @@ import org.pavelf.nevada.api.persistence.domain.Attachment;
 import org.pavelf.nevada.api.persistence.domain.Tag;
 import org.pavelf.nevada.api.persistence.domain.Token;
 import org.pavelf.nevada.api.persistence.domain.Visibility;
-import org.pavelf.nevada.api.persistence.repository.AdvancedStreamPostRepository;
 import org.pavelf.nevada.api.persistence.repository.ApplicationRepository;
 import org.pavelf.nevada.api.persistence.repository.LikeRepository;
 import org.pavelf.nevada.api.persistence.repository.ProfileRepository;
@@ -61,7 +60,7 @@ public class ProfileControllerTest {
     private StreamPostRepository spr;
     
     @Autowired 
-     private LikeRepository lr;
+    private LikeRepository lr;
     
     @Autowired 
     private ProfileRepository pr;
@@ -147,11 +146,11 @@ public class ProfileControllerTest {
 		tr.save(tag);
 		
 		Attachment spTag = new Attachment();
-		spTag.setAssociatedStreamPost(1);
-		spTag.setAssociatedTag("wow");
+		spTag.setToStreamPost(1);
+		spTag.setTagName("wow");
 		sptr.save(spTag);
 		spTag.setId(0);
-		spTag.setAssociatedStreamPost(2);
+		spTag.setToStreamPost(2);
 		sptr.save(spTag);
 		
     	List<Visibility> levels = 
@@ -160,10 +159,7 @@ public class ProfileControllerTest {
     			.collect(Collectors.toList());
     	Sort sort = Sort.by(Direction.ASC, "id");
 		Pageable pageable = PageRequest.of(0, 15, sort);
-    	/*
-		List<Tuple> list1 = spr
-				.findAllByTagWithLikeInfo("wow", 2, pageable);
-		*/
+    	
 		List<Tuple> list1 = 
 				spr.findAllByAuthorIdWithLikeInfo(1, levels, 2, pageable);
 		

@@ -24,11 +24,41 @@ public interface AttachmentRepository
 	
 	@Query("SELECT a FROM Attachment a WHERE a.toMessage = ?1")
 	public List<Attachment> findAllMessageAttachments(int messageId);
-	/*
+	
 	@Modifying
-	@Query("DELETE FROM Attachment a WHERE a.toStreamPost = ?2 "
-			+ "AND a.tagName IN (?1)")
-	public void deleteAllPostTagAttachments(int postId, 
-			Iterable<String> tags);*/
+	@Query("DELETE FROM Attachment a WHERE a.toStreamPost = ?1 "
+			+ "AND (a.tagName IN (?2) OR a.photoId IN (?3))")
+	public void deleteAllPostAttachmentsIn(int postId, 
+			Iterable<String> tagsToDelete, List<Integer> photosToDelete);
+	
+	@Modifying
+	@Query("DELETE FROM Attachment a WHERE a.toStreamPost = ?1 "
+			+ "AND a.tagName IN (?2)")
+	public void deleteAllPostAttachmentsIn(int postId, 
+			Iterable<String> tagsToDelete);
+	
+	@Modifying
+	@Query("DELETE FROM Attachment a WHERE a.toStreamPost = ?1 "
+			+ "AND a.photoId IN (?2)")
+	public void deleteAllPostAttachmentsIn(int postId, 
+			List<Integer> photosToDelete);
+	
+	@Modifying
+	@Query("DELETE FROM Attachment a WHERE a.toMessage = ?1 "
+			+ "AND (a.tagName IN (?2) OR a.photoId IN (?3))")
+	public void deleteAllMessageAttachmentsIn(int messageId, 
+			Iterable<String> tagsToDelete, List<Integer> photosToDelete);
+	
+	@Modifying
+	@Query("DELETE FROM Attachment a WHERE a.toMessage = ?1 "
+			+ "AND a.tagName IN (?2)")
+	public void deleteAllMessageAttachmentsIn(int messageId, 
+			Iterable<String> tagsToDelete);
+	
+	@Modifying
+	@Query("DELETE FROM Attachment a WHERE a.toMessage = ?1 "
+			+ "AND a.photoId IN (?2)")
+	public void deleteAllMessageAttachmentsIn(int messageId, 
+			List<Integer> photosToDelete);
 	
 }

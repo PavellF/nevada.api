@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.pavelf.nevada.api.Application.APPLICATION_ACCEPT_PREFIX;
@@ -39,7 +38,6 @@ import org.springframework.http.ResponseEntity;
  * @since 1.0
  * */
 @RestController
-@RequestMapping("/profiles")
 public class ProfileController {
 
 	private TokenContext principal;
@@ -74,7 +72,7 @@ public class ProfileController {
 	@GetMapping(produces = { 
 			APPLICATION_ACCEPT_PREFIX+".profile+json", 
 			APPLICATION_ACCEPT_PREFIX+".profile+xml"},
-			path = "/{id}")	
+			path = "/profile/{id}")	
 	public ResponseEntity<ProfileDTO> getProfile(@PathVariable("id") int id, 
 			HttpEntity<ProfileDTO> entity, 
 			@RequestHeader(HttpHeaders.ACCEPT) Version version) { 
@@ -95,7 +93,7 @@ public class ProfileController {
 	
 	@PostMapping(consumes = {
 			APPLICATION_ACCEPT_PREFIX+".profile+json", 
-			APPLICATION_ACCEPT_PREFIX+".profile+xml"})
+			APPLICATION_ACCEPT_PREFIX+".profile+xml"}, path = "/profiles")
 	@Secured(access = Access.READ_WRITE, scope = { Scope.ACCOUNT })
 	public ResponseEntity<ProfileDTO> postProfile(
 			HttpEntity<ProfileDTO> entity,
@@ -113,7 +111,7 @@ public class ProfileController {
 	@GetMapping(produces = { 
 			APPLICATION_ACCEPT_PREFIX+".profile+json", 
 			APPLICATION_ACCEPT_PREFIX+".profile+xml"},
-			path = "/{ids}")	
+			path = "/profiles/{ids}")	
 	public ResponseEntity<Set<ProfileDTO>> getProfiles(
 			@PathVariable("ids") String ids, 
 			@RequestHeader(HttpHeaders.ACCEPT) Version version) { 
@@ -135,7 +133,7 @@ public class ProfileController {
 	 * */
 	@PutMapping(consumes = {
 			APPLICATION_ACCEPT_PREFIX+".profile+json", 
-			APPLICATION_ACCEPT_PREFIX+".profile+xml"})
+			APPLICATION_ACCEPT_PREFIX+".profile+xml"}, path = "/profiles")
 	@Secured(access = Access.READ_WRITE, 
 	scope = { Scope.ACCOUNT, Scope.PERSON_INFO })
 	public ResponseEntity<ProfileDTO> updateProfile(

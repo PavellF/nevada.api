@@ -1,5 +1,6 @@
 package org.pavelf.nevada.api.persistence.repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +21,46 @@ import org.springframework.data.repository.query.Param;
 public interface StreamPostRepository 
 	extends JpaRepository<StreamPost, Integer> {
 
+	@Query("SELECT sp, l FROM StreamPost AS sp "
+			+ "INNER JOIN Follower AS f ON f.followedId=sp.associatedProfile "
+			+ "LEFT OUTER JOIN Like AS l ON l.likedById = ?1 "
+			+ "AND l.likedStreamPost = sp.id WHERE sp.id IN (?2) "
+			+ "AND (sp.visibility = 'ALL' "
+			+ "OR (sp.visibility = 'FRIENDS' AND f.followerId = ?1) "
+			+ "OR sp.associatedProfile = ?1 OR sp.authorId = ?1))")
+	public List<Tuple> findAllSelectedForProfile(int forProfile,
+			Iterable<Integer> ids);
+	
+	@Query("SELECT sp FROM StreamPost AS sp WHERE sp.visibility = 'ALL' "
+			+ "AND sp.id IN (?1)")
+	public List<StreamPost> findAllSelected(Iterable<Integer> ids);
+	
+	@Query("SELECT sp, l FROM StreamPost AS sp "
+			+ "INNER JOIN Follower AS f ON f.followedId=sp.associatedProfile "
+			+ "LEFT OUTER JOIN Like AS l ON l.likedById = ?1 "
+			+ "AND l.likedStreamPost = sp.id WHERE AND (sp.visibility = 'ALL' "
+			+ "OR (sp.visibility = 'FRIENDS' AND f.followerId = ?1) "
+			+ "OR sp.associatedProfile = ?1 OR sp.authorId = ?1))")
+	public List<Tuple> findAllForProfile(int forProfile, Pageable pageable);
+	
+	@Query("SELECT sp, l FROM StreamPost AS sp "
+			+ "INNER JOIN Follower AS f ON f.followedId=sp.associatedProfile "
+			+ "LEFT OUTER JOIN Like AS l ON l.likedById = ?1 "
+			+ "AND l.likedStreamPost = sp.id WHERE sp.date BETWEEN ?1 AND ?2 "
+			+ "AND (sp.visibility = 'ALL' "
+			+ "OR (sp.visibility = 'FRIENDS' AND f.followerId = ?1) "
+			+ "OR sp.associatedProfile = ?1 OR sp.authorId = ?1))")
+	public List<Tuple> findAllForProfileForInterval(int forProfile,
+			Instant from, Instant until, Pageable pageable);
+	
+	@Query("SELECT sp FROM StreamPost AS sp WHERE sp.visibility = 'ALL' "
+			+ "AND sp.date BETWEEN ?1 AND ?2")
+	public List<StreamPost> findAllVisibleForInterval(
+			Instant from, Instant until, Pageable pageable);
+	
+	@Query("SELECT sp FROM StreamPost AS sp WHERE sp.visibility = 'ALL'")
+	public List<StreamPost> findAllVisible(Pageable pageable);
+	
 	@Query(value = "SELECT COUNT(*) FROM StreamPost AS sp"
 			+ " WHERE sp.id = ?1 AND sp.associatedProfile = ?2")
 	public int countProfileHasPost(int id, int profileId);
@@ -47,22 +88,19 @@ public interface StreamPostRepository
 	 * @param params fetch options.
 	 * @throws IllegalArgumentException if {@code params} is {@code null}.
 	 * */
-	@Query("SELECT sp, l FROM StreamPost AS sp "
-			+ "INNER JOIN StreamPostTag AS spt "
-			+ "ON spt.associatedStreamPost = sp.id AND spt.associatedTag = ?1 "
+	@Query("SELECT sp, l FROM StreamPost AS sp INNER JOIN Attachment AS a "
+			+ "ON a.toStreamPost = sp.id AND a.tagName = ?1 "
 			+ "LEFT OUTER JOIN Like AS l ON l.likedById = ?2 "
 			+ "AND l.likedStreamPost = sp.id AND sp.visibility = 'ALL'")
 	public List<Tuple> findAllByTagWithLikeInfo(
 			String tag, int requestingId, Pageable pageable);
 	
-	@Query("SELECT sp FROM StreamPost AS sp "
-			+ "INNER JOIN StreamPostTag AS spt "
-			+ "ON spt.associatedStreamPost = sp.id AND spt.associatedTag = ?1 "
+	@Query("SELECT sp FROM StreamPost AS sp INNER JOIN Attachment AS a "
+			+ "ON a.toStreamPost = sp.id AND a.tagName = ?1 "
 			+ "WHERE sp.visibility = 'ALL'")
 	public List<StreamPost> findAllByTag(String tag, Pageable pageable);
 	
-	@Query("SELECT sp FROM StreamPost AS sp "
-			+ "WHERE sp.associatedProfile = :profileId")
+	@Query("SELECT sp FROM StreamPost AS sp WHERE sp.associatedProfile = ?1")
 	public List<StreamPost> getAllPostsAssociatedWithProfile(
 			int profileId, Pageable pageable);
 	
@@ -144,8 +182,5 @@ public interface StreamPostRepository
 	public List<Tuple> findAllByAuthorIdWithLikeInfo(
 			@Param("authorId") int authorId, 
 			@Param("currentId") int requestingId, Pageable pageable);
-	
-	
-	
 	
 }

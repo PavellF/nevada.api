@@ -6,6 +6,9 @@ import static org.pavelf.nevada.api.exception.ExceptionCases.*;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.pavelf.nevada.api.domain.Access;
 import org.pavelf.nevada.api.domain.Destination;
@@ -16,6 +19,7 @@ import org.pavelf.nevada.api.domain.Version;
 import org.pavelf.nevada.api.exception.UnrecognizedUserException;
 import org.pavelf.nevada.api.exception.WebApplicationException;
 import org.pavelf.nevada.api.persistence.domain.Visibility;
+import org.pavelf.nevada.api.persistence.repository.Temporal;
 import org.pavelf.nevada.api.security.Secured;
 import org.pavelf.nevada.api.security.TokenContext;
 import org.pavelf.nevada.api.security.User;
@@ -35,6 +39,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -304,4 +309,56 @@ public class StreamPostController {
 		throw new WebApplicationException(ACCESS_DENIED);
 	}
 	
+	protected int getUserId() {
+		User issuer = principal.getToken().getUser().orElseThrow(() -> 
+		new WebApplicationException(UNRECOGNIZED_USER));
+		return issuer.getIdAsInt();
+	}
+	
+	/**
+	 * Returns only selected posts.
+	 * */
+	@GetMapping(produces = { 
+			APPLICATION_ACCEPT_PREFIX+".post+json", 
+			APPLICATION_ACCEPT_PREFIX+".post+xml"},
+			path = "/posts/{ids}")	
+	public ResponseEntity<List<StreamPostDTO>> getSelectedPosts(
+			@PathVariable("ids") String ids, 
+			@RequestHeader(HttpHeaders.ACCEPT) Version version) { 
+		
+		Set<Integer> postIds = Pattern.compile("-")
+				.splitAsStream(ids)
+				.map(Integer::valueOf)
+				.collect(Collectors.toSet());
+		
+		if (postIds.size() > 35) {
+			throw new WebApplicationException(OUT_OF_BOUND_VALUE);
+		}
+		
+		List<StreamPostDTO> list = (principal.isAuthorized()) 
+				? streamPostService.getSelectedVisibleByProfile(
+					getUserId(), postIds, version)
+				: streamPostService.getSelectedVisibleByProfile(
+					null, postIds, version);
+		
+		return ResponseEntity.ok(list);
+	}
+	
+	@GetMapping(produces = { 
+			APPLICATION_ACCEPT_PREFIX+".post+json", 
+			APPLICATION_ACCEPT_PREFIX+".post+xml"},
+			path = "/posts")	
+	public ResponseEntity<List<StreamPostDTO>> getFeaturedPosts(
+			@RequestParam(name = "interval", defaultValue = "DAY") 
+			Temporal forInterval,
+			PageAndSortExtended params) { 
+		
+		List<StreamPostDTO> list = (principal.isAuthorized()) 
+				? streamPostService.getAllVisibleByProfile(
+						getUserId(), params, forInterval)
+				: streamPostService.getAllVisibleByProfile(
+						null, params, forInterval);
+		
+		return ResponseEntity.ok(list);
+	}
 }
