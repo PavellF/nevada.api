@@ -27,7 +27,7 @@ public interface StreamPostRepository
 			+ "AND l.likedStreamPost = sp.id WHERE sp.id IN (?2) "
 			+ "AND (sp.visibility = 'ALL' "
 			+ "OR (sp.visibility = 'FRIENDS' AND f.followerId = ?1) "
-			+ "OR sp.associatedProfile = ?1 OR sp.authorId = ?1))")
+			+ "OR sp.associatedProfile = ?1 OR sp.authorId = ?1)")
 	public List<Tuple> findAllSelectedForProfile(int forProfile,
 			Iterable<Integer> ids);
 	
@@ -38,9 +38,9 @@ public interface StreamPostRepository
 	@Query("SELECT sp, l FROM StreamPost AS sp "
 			+ "INNER JOIN Follower AS f ON f.followedId=sp.associatedProfile "
 			+ "LEFT OUTER JOIN Like AS l ON l.likedById = ?1 "
-			+ "AND l.likedStreamPost = sp.id WHERE AND (sp.visibility = 'ALL' "
+			+ "AND l.likedStreamPost = sp.id WHERE (sp.visibility = 'ALL' "
 			+ "OR (sp.visibility = 'FRIENDS' AND f.followerId = ?1) "
-			+ "OR sp.associatedProfile = ?1 OR sp.authorId = ?1))")
+			+ "OR sp.associatedProfile = ?1 OR sp.authorId = ?1)")
 	public List<Tuple> findAllForProfile(int forProfile, Pageable pageable);
 	
 	@Query("SELECT sp, l FROM StreamPost AS sp "
@@ -49,7 +49,7 @@ public interface StreamPostRepository
 			+ "AND l.likedStreamPost = sp.id WHERE sp.date BETWEEN ?1 AND ?2 "
 			+ "AND (sp.visibility = 'ALL' "
 			+ "OR (sp.visibility = 'FRIENDS' AND f.followerId = ?1) "
-			+ "OR sp.associatedProfile = ?1 OR sp.authorId = ?1))")
+			+ "OR sp.associatedProfile = ?1 OR sp.authorId = ?1)")
 	public List<Tuple> findAllForProfileForInterval(int forProfile,
 			Instant from, Instant until, Pageable pageable);
 	

@@ -3,7 +3,6 @@
 
 CREATE TABLE IF NOT EXISTS profiles (
         id SERIAL NOT NULL,
-        profile_id INTEGER DEFAULT NULL REFERENCES profiles(id),
         email VARCHAR(128) NOT NULL,
         password VARCHAR(1024) NOT NULL,
         username VARCHAR(64) NOT NULL,
@@ -143,9 +142,6 @@ CREATE TABLE IF NOT EXISTS attachment (
         photo INTEGER DEFAULT NULL REFERENCES photos(id),
         tag VARCHAR(64) DEFAULT NULL REFERENCES tags (name)
 );
-
-ALTER TABLE IF EXISTS stream_post_has_tag
-       ADD CONSTRAINT uniq_stream_post_has_tag UNIQUE (stream_post_id, tag);
 
 ALTER TABLE IF EXISTS tokens
        ADD CONSTRAINT uniq_tokens_token UNIQUE (token);

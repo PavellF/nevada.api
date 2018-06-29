@@ -21,6 +21,10 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * @author Pavel F.
+ * @since 1.0
+ * */
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {
 
@@ -52,7 +56,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 				new ReloadableResourceBundleMessageSource();
 		messageSource.setConcurrentRefresh(false);
 		messageSource.setBasenames("classpath:locale/ExceptionCases");
-		messageSource.setDefaultEncoding("UTF-8");
+		messageSource.setDefaultEncoding("UTF-16");
 		return messageSource;
 	}
 	

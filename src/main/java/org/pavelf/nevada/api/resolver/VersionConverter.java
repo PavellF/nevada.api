@@ -5,7 +5,7 @@ import org.pavelf.nevada.api.domain.VersionImpl;
 import org.springframework.core.convert.converter.Converter;
 
 /**
- * Converter for {@code Version}.
+ * Converter for {@link Version}.
  * @author Pavel F.
  * @since 1.0
  * */

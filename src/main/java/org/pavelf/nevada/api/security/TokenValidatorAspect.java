@@ -1,13 +1,7 @@
 package org.pavelf.nevada.api.security;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-
 import javax.servlet.http.HttpServletRequest;
 
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.pavelf.nevada.api.exception.ExceptionCases;
@@ -15,14 +9,7 @@ import org.pavelf.nevada.api.exception.WebApplicationException;
 import org.pavelf.nevada.api.logging.Logger;
 import org.pavelf.nevada.api.logging.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.MethodParameter;
-import org.springframework.http.HttpInputMessage;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 
 /**
  * Aspect to perform checking annotated with {@link Secured} controllers.
@@ -38,7 +25,8 @@ public class TokenValidatorAspect {
 	private Logger log;
 	
 	@Autowired
-	public TokenValidatorAspect(HttpServletRequest request, TokenContext context, 
+	public TokenValidatorAspect(HttpServletRequest request, 
+			TokenContext context, 
 			LoggerFactory factory) {
 		this.request = request;
 		this.context = context;
@@ -46,8 +34,8 @@ public class TokenValidatorAspect {
 	}
 	
 	/**
-	 * Decides whether request token has appropriate access to the controller method annotated with
-	 * {@link Secured}.
+	 * Decides whether request token has appropriate access to the controller 
+	 * method annotated with {@link Secured}.
 	 * */
 	@Before("@annotation(secured)")
 	public void process(Secured secured) throws Throwable {

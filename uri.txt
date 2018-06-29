@@ -33,10 +33,10 @@
 /likes/{id} - DELETE
 
 /profiles/{id}/messages - GET //should return objects message linked to
-/{owner}/{owner_id}/{destination}/{destination_id}/messages - POST, PUT, GET *
-/{owner}/{owner_id}/{destination}/{destination_id}/messages/map - GET *
-/{owner}/{owner_id}/{destination}/{destination_id}/messagesList - GET *
-/{owner}/{owner_id}/{destination}/{destination_id}/messages/{ids} - GET *
+/{owner}/{owner_id}/{destination}/{destination_id}/messages - POST, PUT, GET 
+/{owner}/{owner_id}/{destination}/{destination_id}/messages/map - GET 
+/{owner}/{owner_id}/{destination}/{destination_id}/messagesList - GET 
+/{owner}/{owner_id}/{destination}/{destination_id}/messages/{ids} - GET 
 
 /{destination}/{destination_id}/photos - GET
 /{destination}/{destination_id}/photos/{id} - GET

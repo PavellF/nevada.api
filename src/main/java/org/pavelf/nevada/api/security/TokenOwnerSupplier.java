@@ -2,7 +2,8 @@ package org.pavelf.nevada.api.security;
 
 
 /**
- * Describes methods for obtaining user and token based on request information (usually headers).
+ * Describes methods for obtaining user and token based on request information 
+ * (usually headers).
  * @since 1.0
  * @author Pavel F.
  * */

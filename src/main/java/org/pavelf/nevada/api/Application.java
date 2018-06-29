@@ -1,14 +1,12 @@
 package org.pavelf.nevada.api;
 
-import javax.sql.DataSource;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
+@EnableScheduling
 @EnableTransactionManagement
 public class Application {
 
@@ -20,10 +18,6 @@ public class Application {
 	public static final String APPLICATION_ACCEPT_PREFIX = 
 			"application/vnd.nevada";
 	
-	@Autowired
-	public Application(DataSource dataSource, Environment env) {
-		
-	}
 	
 	public static void main(String[] args) {
 		SpringApplication app = new SpringApplication(Application.class);

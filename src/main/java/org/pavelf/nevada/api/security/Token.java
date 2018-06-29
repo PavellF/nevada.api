@@ -1,11 +1,8 @@
 package org.pavelf.nevada.api.security;
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Represents current request's token and optional its owner. Immutable.

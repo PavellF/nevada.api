@@ -8,10 +8,9 @@ package org.pavelf.nevada.api.persistence.repository;
 public interface AdvancedStreamPostRepository {
 
 	/**
-	 * Updates rating row based on likes that stream post ever have. 
+	 * Updates rating row based on likes that stream post ever had. 
 	 * Resource consuming operation. Do not call this often.
 	 * */
 	public void updateRating();
-	
 	
 }

@@ -11,6 +11,7 @@ import org.pavelf.nevada.api.persistence.domain.Attachment;
 import org.pavelf.nevada.api.persistence.domain.Tag;
 import org.pavelf.nevada.api.persistence.domain.Token;
 import org.pavelf.nevada.api.persistence.domain.Visibility;
+import org.pavelf.nevada.api.persistence.repository.AdvancedStreamPostRepository;
 import org.pavelf.nevada.api.persistence.repository.ApplicationRepository;
 import org.pavelf.nevada.api.persistence.repository.LikeRepository;
 import org.pavelf.nevada.api.persistence.repository.ProfileRepository;
@@ -39,12 +40,17 @@ import org.pavelf.nevada.api.persistence.domain.Application;
 import static org.pavelf.nevada.api.Application.APPLICATION_ACCEPT_PREFIX;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.persistence.Tuple;
 
+/**
+ * @author Pavel F.
+ * @since 1.0
+ * */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT,
 properties = "server.port=7777")
@@ -77,6 +83,74 @@ public class ProfileControllerTest {
     @Autowired
     private TokenRepository tokenRepository;
     
+    @Autowired
+    private AdvancedStreamPostRepository aspr;
+    
+    public Stream<Integer> populateStreamPosts(int count) {
+    	return Stream.generate(() -> {
+    		StreamPost sp = new StreamPost();
+    		sp.setAuthorId(1);
+    		sp.setCommentable(Visibility.ALL);
+    		sp.setContent("lol " + (int) (Math.random() * 100));
+    		sp.setDate(Instant.now());
+    		sp.setVisibility(Visibility.ALL);
+    		sp.setAssociatedProfile(1);
+    		return sp;
+    	}).limit(count).map(sp -> spr.save(sp).getId());
+    }
+    
+    public Stream<Integer> createProfiles(int count) {
+    	return Stream.generate(() -> {
+    		Profile p = new Profile();
+        	p.setEmail((int) (Math.random() * 10000) + "profile@test.com");
+        	p.setPassword("secret".toCharArray());
+        	p.setSignDate(Instant.now());
+        	p.setUsername("Catch" + (int) (Math.random() * 10000));
+        	return p;
+    	}).limit(count).map(p -> pr.save(p).getId());
+    }
+    
+    @Test
+    public void shouldUpdateStreamPostRating() throws InterruptedException {
+    	setInitialData();
+    	List<Integer> sList = populateStreamPosts(3)
+    			.collect(Collectors.toList());
+    	
+    	List<Integer> pList = createProfiles(9).collect(Collectors.toList());
+    	
+    	List<Integer> postRatingSum = new ArrayList<>();
+    	
+    	for (Integer sId : sList) {
+    		
+    		int currentPostRatingSum = 0;
+    		
+    		for (Integer pId : pList) {
+    			
+    			Like l = new Like();
+    			l.setDate(Instant.now());
+	    		l.setLikedById(pId);
+	    		
+	    		short thisProfileRating = (short) (Math.random() * 10);
+	    		currentPostRatingSum += thisProfileRating;
+	    		
+	    		l.setRating(thisProfileRating);
+	    		l.setLikedStreamPost(sId);
+	    		lr.save(l);
+    		}
+    		
+    		postRatingSum.add(currentPostRatingSum);
+    	}
+    	
+    	aspr.updateRating();
+    	
+    	List<Integer> updatedRatings = spr.findAllById(sList).stream()
+    			.map(StreamPost::getRating).collect(Collectors.toList());
+    	
+    	updatedRatings.forEach(System.out::println);
+    	Assertions.assertThat(updatedRatings).containsAll(postRatingSum);
+    	
+    	Thread.sleep(9000000);
+    }
     
     public void setInitialData() {
     	Profile executor = new Profile();

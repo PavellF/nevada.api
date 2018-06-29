@@ -7,7 +7,6 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.pavelf.nevada.api.domain.Access;
@@ -143,32 +142,38 @@ public class MessageController {
 				throw new WebApplicationException(ACCESS_DENIED);
 			} 
 			
-			final StreamPostDTO post = streamPostService.getById(
-					destinationId, version).orElseThrow(() -> 
-					new WebApplicationException(ACCESS_DENIED));
+			final StreamPostDTO post = getPostById(destinationId, version);
 			
 			if (owner == Owner.PROFILE && 
 					post.getAssociatedProfile() == ownerId) {
 
-				final URI created = URI.create(
-					"profile/"+ownerId+"/posts/"+destinationId+"/messages");
-				
-				boolean canCommentPost = canCommentPost(
-						streamPostService.getById(destinationId, version),
+				boolean canCommentPost = canCommentPost(post,
 						ownerId, issuerId, posted);
 				
 				if (canCommentPost || securityContext.getToken().isSuper()) {
+					
 					validateAttachments(posted.getImages(), 
-							posted.getTags(), issuerId);
-					messageService.saveUnderStreamPost(
-							destinationId, posted, version);
-					return ResponseEntity.created(created).build();
+							posted.getTags(), 
+							issuerId);
+					
+					Integer id = messageService.saveUnderStreamPost(
+							destinationId, 
+							posted, 
+							version);
+					
+					return ResponseEntity.created(
+							URI.create(id.toString())).build();
 				}
 				
 			}
 		}
 		
 		throw new WebApplicationException(ACCESS_DENIED);
+	}
+	
+	protected StreamPostDTO getPostById(int id, Version version) {
+		return streamPostService.getById(id, version).orElseThrow(() -> 
+					new WebApplicationException(ACCESS_DENIED));
 	}
 	
 	protected void validateAttachments(Collection<Integer> images, 
@@ -189,10 +194,8 @@ public class MessageController {
 		} 
 	}
 	
-	protected boolean canCommentPost(Optional<StreamPostDTO> maybePost, 
+	protected boolean canCommentPost(StreamPostDTO post, 
 			int ownerId, int issuerId, MessageDTO posted) {
-		final StreamPostDTO post = maybePost.orElseThrow(() -> 
-					new WebApplicationException(ACCESS_DENIED));
 		
 		final Visibility whoCanCommentThis = post.getCommentable();
 		final boolean isOwner = ownerId == issuerId;
@@ -256,9 +259,7 @@ public class MessageController {
 		
 		if (destination == Destination.STREAM_POST) {
 			
-			final StreamPostDTO post = streamPostService.getById(
-					destinationId, version).orElseThrow(() -> 
-				new WebApplicationException(ACCESS_DENIED));
+			final StreamPostDTO post = getPostById(destinationId, version);
 			
 			if (owner == Owner.PROFILE && 
 					post.getAssociatedProfile() == destinationId) {
@@ -266,8 +267,7 @@ public class MessageController {
 				final boolean isAuthor = 
 						messageService.isAuthorOf(issuerId, posted.getId());
 				final boolean canCommentPost = canCommentPost(
-						streamPostService.getById(destinationId, version),
-						ownerId, issuerId, posted);
+						post, ownerId, issuerId, posted);
 				
 				final boolean isOwner = ownerId == issuerId;
 				final boolean isAuthorAndOwner = isAuthor && isOwner;
@@ -277,12 +277,15 @@ public class MessageController {
 						!isAuthor && isOwner && posted.getContent() == null;
 				
 				if (securityContext.getToken().isSuper() || (canCommentPost
-						&& (isAuthorAndOwner || 
-							isNotAuthorOfMessageButOwnerOfPost || 
-							isAuthorOfMessageButNotOwnerOfPost))) {
+							&& (isAuthorAndOwner 
+									|| isNotAuthorOfMessageButOwnerOfPost 
+									|| isAuthorOfMessageButNotOwnerOfPost))) {
+					
 					validateAttachments(posted.getImages(), 
 							posted.getTags(), issuerId);
+					
 					messageService.update(posted, version);
+					
 					return ResponseEntity.noContent().build();
 				}
 			}
