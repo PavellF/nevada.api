@@ -12,7 +12,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Past;
 import javax.validation.constraints.Size;
 
 @Entity
@@ -31,12 +30,11 @@ public class Profile {
 	
 	@Column(name="password")
 	@NotNull
-	@Size(min = 1, max = 1024)
+	@Size(min = 6, max = 1024)
 	private char[] password;
 	
 	@Column(name="sign_date")
 	@NotNull
-	@Past
 	private Instant signDate;
 	
 	@Column(name="email")
@@ -60,10 +58,10 @@ public class Profile {
 	
 	@Min(0)
 	@Column(name="popularity")
-	private int popularity;
+	private Integer popularity;
 	
 	@Column(name="rating")
-	private int rating;
+	private Integer rating;
 	
 	@Column(name="suspended_until")
 	private Instant suspendedUntil;

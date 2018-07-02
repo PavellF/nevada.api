@@ -5,6 +5,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+/**
+ * Social network API.
+ * @author Pavel F.
+ * @since 1.0
+ * */
 @SpringBootApplication
 @EnableScheduling
 @EnableTransactionManagement

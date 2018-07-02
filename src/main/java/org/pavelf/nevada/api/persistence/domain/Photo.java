@@ -33,7 +33,6 @@ public class Photo {
 	private String message;
 	
 	@OneToOne(fetch=FetchType.LAZY, cascade = { }, optional = false)
-	@NotNull
 	@JoinColumn(name = "owner_id", insertable = false, updatable = false)
 	private Profile owner; 
 	

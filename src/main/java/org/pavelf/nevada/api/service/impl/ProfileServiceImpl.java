@@ -1,6 +1,7 @@
 package org.pavelf.nevada.api.service.impl;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -118,19 +119,42 @@ public class ProfileServiceImpl implements ProfileService {
 		
 		final char[] password = profile.getPassword();
 		
-		Profile newProfile = new Profile();
-		newProfile.setId(profile.getId());
-		newProfile.setEmail(profile.getEmail());
-		newProfile.setPictureId(profile.getPictureId());
-		newProfile.setAboutId(profile.getAboutId());
+		final Optional<Profile> maybeProfile = 
+				principalRepository.findById(profile.getId());
+		
+		if (!maybeProfile.isPresent()) {
+			return false;
+		}
+		
+		final Profile newProfile = maybeProfile.get();
+		
+		if (profile.getEmail() != null) {
+			newProfile.setEmail(profile.getEmail());
+		}
+		
+		if (profile.getPictureId() != null) {
+			newProfile.setPictureId(profile.getPictureId());
+		}
+		
+		if (profile.getAboutId() != null) {
+			newProfile.setAboutId(profile.getAboutId());
+		}
 		
 		if (password != null) {
 			newProfile.setPassword(HttpUtil.hash(Algorithm.MD5, password));
 		}
 		
-		newProfile.setPopularity(profile.getPopularity());
-		newProfile.setSuspendedUntil(profile.getSuspendedUntil());
-		newProfile.setUsername(profile.getUsername());
+		if (profile.getPopularity() != null) {
+			newProfile.setPopularity(profile.getPopularity());
+		}
+		
+		if (profile.getSuspendedUntil() != null) {
+			newProfile.setSuspendedUntil(profile.getSuspendedUntil());
+		}
+		
+		if (profile.getUsername() != null) {
+			newProfile.setUsername(profile.getUsername());
+		}
 		
 		principalRepository.save(newProfile);
 		

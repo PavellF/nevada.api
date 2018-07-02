@@ -8,6 +8,7 @@ import org.pavelf.nevada.api.exception.ExceptionCases;
 import org.pavelf.nevada.api.exception.WebApplicationException;
 
 import org.pavelf.nevada.api.logging.LoggerFactory;
+import org.pavelf.nevada.api.resolver.DestinationConverter;
 import org.pavelf.nevada.api.resolver.PageAndSortResolver;
 import org.pavelf.nevada.api.resolver.VersionConverter;
 import org.pavelf.nevada.api.security.IpTokenInterceptor;
@@ -47,6 +48,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 	
 	@Override
     public void addFormatters(FormatterRegistry registry) {
+        registry.addConverter(new DestinationConverter());
         registry.addConverter(new VersionConverter());
     }
 	
@@ -57,6 +59,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 		messageSource.setConcurrentRefresh(false);
 		messageSource.setBasenames("classpath:locale/ExceptionCases");
 		messageSource.setDefaultEncoding("UTF-16");
+		messageSource.setFallbackToSystemLocale(false);
 		return messageSource;
 	}
 	

@@ -137,7 +137,7 @@ public class PhotoServiceImpl implements PhotoService {
 		} break;
 		}
 		
-		if(result.toArray().length == 1) {
+		if (result != null && result.toArray().length == 1) {
 			return result.get(0, byte[].class);
 		}
 		
@@ -211,7 +211,7 @@ public class PhotoServiceImpl implements PhotoService {
 		
 		Picture medium = Picture.newPicture(raw, 340, 340, true, 1f);
 		imageProcessor.process(medium);
-		toSave.setSmall(medium.getData());
+		toSave.setMedium(medium.getData());
 		
 		toSave.setOriginal(raw);
 		

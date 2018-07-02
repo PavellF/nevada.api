@@ -35,7 +35,7 @@ In order to access some of endpoints you have to have token with one or more sco
 appropriate for endpoind access level. For example to send a message you may want to have `MESSAGE READ/WRITE` token.
 
 # SQL Schema
-![schema](https://raw.githubusercontent.com/username/projectname/branch/path/to/img.png)
+![schema](https://github.com/PavellF/nevada.api/blob/master/sequel.png?raw=true)
 
 # Example request
 Besides controller classes all endpoints list also enumerated in uri.txt.<br>

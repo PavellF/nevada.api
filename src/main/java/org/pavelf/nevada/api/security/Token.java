@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Represents current request's token and optional its owner. Immutable.
+ * Represents current request's token and (optional) its owner. Immutable.
  * @author Pavel F.
  * @since 1.0
  * */
@@ -19,7 +19,8 @@ public class Token {
 	/**
 	 * @throws IllegalArcumentException if null passed (except for user).
 	 * */
-	public Token(char[] token, Map<String, Integer> scopesAccess, boolean isSuper, User user) {
+	public Token(char[] token, Map<String, Integer> scopesAccess, 
+			boolean isSuper, User user) {
 		if (token == null || scopesAccess == null) {
 			throw new IllegalArgumentException();
 		}
@@ -38,6 +39,8 @@ public class Token {
 	
 	/**
 	 * Whether at least one scope have access level;
+	 * @param acccessLevel required minimal access level.
+	 * @param scopes token has got to had at least one of these scopes. 
 	 * */
 	public boolean hasAccess(int acccessLevel, String... scopes) {
 		if (scopes == null) {
@@ -47,7 +50,7 @@ public class Token {
 		for (String scope : scopes) { 
 			Integer tokenScope = scopesAccess.get(scope);
 			
-			if (tokenScope != null && tokenScope <= acccessLevel) {
+			if (tokenScope != null && tokenScope >= acccessLevel) {
 				return true;
 			}
 		}

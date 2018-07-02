@@ -89,4 +89,21 @@ public interface ExceptionCases {
 			"Can not like object twice or like own content.", 
 			HttpStatus.BAD_REQUEST);
 	
+	public static final ExceptionCase WRONG_TYPE = ExceptionCase.of(
+			20, 
+			"Different type expected. Consider sending integer value instead "
+			+ "of string or vice versa.", 
+			HttpStatus.BAD_REQUEST);
+	
+	public static final ExceptionCase PARSING_EXCEPTION = ExceptionCase.of(
+			21, 
+			"Could not parse input value. For instance, consider passing "
+			+ "string that consist of numeric value when trying to parse "
+			+ "integer.", HttpStatus.BAD_REQUEST);
+	
+	public static final ExceptionCase UPLOADED_FILE_IS_TOO_LARGE = 
+			ExceptionCase.of(
+			22, 
+			"Uploaded file is too large.",
+			HttpStatus.BAD_REQUEST);
 }

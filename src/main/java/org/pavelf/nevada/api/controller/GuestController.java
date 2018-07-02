@@ -46,18 +46,15 @@ public class GuestController {
 		if (principal.isAuthorized()) {
 			final User issuer = principal.getToken().getUser()
 					.orElseThrow(UnrecognizedUserException::new);
+			final boolean isSuper = principal.getToken().isSuper();
 			
 			if (destination == Destination.PROFILE) {
 				
-				if (principal.getToken().isSuper()) {
+				if (isSuper || issuer.getIdAsInt() == destinationId) {
 					return ResponseEntity.ok(guestService
 							.getAllGuestsForProfile(
-									destinationId, true, pageAndSort));
-				} else if (issuer.getIdAsInt() == destinationId) {
-					return ResponseEntity.ok(guestService
-							.getAllGuestsForProfile(
-									destinationId, false, pageAndSort));
-				}
+									destinationId, isSuper, pageAndSort));
+				} 
 			}
 		}
 		

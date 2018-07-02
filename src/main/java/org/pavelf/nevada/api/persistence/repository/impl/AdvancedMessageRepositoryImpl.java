@@ -28,7 +28,7 @@ public class AdvancedMessageRepositoryImpl
 	}
 	
 	private static final String UPDATE_RATING_FIELD = 
-			"UPDATE messages AS m SET m.rating = COALESCE(("
+			"UPDATE messages AS m SET rating = COALESCE(("
 			+ "SELECT SUM(l.rating) FROM _likes AS l "
 			+ "WHERE l.liked_message = m.id), 0);";
 	

@@ -46,6 +46,10 @@ public class ProfileController {
 	private MessageService messageService;
 	private GuestService guestService;
 	
+	private static final String XML = APPLICATION_ACCEPT_PREFIX+".profile+xml";
+	private static final String JSON = 
+			APPLICATION_ACCEPT_PREFIX+".profile+json";
+	
 	@Autowired
 	public ProfileController(TokenContext principal,
 			ProfileService profileService, PhotoService photoService,
@@ -62,19 +66,17 @@ public class ProfileController {
 				.orElseThrow(UnrecognizedUserException::new);
 	}
 	
-	/*
-	 * Produces xml or json representation of the user profile.
+	/* Produces xml or json representation of the user profile.
 	 * Expected headers: 
-	 * Accept-Language(optional), Accept-Charset(optional), Authorization(optional),
-	 * Accept(mandatory, with versioning information: application/xml;version=1.0)
+	 * Accept-Language(optional), 
+	 * Accept-Charset(optional), 
+	 * Authorization(optional),
+	 * Accept(mandatory, with versioning 
+	 * information: application/xml;version=1.0)
 	 * @param id profile id.
 	 * */
-	@GetMapping(produces = { 
-			APPLICATION_ACCEPT_PREFIX+".profile+json", 
-			APPLICATION_ACCEPT_PREFIX+".profile+xml"},
-			path = "/profile/{id}")	
+	@GetMapping(produces = { JSON, XML }, path = "/profile/{id}")	
 	public ResponseEntity<ProfileDTO> getProfile(@PathVariable("id") int id, 
-			HttpEntity<ProfileDTO> entity, 
 			@RequestHeader(HttpHeaders.ACCEPT) Version version) { 
 		
 		if(!principal.isAuthorized()) {
@@ -86,14 +88,17 @@ public class ProfileController {
 		if (issuer.getIdAsInt() == id) {
 			return ResponseEntity.ok(profileService.read(id, false, version));
 		} else {
-			guestService.visitUserProfile(id, issuer.getIdAsInt(), false);
-			return ResponseEntity.ok(profileService.read(id, true, version));
+			ProfileDTO fetched = profileService.read(id, true, version);
+			
+			if (fetched != null) {
+				guestService.visitUserProfile(id, issuer.getIdAsInt(), false);
+			}
+			
+			return ResponseEntity.ok(fetched);
 		}
 	}
 	
-	@PostMapping(consumes = {
-			APPLICATION_ACCEPT_PREFIX+".profile+json", 
-			APPLICATION_ACCEPT_PREFIX+".profile+xml"}, path = "/profiles")
+	@PostMapping(consumes = { JSON, XML }, path = "/profiles")
 	@Secured(access = Access.READ_WRITE, scope = { Scope.ACCOUNT })
 	public ResponseEntity<ProfileDTO> postProfile(
 			HttpEntity<ProfileDTO> entity,
@@ -105,13 +110,10 @@ public class ProfileController {
 		}
 		
 		Integer id = profileService.create(posted, version);
-		return ResponseEntity.created(URI.create("/profiles/" + id)).build();
+		return ResponseEntity.created(URI.create(id.toString())).build();
 	}
 	
-	@GetMapping(produces = { 
-			APPLICATION_ACCEPT_PREFIX+".profile+json", 
-			APPLICATION_ACCEPT_PREFIX+".profile+xml"},
-			path = "/profiles/{ids}")	
+	@GetMapping(produces = { JSON, XML }, path = "/profiles/{ids}")	
 	public ResponseEntity<Set<ProfileDTO>> getProfiles(
 			@PathVariable("ids") String ids, 
 			@RequestHeader(HttpHeaders.ACCEPT) Version version) { 
@@ -131,9 +133,7 @@ public class ProfileController {
 	/**
 	 * @return 204 "No Content"
 	 * */
-	@PutMapping(consumes = {
-			APPLICATION_ACCEPT_PREFIX+".profile+json", 
-			APPLICATION_ACCEPT_PREFIX+".profile+xml"}, path = "/profiles")
+	@PutMapping(path = "/profiles", consumes = { JSON, XML })
 	@Secured(access = Access.READ_WRITE, 
 	scope = { Scope.ACCOUNT, Scope.PERSON_INFO })
 	public ResponseEntity<ProfileDTO> updateProfile(
@@ -162,7 +162,7 @@ public class ProfileController {
 		}
 		
 		//can change anything but rating, popularity
-		if (principal.getToken().hasAccess(2, Scope.ACCOUNT)) {
+		if (principal.getToken().hasAccess(Access.READ_WRITE, Scope.ACCOUNT)) {
 			if (toUpdate.getPassword() != null) {
 				final char[] oldPassword = toUpdate.getOldPassword();
 				if (oldPassword == null) {

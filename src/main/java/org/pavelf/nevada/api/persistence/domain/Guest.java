@@ -38,7 +38,7 @@ public class Guest {
 	@Column(name = "hidden")
 	private boolean hidden;
 	
-	@Column(name="when")
+	@Column(name="visited")
 	@NotNull
 	@Past
 	private Instant when;

@@ -9,7 +9,7 @@ import org.pavelf.nevada.api.domain.Version;
 import org.pavelf.nevada.api.domain.VersionImpl;
 import org.pavelf.nevada.api.exception.WebApplicationException;
 import org.pavelf.nevada.api.persistence.domain.Sorting;
-import org.pavelf.nevada.api.service.PageAndSort;
+import org.pavelf.nevada.api.service.PageAndSortExtended;
 import org.pavelf.nevada.api.service.impl.PageAndSortImpl;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
@@ -28,7 +28,7 @@ public class PageAndSortResolver implements HandlerMethodArgumentResolver {
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return parameter.getParameterType().equals(PageAndSort.class);
+		return parameter.getParameterType().equals(PageAndSortExtended.class);
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class PageAndSortResolver implements HandlerMethodArgumentResolver {
 			}
 			
 			String orderParam = webRequest.getParameter("order");
-			Stream<Sorting> order = null;
+			Stream<Sorting> order = Stream.empty();
 			
 			if (orderParam != null) {
 				order = Pattern.compile("-")

@@ -1,9 +1,7 @@
 package org.pavelf.nevada.api.controller;
 
 import static org.pavelf.nevada.api.Application.APPLICATION_ACCEPT_PREFIX;
-import static org.pavelf.nevada.api.exception.ExceptionCases.ACCESS_DENIED;
-import static org.pavelf.nevada.api.exception.ExceptionCases.BANNED_PROFILE;
-import static org.pavelf.nevada.api.exception.ExceptionCases.BODY_REQUIRED;
+import static org.pavelf.nevada.api.exception.ExceptionCases.*;
 
 import java.net.URI;
 import java.util.List;
@@ -40,7 +38,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Exposes endpoints to access {@code Photo} resource.
+ * Exposes endpoints to access {@link #Photo} resource.
  * @author Pavel F.
  * @since 1.0
  * */
@@ -52,6 +50,9 @@ public class PhotoController {
 	private FollowersService followersService;
 	private StreamPostService streamPostService;
 	private ProfileService profileService;
+	
+	private static final String JSON = APPLICATION_ACCEPT_PREFIX+".photo+json";
+	private static final String XML = APPLICATION_ACCEPT_PREFIX+".photo+xml";
 	
 	@Autowired
 	public PhotoController(TokenContext securityContext,
@@ -74,9 +75,7 @@ public class PhotoController {
 		return securityContext.getToken().isSuper();
 	}
 	
-	@GetMapping(produces = { 
-			APPLICATION_ACCEPT_PREFIX+".photo+json", 
-			APPLICATION_ACCEPT_PREFIX+".photo+xml"},
+	@GetMapping(produces = { JSON , XML }, 
 			path = "/{destination}/{destination_id}/photos")	
 	public ResponseEntity<List<PhotoDTO>> getPhotos(
 			@PathVariable("destination") Destination destination,
@@ -209,7 +208,7 @@ public class PhotoController {
 		return ResponseEntity.notFound().build();
 	}
 	
-	@PostMapping(consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
 			path = "/photos")	
 	@Secured(access = Access.READ_WRITE, scope = { Scope.PHOTO })
 	public ResponseEntity<byte[]> postImage(
@@ -243,10 +242,7 @@ public class PhotoController {
 		return ResponseEntity.created(URI.create(id.toString())).build();
 	}
 	
-	@PutMapping(consumes = {
-			APPLICATION_ACCEPT_PREFIX+".photo+json", 
-			APPLICATION_ACCEPT_PREFIX+".photo+xml"},
-			path = "/photos")
+	@PutMapping(consumes = { JSON , XML }, path = "/photos")
 	@Secured(access = Access.READ_WRITE, scope = { Scope.PHOTO })
 	public ResponseEntity<PhotoDTO> updatePhoto(
 				HttpEntity<PhotoDTO> entity,

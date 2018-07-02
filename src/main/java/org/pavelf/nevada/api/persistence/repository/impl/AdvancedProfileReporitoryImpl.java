@@ -28,14 +28,14 @@ public class AdvancedProfileReporitoryImpl
 	}
 	
 	private static final String UPDATE_RATING_FIELD = 
-			"UPDATE profiles AS p SET p.rating=( COALESCE("
+			"UPDATE profiles AS p SET rating=( COALESCE("
 			+ "(SELECT SUM(sp.rating) FROM stream_post AS sp "
 			+ "WHERE sp.author = p.id), 0) +  COALESCE("
 			+ "(SELECT SUM(m.rating) FROM messages AS m "
 			+ "WHERE m.author = p.id), 0) )";
 	
 	private static final String UPDATE_POPULARITY = "UPDATE profiles AS p "
-			+ "SET p.rating= COALESCE((SELECT COUNT(*) FROM guests AS g "
+			+ "SET rating= COALESCE((SELECT COUNT(*) FROM guests AS g "
 			+ "WHERE g.to_profile = p.id), 0);";
 	
 	@Override

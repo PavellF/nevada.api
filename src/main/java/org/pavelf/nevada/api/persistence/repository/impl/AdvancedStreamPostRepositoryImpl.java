@@ -28,7 +28,7 @@ public class AdvancedStreamPostRepositoryImpl
 	}
 	
 	private static final String UPDATE_RATING_FIELD = 
-			"UPDATE stream_post AS sp SET sp.rating = COALESCE("
+			"UPDATE stream_post AS sp SET rating = COALESCE("
 			+ "(SELECT SUM(l.rating) FROM _likes AS l "
 			+ "WHERE l.liked_stream_post = sp.id), 0);";
 
