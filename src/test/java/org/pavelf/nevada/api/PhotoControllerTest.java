@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -28,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -37,7 +39,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT,
@@ -52,11 +58,8 @@ public class PhotoControllerTest {
 	private static final String XML = APPLICATION_ACCEPT_PREFIX+
 			".photo+xml;version=1.0";
 	
-	private static final String RAW = 
-			MediaType.MULTIPART_FORM_DATA_VALUE + ";version=1.0";
-	
-	@Autowired
-	private ResourceLoader resourceLoader;
+	private static final String JPEG = 
+			MediaType.IMAGE_JPEG_VALUE +";version=1.0";
 	
 	@Autowired
     private TestRestTemplate restTemplate;
@@ -70,20 +73,22 @@ public class PhotoControllerTest {
     @Autowired
     private TokenRepository tr;
     
+    @Autowired
+	private ResourceLoader resourceLoader;
+    
     private String getBaseURL() {
 		return "http://localhost:" + port;
 	}
     
     private byte[] fromFilesystem(String path) throws IOException {
-    	Resource resource = resourceLoader.getResource("file:" + path);
-    	try (InputStream is = resource.getInputStream()) {
+    	try (InputStream is = new FileInputStream(new File(path))) {
     		byte[] targetArray = new byte[is.available()];
 	        is.read(targetArray);
 	    	return targetArray;
     	}
     }
     
-    private void toFilesystem(byte[] raw, String saveTo) {
+    protected void toFilesystem(byte[] raw, String saveTo) {
     	try (FileOutputStream fos = new FileOutputStream(saveTo)) {
     	    fos.write(raw);
     	} catch (IOException ioe) {
@@ -97,15 +102,15 @@ public class PhotoControllerTest {
 	    	.setPhotoAccess(Access.READ_WRITE)
 	    	.build(pr, ar, tr);
     	
-    	HttpHeaders headers = new HttpHeaders();
-		headers.set(HttpHeaders.CONTENT_TYPE, RAW);	
+		HttpHeaders headers = new HttpHeaders();
+		headers.set(HttpHeaders.CONTENT_TYPE, JPEG);	
 		headers.set(HttpHeaders.AUTHORIZATION, token.getToken());
 		
 		ResponseEntity<ExceptionCase> response = restTemplate.exchange(
-    			getBaseURL() + "/photos?visibility=ALL", 
+    			getBaseURL() + "/photos?visibility=ALL&version=1.0", 
     			HttpMethod.POST, 
     			new HttpEntity<>(
-    					fromFilesystem("/Users/macuser/Desktop/large.pdf"), 
+    					fromFilesystem("/Users/macuser/Desktop/test.png"),
     					headers), 
     			ExceptionCase.class);
     	
@@ -117,18 +122,18 @@ public class PhotoControllerTest {
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		
 		byte[] small = loadImage(Size.SMALL, imageOwnerId, createdImageId);
-		//toFilesystem(small, "/Users/macuser/Desktop/testedSm.jpg");
+		toFilesystem(small, "/Users/macuser/Desktop/testedSm.png");
 		
 		byte[] medium = loadImage(Size.MEDIUM, imageOwnerId, createdImageId);
-		//toFilesystem(medium, "/Users/macuser/Desktop/testedMe.jpg");
+		toFilesystem(medium, "/Users/macuser/Desktop/testedMe.png");
 		
 		byte[] original = loadImage(Size.ORIGINAL, imageOwnerId, createdImageId);
-		//toFilesystem(original, "/Users/macuser/Desktop/testedOr.jpg");
+		toFilesystem(original, "/Users/macuser/Desktop/testedOr.png");
     }
     
     public byte[] loadImage(Size size, int profileId, int photoId) {
     	HttpHeaders headers = new HttpHeaders();
-		headers.set(HttpHeaders.ACCEPT, RAW);	
+		headers.set(HttpHeaders.ACCEPT, JPEG);	
 		
 		return restTemplate.exchange(
     			getBaseURL() + "/profile/"+profileId+"/photos/" + 

@@ -53,6 +53,8 @@ public class PhotoController {
 	
 	private static final String JSON = APPLICATION_ACCEPT_PREFIX+".photo+json";
 	private static final String XML = APPLICATION_ACCEPT_PREFIX+".photo+xml";
+	private static final String JPEG = MediaType.IMAGE_JPEG_VALUE;
+	private static final String PNG = MediaType.IMAGE_PNG_VALUE;
 	
 	@Autowired
 	public PhotoController(TokenContext securityContext,
@@ -140,8 +142,8 @@ public class PhotoController {
 		return ResponseEntity.notFound().build();
 	}
 	
-	@GetMapping(produces = MediaType.APPLICATION_OCTET_STREAM_VALUE,
-			path = "/{destination}/{destination_id}/photos/{id}")	
+	@GetMapping(path = "/{destination}/{destination_id}/photos/{id}", 
+			produces = { JPEG, PNG })	
 	public ResponseEntity<byte[]> getImage(
 			@PathVariable("destination") Destination destination,
 			@PathVariable("destination_id") int destinationId, 
@@ -208,8 +210,7 @@ public class PhotoController {
 		return ResponseEntity.notFound().build();
 	}
 	
-	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-			path = "/photos")	
+	@PostMapping(consumes = { JPEG, PNG }, path = "/photos")	
 	@Secured(access = Access.READ_WRITE, scope = { Scope.PHOTO })
 	public ResponseEntity<byte[]> postImage(
 			HttpEntity<byte[]> image,
@@ -225,6 +226,10 @@ public class PhotoController {
 		
 		if (posted == null) {
 			throw new WebApplicationException(BODY_REQUIRED);
+		}
+		
+		if (posted.length > 36000000L) {
+			throw new WebApplicationException(UPLOADED_FILE_IS_TOO_LARGE); 
 		}
 		
 		if (profileService.isSuspended(issuerId)) {

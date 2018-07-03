@@ -1,17 +1,14 @@
 package org.pavelf.nevada.api.domain;
 
-import static org.pavelf.nevada.api.exception.ExceptionCases.*;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.pavelf.nevada.api.exception.WebApplicationException;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 
 /**
- * General purpose implementation of {@code Version}. Immutable.
+ * General purpose implementation of {@link #Version}. Immutable.
  * @author Pavel F.
  * @since 1.0
  * */
@@ -36,8 +33,9 @@ public final class VersionImpl implements Version {
 	 * @return maybe {@code null} if this version does not exist.
 	 * */
 	public static Version getBy(String value) {
-		return (ALL_VERSIONS.containsKey(value)) ? 
-				ALL_VERSIONS.get(value) : null;
+		return (ALL_VERSIONS.containsKey(value)) 
+					? ALL_VERSIONS.get(value) 
+					: null;
 	}
 	
 	/**
@@ -48,42 +46,30 @@ public final class VersionImpl implements Version {
 	 * @throws WebApplicationException when could not recognize version.
 	 * */
 	private VersionImpl (String version) {
-		try {
-			String[] splitted = version.split("\\.");
-			this.major = Integer.parseInt(splitted[0]);
-			this.minor = Integer.parseInt(splitted[1]);
-		} catch (NumberFormatException | NullPointerException nfe) {
-			throw new WebApplicationException(MALFORMED_VERSION);
-		}
+		String[] splitted = version.split("\\.");
+		this.major = Integer.parseInt(splitted[0]);
+		this.minor = Integer.parseInt(splitted[1]);
 	}
 
 	/**
 	 * Constructs object based on header value. 
 	 * Takes the first encountered version value.
 	 * @param headerValue value with version parameter.
-	 * @throws WebApplicationException when could not recognize version.
+	 * @return version if exists, or {@code null}.
+	 * @throws InvalidMediaTypeException when could not parse header.
 	 * */
 	public static Version valueOf(String headerValue) {
-		try {
-			List<MediaType> mediaTypes = MediaType
-					.parseMediaTypes(headerValue);
+		List<MediaType> mediaTypes = MediaType.parseMediaTypes(headerValue);
 			
-			for (MediaType mt : mediaTypes) {
-				String version = mt.getParameter("version");
-				
-				if (ALL_VERSIONS.containsKey(version)) {
-					return ALL_VERSIONS.get(version);
-				}
+		for (MediaType mt : mediaTypes) {
+			String version = mt.getParameter("version");
+			
+			if (ALL_VERSIONS.containsKey(version)) {
+				return ALL_VERSIONS.get(version);
 			}
-			
-			throw new WebApplicationException(UNKNOWN_VERSION);
-			
-		} catch (InvalidMediaTypeException imte) {
-			WebApplicationException e  
-			= new WebApplicationException(MALFORMED_VERSION);
-			e.initCause(imte);
-			throw e;
 		}
+		
+		return null;
 	}
 	
 	public boolean isBelow(Version  version) {

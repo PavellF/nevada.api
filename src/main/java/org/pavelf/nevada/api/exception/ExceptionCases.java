@@ -20,9 +20,9 @@ public interface ExceptionCases {
 	
 	public static final ExceptionCase UNKNOWN_VERSION =
 			ExceptionCase.of(3, 
-					"Could not recognize incoming request's header version.", 
+					"Could not recognize incoming request's version.", 
 					HttpStatus.BAD_REQUEST);
-	
+	//duplicate!
 	public static final ExceptionCase MALFORMED_VERSION =
 			ExceptionCase.of(4, "Can not parse requested object version.", 
 					HttpStatus.BAD_REQUEST);

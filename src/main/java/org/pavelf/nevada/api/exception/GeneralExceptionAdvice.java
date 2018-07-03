@@ -5,7 +5,6 @@ import java.util.Locale;
 import javax.validation.ConstraintViolationException;
 import static org.pavelf.nevada.api.exception.ExceptionCases.*;
 
-import org.apache.tomcat.util.http.fileupload.FileUploadBase;
 import org.pavelf.nevada.api.logging.Logger;
 import org.pavelf.nevada.api.logging.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 /**
  * All exceptions ever thrown in time of processing request will be intercepted 
- * and routed and mapped to this class handlers.
+ * and routed to this class handlers.
  * @author Pavel F.
  * @since 1.0
  * */
@@ -39,26 +38,8 @@ public class GeneralExceptionAdvice  {
 	@ExceptionHandler(WebApplicationException.class)
 	public ResponseEntity<ExceptionCase> webApplicationExceptionHandler(
 			WebApplicationException execption, Locale locale) {
-		ExceptionCase info = execption.getExceptionCase();
-		
-		log.error("THROWN: " + info.toString());
-		
-		if (locale == null) {
-			locale = Locale.ENGLISH;
-		}
-		
-		log.error("Incoming request locale was set: " + locale.toString());
-			
-		String message = messageSource.getMessage(
-				String.valueOf(info.getCode()), null, locale);
-			
-		log.error("Appropriate message was just found: " + message);
-			
-		info = info.setMessage(message);
-		
-		log.error("Sending exception object to the caller...");
-		
-		return ResponseEntity.status(info.getHttpStatus()).body(info);
+		return handleExceptionCase(execption, locale, 
+				execption.getExceptionCase());
 	}
 	
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -82,11 +63,11 @@ public class GeneralExceptionAdvice  {
 		return handleExceptionCase(execption, locale, PARSING_EXCEPTION);
 	}
 	
-	@ExceptionHandler(FileUploadBase.SizeLimitExceededException.class)
+	@ExceptionHandler(NullPointerException.class)
 	public ResponseEntity<ExceptionCase> sizeLimitExceeded(Locale locale, 
-			FileUploadBase.SizeLimitExceededException e) {
+			NullPointerException exception) {
 		
-		return handleExceptionCase(e, locale, UPLOADED_FILE_IS_TOO_LARGE);
+		return handleExceptionCase(exception, locale, INTERNAL_SERVER_ERROR);
 	}
 	
 	protected ResponseEntity<ExceptionCase> handleExceptionCase(
