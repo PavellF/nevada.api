@@ -25,20 +25,21 @@ There are several access scopes:
 - `STREAM`
 - `PERSON_INFO` 
 
-<br>All of them has one of the following levels:
+<br>
+All of them has one of the following levels:
+
 - `NONE`
 - `READ`
 - `READ/WRITE`
-<br>
-Less restrictive include stronger ones, for example `READ/WRITE` also includes `READ` and `NONE`.
-In order to access some of endpoints you have to have token with one or more scopes and
-appropriate for endpoind access level. For example to send a message you may want to have `MESSAGE READ/WRITE` token.
 
-# SQL Schema
-![schema](https://github.com/PavellF/nevada.api/blob/master/sequel.png?raw=true)
+<br>
+Less restrictive include stronger ones, for example READ_WRITE also includes READ and NONE.
+In order to access some of endpoints you have to have token with one or more scopes and
+appropriate for endpoind access level. For example to send a message you may need to have token
+with MESSAGE READ_WRITE access level.
 
 # Example request
-Besides controller classes all endpoints list also enumerated in uri.txt.<br>
+Besides controller classes all endpoints also listed in uri.txt.<br>
  <br>
 ```diff
 - GET /profile/{id}
@@ -56,5 +57,15 @@ GET /profile/{id}
 Accept: application/vnd.nevada.profile+json;version=1.0
 Authorization:token
 ```
+
+# Dependencies
+See `pom.xml`. <br>
+`Image` class from JavaXT Core library was used.
+
+# SQL Schema
+![schema](https://github.com/PavellF/nevada.api/blob/master/sequel.png?raw=true)
+
 # License
-😈😈😈 **It is free!!** 😈😈😈
+
+😈😈😈 **It is free!!** 😈😈😈 <br>
+Licensed under MIT license.
